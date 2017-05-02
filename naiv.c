@@ -46,8 +46,8 @@ void dequantize(double **d, uint8_t **q, double *mn, double *mx, int n){
 
 int main() {
 	int n=3;
-	double **d = (double **)malloc( n*n * sizeof(double) );
-	double **ded = (double **)malloc( n*n * sizeof(double) );
+	double **d = (double **)malloc( n * sizeof(double *) );
+	double **ded = (double **)malloc( n * sizeof(double *) );
 	uint8_t **q = (uint8_t **)malloc( n*n * sizeof(uint8_t) );
 	for (int i = 0; i<n; i++) {
 		d[i] = (double *)malloc( n * sizeof(double) );
