@@ -37,7 +37,7 @@
 #include "tsc_x86.h"
 #include <stdint.h>
 
-#include "vanilla_test.h"
+#include "naiv.h"
 
 
 /* prototype of the function you need to optimize */
@@ -57,7 +57,7 @@ using namespace std;
 double get_perf_score(quant f);
 void register_functions();
 double perf_test(quant f, char *desc, int flops);
-int validation_test(quant f);
+int validation(quant f);
 
 
 void add_function(quant f, char *name, int flop);
@@ -111,7 +111,7 @@ void destroy(double * m)
 */
 void register_functions()
 {	
-	add_function(&vanilla, "Naive implementation",40/5);
+	add_function(&vanilla_quantize, "Naive implementation",40/5);
 	// Add your functions here
 	// add_function(&your_function, "function: Optimization X", nrflops);
 	
@@ -143,142 +143,107 @@ int main(int argc, char **argv)
 
 		return 0;
 	}
-	printf("\n%d functions registered", numFuncs);
+	printf("\n%d functions registered\n", numFuncs);
 
 	// Test of vanilla implementation first
-	test_success = validation_test(userFuncs[0]);
+	test_success = validation(userFuncs[0]);
 	if (test_success == 0)
 	{
 		printf("Vanilla implementation failed test!!\n");
 		return 0;
 	}
     
-	int test_optimized = 1;
-    if (test_optimized)
+	
+    // Init vectors at random for computation
+	double **d;
+	uint8_t **q;
+	double mn, mx;
+	int n = 128;
+
+	d = build_full_mat(n);
+	q = allocate_quantized_mat(n);
+
+    // Get result of slow implementation
+	quant f = userFuncs[0];
+	f(d,q,&mn,&mx,n);
+	//double result = z[0];
+	double error = 0;
+
+    // Make sure the result of optimized implementation is correct
+	for (i = 0; i < numFuncs; i++)
     {
-	    // Init vectors at random for computation
-		double **d;
-		uint8_t **q;
-		double mn, mx;
-		int n = 128;
-
-		d = build_full_mat(n);
-		q = allocate_quantized_mat(n);
-
-	    // Get result of slow implementation
-		quant f = userFuncs[0];
+		quant f = userFuncs[i];
 		f(d,q,&mn,&mx,n);
-		//double result = z[0];
-		double error = 0;
+		//error = fabs(z[0] - result);
+		//result = z[0];
 
-	    // Make sure the result of optimized implementation is correct
-		for (i = 0; i < numFuncs; i++)
-	    {
-			quant f = userFuncs[i];
-			f(d,q,&mn,&mx,n);
-			//error = fabs(z[0] - result);
-			//result = z[0];
-
-	        if (error > EPS)
-				printf("ERROR!!!!  the results for the %d th function are different to the previous", i);
-		}
-	    // Free memory
-		free(d);
-		free(q);
-
-	    
-	    // Measure the performance of the different implementations
-		for (i = 0; i < numFuncs; i++)
-		{				
-			perf = perf_test(userFuncs[i], funcNames[i], funcFlops[i]);
-			printf("\nPerformance: %s\nPerf: %.3f FLOPs/c  Cycles: %.3f cycles\n", funcNames[i], perf, ((double)funcFlops[i])/perf);
-		}
+        if (error > EPS)
+			printf("ERROR!!!!  the results for the %d th function are different to the previous", i);
 	}
+    // Free memory
+	free(d);
+	free(q);
+
+    
+    // Measure the performance of the different implementations
+	for (i = 0; i < numFuncs; i++)
+	{				
+		perf = perf_test(userFuncs[i], funcNames[i], funcFlops[i]);
+		printf("\nPerformance: %s\nPerf: %.3f FLOPs/c  Cycles: %.3f cycles\n", funcNames[i], perf, ((double)funcFlops[i])/perf);
+	}
+
 
 	return 0;
 }
 
 
-int validation_test(quant f){
-	double double_mat[3][3] = {0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5};
-	uint8_t int_mat[3][3] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-
-	double double_mat_target[3][3] = {1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5};
-	uint8_t int_mat_target[3][3] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
-	
-	double **d_test;
-	uint8_t **q_test;
-	int n=3;
-
-	double mn = 2;
-	double mx = 8;
-
-	double min_target = 1;
-	double max_target = 16;
 
 
-	// for (int i=0; i<n; i++){
-	// 	*(d_test+i) = double_mat[i];
-	// 	*(q_test+i) = int_mat[i];
-	// }
-	d_test = build_full_mat(n);
-	q_test = allocate_quantized_mat(n);
-	
-	for (int i=0; i<n; i++){
-		for (int j=0; j<n; j++){
-			d_test[i][j] = double_mat[i][j];
-			q_test[i][j] = int_mat[i][j];
-
-		}
-	}
-	
-	f(d_test, q_test, &mn, &mx, n);
-	for(int i=0; i<n; i++){
-		for (int j=0; j<n; j++){
-			if(d_test[i][j]!=double_mat_target[i][j]){
-				printf("Error in double matrix at [%d][%d]\n", i, j);
-				printf("%lf %lf\n", d_test[i][j], double_mat_target[i][j]);
-				return 0;
-			}
-			if(q_test[i][j]!=int_mat_target[i][j]){
-				printf("Error in int matrix at [%d][%d]\n", i, j);
-				return 0;
-			}
-		}
-	}
-
-	if (mn!=min_target){
-		printf("Error in min\n");
-				return 0;
-	}
-
-	if (mx!=max_target){
-		printf("Error in max\n");
-				return 0;
-	}
-
-    printf("Test Passed!!\n" );
-    return 1;
-}
-
-
-
-
+// Test for vanilla implementation
 int validation(quant f){
-    double test_d[3][3] = {-10.0,     0.0,       1.47,
-                           -7.89,    3.05,    -9.9431,
-                            15.3,   -10.0,       15.6};
-    uint8_t q[3][3];
+
+	// Test input
+    double d_test_array[3][3] = {-10.0,     0.0,       1.47,
+                               -7.89,    3.05,    -9.9431,
+                                15.3,   -10.0,       15.5};
+    // Expected output
     uint8_t q_answer[3][3] = { 0,    100,    115,
-                              21,    130,      6,
+                              21,    131,      1,
                              253,      0,    255};
     
-    double *mn, *mx;
+    double **d_test;
+	uint8_t **q_test;
+
+    double mn, mx;
     int n =3;
 
-    int test_passed = 1;
+    // Initialize values
+    d_test = build_full_mat(n);
+	q_test = allocate_quantized_mat(n);
+	
+	// Write test input to the allocated matrix
+	for (int i=0; i<n; i++){
+		for (int j=0; j<n; j++){
+			d_test[i][j] = d_test_array[i][j];
+		}
+	}
 
-    return test_passed;
+	// Call function
+	f(d_test, q_test, &mn, &mx, n);
+
+	// Check output is correct
+	for(int i=0; i<n; i++){
+		for (int j=0; j<n; j++){
+			if(q_test[i][j] != q_answer[i][j]){
+				printf("Error in quantized matrix at [%d][%d]\n\n", i, j);
+				printf("Expected value: %u\t Actual value: %u\n",  q_answer[i][j], q_test[i][j]);
+				return 0;
+			}
+		}
+	}
+
+	printf("Test Passed!!\n" );
+	return 1;
 }
 
 
