@@ -51,6 +51,12 @@ typedef void(*quant)(double**, uint8_t**, double*, double*, int);
 #define FLOPS (4.*n)
 #define EPS (1e-3)
 
+/* start ---definition relevant to timing */
+#define NUM_RUNS 1				// number of runs we measure, then average
+#define FREQUENCY 3.4e9			// need to change on different computers. This value is the actual CPU frequency
+// #define CALIBRATE				// Whether calibrate before measuring.
+/* end   ---definition relevant to timing */
+
 using namespace std;
 
 //headers
@@ -58,6 +64,10 @@ double get_perf_score(quant f);
 void register_functions();
 double perf_test(quant f, char *desc, int flops);
 int validation(quant f);
+double c_clock(quant f);
+double timeofday(quant f);
+
+
 
 
 void add_function(quant f, char *name, int flop);
@@ -117,6 +127,7 @@ void register_functions()
 	
 }
 
+
 /*
 * Main driver routine - calls register_funcs to get student functions, then
 * tests all functions registered, and reports the best performance
@@ -126,6 +137,7 @@ int main(int argc, char **argv)
 	printf("Starting program\n");
 	double perf;
 	double maxPerf = 0;
+	double clocksElapsed, timeElapsed;
 	int i;
 	int maxInd = 0;
 	int verbosity = 2;
@@ -190,6 +202,14 @@ int main(int argc, char **argv)
 	{				
 		perf = perf_test(userFuncs[i], funcNames[i], funcFlops[i]);
 		printf("\nPerformance: %s\nPerf: %.3f FLOPs/c  Cycles: %.3f cycles\n", funcNames[i], perf, ((double)funcFlops[i])/perf);
+	}
+
+	// Measure the elapsed time and clock ticks of each implementation
+	for (i = 0; i < numFuncs; i++)
+	{	
+		clocksElapsed = c_clock(userFuncs[i]);
+		timeElapsed = timeofday(userFuncs[i]);
+		printf("\nTimeElapsed: %s\nMeasured by c_clock(): %lf seconds\r\rMeasured by timeofday(): %lf seconds\n", funcNames[i], clocksElapsed, timeElapsed);
 	}
 
 
@@ -333,4 +353,90 @@ double perf_test(quant f, char *desc, int flops)
 	cycles = cyclesList.front();	
 	return (n * flops * 1.0) / cycles;
 }
+
+/* 
+ * Timing function --- more accurate than rdtsc() on Unix Systems.
+ * return time elapsed in seconds 
+ */
+double c_clock(quant f) {
+	int i, num_runs;
+	double cycles;
+	clock_t start, end;
+	// definition of parameters used in f
+	double **d;
+	uint8_t **q;
+	double mn, mx;
+	int n = 128;
+	// initialization of parameters.
+	d = build_full_mat(n);
+	q = allocate_quantized_mat(n);
+	// number of runs we measure
+	num_runs = NUM_RUNS;
+	// if calibrate, num_runs changes to 2 ^ 14
+	#ifdef CALIBRATE
+		while(num_runs < (1 << 14)) {
+			start = clock();
+			for (i = 0; i < num_runs; ++i) {
+				f(d,q,&mn,&mx,n);
+			}
+			end = clock();
+			cycles = (double)(end-start);
+			// Same as in c_clock: CYCLES_REQUIRED should be expressed accordingly to the order of magnitude of CLOCKS_PER_SEC
+			if(cycles >= CYCLES_REQUIRED/(FREQUENCY/CLOCKS_PER_SEC)) break;
+			num_runs *= 2;
+		}
+	#endif
+	// actual timing starts here
+	start = clock();
+	for(i=0; i<num_runs; ++i) {
+		// we run the quantization code.
+		f(d,q,&mn,&mx,n); 
+	}
+	end = clock();
+	free(d);
+	free(q);
+
+	return (double)((end-start)/num_runs)/CLOCKS_PER_SEC;
+}
+/*
+ * Measure the running time of function f ---- works on Unix Systems
+ * return running time in second
+ */
+double timeofday(quant f) {
+	int i, num_runs;
+	double cycles;
+	struct timeval start, end;
+	// definition of parameters used in f
+	double **d;
+	uint8_t **q;
+	double mn, mx;
+	int n = 128;
+	// initialization of parameters.
+	d = build_full_mat(n);
+	q = allocate_quantized_mat(n);
+	// if calibrate, num_runs changes to 2 ^ 14
+	num_runs = NUM_RUNS;
+	#ifdef CALIBRATE
+		while(num_runs < (1 << 14)) {
+			gettimeofday(&start, NULL);
+			for (i = 0; i < num_runs; ++i) {
+				f(d,q,&mn,&mx,n);
+			}
+			gettimeofday(&end, NULL);
+			cycles = (double)((end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec)/1e6)*FREQUENCY;
+			if(cycles >= CYCLES_REQUIRED) break;
+			num_runs *= 2;
+		}
+	#endif
+	// start measure	
+	gettimeofday(&start, NULL);
+	for(i=0; i < num_runs; ++i) {
+		f(d,q,&mn,&mx,n); 
+	}
+	gettimeofday(&end, NULL);
+	free(d);
+	free(q);
+	return (double)((end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec)/1e6)/ num_runs;
+}
+
 
