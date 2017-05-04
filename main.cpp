@@ -27,11 +27,13 @@
 */
 //#include "stdafx.h"
 
+
 #include <list>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <sys/time.h>
 #include <math.h>
 #include <string.h>
 #include "tsc_x86.h"
@@ -62,7 +64,7 @@ using namespace std;
 //headers
 double get_perf_score(quant f);
 void register_functions();
-double perf_test(quant f, char *desc, int flops);
+double perf_test(quant f, char *desc, int flops, int dim);
 int validation(quant f);
 double c_clock(quant f);
 double timeofday(quant f);
@@ -121,7 +123,7 @@ void destroy(double * m)
 */
 void register_functions()
 {	
-	add_function(&vanilla_quantize, "Naive implementation",40/5);
+	add_function(&vanilla_quantize, (char *)"naive",3);
 	// Add your functions here
 	// add_function(&your_function, "function: Optimization X", nrflops);
 	
@@ -142,6 +144,7 @@ int main(int argc, char **argv)
 	int maxInd = 0;
 	int verbosity = 2;
 	int test_success = 0;
+	FILE *fp;
     
     // Initialize the vectors of functions, function names and function flops
 	register_functions();
@@ -196,12 +199,19 @@ int main(int argc, char **argv)
 	free(d);
 	free(q);
 
-    
+    const char perf_str[30]="_perf.dat";
+    char fun_name[30];
     // Measure the performance of the different implementations
 	for (i = 0; i < numFuncs; i++)
-	{				
-		perf = perf_test(userFuncs[i], funcNames[i], funcFlops[i]);
-		printf("\nPerformance: %s\nPerf: %.3f FLOPs/c  Cycles: %.3f cycles\n", funcNames[i], perf, ((double)funcFlops[i])/perf);
+	{		
+		strcpy(fun_name,funcNames[i]);
+		fp = fopen(strcat(fun_name,perf_str),"w+");
+		for(n=10;n<=200;n+=10){
+			perf = perf_test(userFuncs[i], funcNames[i], funcFlops[i],n);
+			printf("\nPerformance: %s\nPerf: %.5f FLOPs/c  Cycles: %.3f cycles\n", funcNames[i], perf, ((double)funcFlops[i])/perf);
+			fprintf(fp, "%d %f \n",n,perf );
+		}
+		fclose(fp);
 	}
 
 	// Measure the elapsed time and clock ticks of each implementation
@@ -296,7 +306,7 @@ void add_function(quant f, char *name, int flops)
 * Checks the given function for validity. If valid, then computes and
 * reports and returns its performance in MFLOPs
 */
-double perf_test(quant f, char *desc, int flops)
+double perf_test(quant f, char *desc, int flops,int n)
 {
 	double cycles = 0.;
 	double perf = 0.0;
@@ -307,7 +317,6 @@ double perf_test(quant f, char *desc, int flops)
 	double **d;
 	uint8_t **q;
 	double mn, mx;
-	int n = 128;
 
 	d = build_full_mat(n);
 	q = allocate_quantized_mat(n);
@@ -350,8 +359,9 @@ double perf_test(quant f, char *desc, int flops)
 	free(d);
 	free(q);
 	cyclesList.sort();
-	cycles = cyclesList.front();	
-	return (n * flops * 1.0) / cycles;
+	cycles = cyclesList.front();
+
+	return (n*n*flops*1.0) / cycles;
 }
 
 /* 
