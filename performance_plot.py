@@ -24,6 +24,7 @@ ax.text(dim[-3],11/10*performance[-1],'naive',color='b')
 ax.text(dim[-5],7/10*peak,'scalar peak performance',color='r')
 plt.show()
 fig.savefig('Performance_q.eps', format='eps')
+fig.savefig('Performance_q.png', format='png', dpi=200)
 
 """
 dim, cycles = np.loadtxt("runtime_deq.txt", unpack=True)
