@@ -219,7 +219,7 @@ int main(int argc, char **argv)
 	{	
 		clocksElapsed = c_clock(userFuncs[i]);
 		timeElapsed = timeofday(userFuncs[i]);
-		printf("\nTimeElapsed: %s\nMeasured by c_clock(): %lf seconds\r\rMeasured by timeofday(): %lf seconds\n", funcNames[i], clocksElapsed, timeElapsed);
+		printf("\nTimeElapsed: %s\nMeasured by c_clock(): %lf seconds\nMeasured by timeofday(): %lf seconds\n", funcNames[i], clocksElapsed, timeElapsed);
 	}
 
 
