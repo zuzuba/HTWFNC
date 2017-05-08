@@ -28,16 +28,33 @@ void vanilla_quantize(double **d, uint8_t **q, double *mn, double *mx, int n){
 
 	// Compute size of linear cell
 	double delta = (*mx - *mn)/255;
+	double offset = -*mn/delta;
+	
+	uint8_t int_offset;
+	if (offset < 0){
+		int_offset = 0;
+	} else if (offset > 255){
+		int_offset = 255;
+	} else {
+		int_offset = (uint8_t)round(offset);
+	}
 
+	double qmin = 0 ;
+	double qmax = 255;
+	double t1, t2, t3;
 	// Determine uint8_t representation
 	for(int i = 0; i<n; i++){
-		for(int j = 0; j<n; j++)
-			q[i][j] = round((d[i][j] - *mn)/delta);
+		for(int j = 0; j<n; j++){
+			t1 = int_offset + d[i][j]/delta;
+			t2 = min(&qmax, &t1);
+			t3 = max(&qmin, &t2);
+
+			q[i][j] = (uint8_t)round(t3);
 	}
 
 
 }
-
+}
 void dequantize(double **d, uint8_t **q, double *mn, double *mx, int n){
 	double delta = (*mx - *mn)/256; // size of linear cell
 	double runner = 0.0;
