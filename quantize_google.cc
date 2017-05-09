@@ -1,9 +1,7 @@
 // Example code illustrating the theory exposed in doc/quantization.md
 
 /* Command line to build and run on x86:
-c++ doc/quantization_example.cc -I . --std=c++11 -msse4.1 -lpthread \
-  -o /tmp/quantization_example && \
-/tmp/quantization_example
+c++ doc/quantization_example.cc -I . --std=c++11 -msse4.1 -lpthread -o performance_google
 */
 
 #include <algorithm>
