@@ -123,7 +123,7 @@ void destroy(double * m)
 */
 void register_functions()
 {	
-	add_function(&vanilla_quantize, (char *)"naive",3);
+	add_function(&vanilla_quantize, (char *)"naive",7);
 	// Add your functions here
 	// add_function(&your_function, "function: Optimization X", nrflops);
 	
@@ -206,7 +206,7 @@ int main(int argc, char **argv)
 	{		
 		strcpy(fun_name,funcNames[i]);
 		fp = fopen(strcat(fun_name,perf_str),"w+");
-		for(n=10;n<=200;n+=10){
+		for(n=3;n<=200;n+=1){
 			perf = perf_test(userFuncs[i], funcNames[i], funcFlops[i],n);
 			printf("\nPerformance: %s\nPerf: %.5f FLOPs/c  Cycles: %.3f cycles\n", funcNames[i], perf, ((double)funcFlops[i])/perf);
 			fprintf(fp, "%d %f \n",n,perf );
@@ -456,6 +456,7 @@ double perf_test(quant f, char *desc, int flops,int n)
 
 	d = build_full_mat(n);
 	q = allocate_quantized_mat(n);
+	
 
 	// Warm-up phase: we determine a number of executions that allows
 	// the code to be executed for at least CYCLES_REQUIRED cycles.
