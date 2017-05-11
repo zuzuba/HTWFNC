@@ -232,7 +232,9 @@ int main(int argc, char **argv)
 // Test for vanilla implementation
 int validation(quant f){
 
-	// Test input
+	/* Test input that does not need offset to represent 0 exactly
+    Min = -10, Max = 15.5, delta = 0, no offset
+    */
     double d_test_array[3][3] = {-10.0,     0.0,       1.47,
                                -7.89,    3.05,    -9.9431,
                                 15.3,   -10.0,       15.5};
@@ -272,7 +274,141 @@ int validation(quant f){
 		}
 	}
 
-	printf("Test Passed!!\n" );
+	printf("First test Passed!!\n" );
+	//return 1;
+
+	/* Test input
+	Min = -10.03, Max = 15.47, delta = 0.1, need to offsey by 0.03
+	Notice that entry [2][1] would corrspond to 1 if the shif was not performed correctly.
+	*/
+    double d_test_array1[3][3] = {-10.03,     0.0,       1.47,
+                               -7.89,    3.05,    -9.9431,
+                                15.3,   -9.97,       15.47};
+
+
+	for (int i=0; i<n; i++){
+		for (int j=0; j<n; j++){
+			d_test[i][j] = d_test_array1[i][j];
+		}
+	}
+
+	// Call function
+	f(d_test, q_test, &mn, &mx, n);
+
+	// Check output is correct
+	for(int i=0; i<n; i++){
+		for (int j=0; j<n; j++){
+			if(q_test[i][j] != q_answer[i][j]){
+				printf("Error in quantized matrix at [%d][%d]\n\n", i, j);
+				printf("Expected value: %u\t Actual value: %u\n",  q_answer[i][j], q_test[i][j]);
+				return 0;
+			}
+		}
+	}
+
+	printf("Second test Passed!!\n" );
+
+		/* Test input
+	Min = -9.96, Max = 15.54, delta = 0.1, need to offsey by -0.04
+	Notice that entry [2][1] would corrspond to 254 if the shif was not performed correctly.
+	*/
+    double d_test_array2[3][3] = {-9.96,     0.0,       1.47,
+                               -7.89,    3.05,    -9.9431,
+                                15.3,   15.48,       15.54};
+    q_answer[2][1] = 255;
+
+
+	for (int i=0; i<n; i++){
+		for (int j=0; j<n; j++){
+			d_test[i][j] = d_test_array2[i][j];
+		}
+	}
+
+	// Call function
+	f(d_test, q_test, &mn, &mx, n);
+
+	// Check output is correct
+	for(int i=0; i<n; i++){
+		for (int j=0; j<n; j++){
+			if(q_test[i][j] != q_answer[i][j]){
+				printf("Error in quantized matrix at [%d][%d]\n\n", i, j);
+				printf("Expected value: %u\t Actual value: %u\n",  q_answer[i][j], q_test[i][j]);
+				return 0;
+			}
+		}
+	}
+
+	//Reset the q_answer to initial value
+	q_answer[2][1] = 0;
+
+	printf("Third test Passed!!\n" );
+
+	/* Test input - Matrix all positive and offset needs to be saturated
+	Min = 1.0, Max = 26.5, delta = 0.1, need to shift by -1.0, which means to saturate the int_offset.
+	*/
+    double d_test_array3[3][3] = {1.0, 	14.23, 1.05,
+    							  8.39, 16.00, 21.9,
+    							  25.8, 25.5,  26.5};
+
+   	uint8_t q_answer3[3][3] = {10, 142, 11,
+   							   84, 160, 219,
+   							   255, 255, 255};
+
+	for (int i=0; i<n; i++){
+		for (int j=0; j<n; j++){
+			d_test[i][j] = d_test_array3[i][j];
+		}
+	}
+
+	// Call function
+	f(d_test, q_test, &mn, &mx, n);
+
+	// Check output is correct
+	for(int i=0; i<n; i++){
+		for (int j=0; j<n; j++){
+			if(q_test[i][j] != q_answer3[i][j]){
+				printf("Error in quantized matrix at [%d][%d]\n\n", i, j);
+				printf("Expected value: %u\t Actual value: %u\n",  q_answer3[i][j], q_test[i][j]);
+				return 0;
+			}
+		}
+	}
+
+	printf("Fourth test Passed!!\n" );
+
+		/* Test input - Matrix all positive and offset needs to be saturated
+	Min = -26.5, Max = -1, delta = 0.1, need to shift by -1.0, which means to saturate the int_offset.
+	*/
+    double d_test_array4[3][3] = {-1.0, 	-14.23, -1.05,
+    							  -8.39, -16.00, -21.9,
+    							  -25.8, -25.5,  -26.5};
+
+   	uint8_t q_answer4[3][3] = {245, 113, 245,
+   							   171, 95, 36,
+   							   0, 0, 0};
+
+	for (int i=0; i<n; i++){
+		for (int j=0; j<n; j++){
+			d_test[i][j] = d_test_array4[i][j];
+		}
+	}
+
+	// Call function
+	f(d_test, q_test, &mn, &mx, n);
+
+	// Check output is correct
+	for(int i=0; i<n; i++){
+		for (int j=0; j<n; j++){
+			if(q_test[i][j] != q_answer4[i][j]){
+				printf("Error in quantized matrix at [%d][%d]\n\n", i, j);
+				printf("Expected value: %u\t Actual value: %u\n",  q_answer4[i][j], q_test[i][j]);
+				return 0;
+			}
+		}
+	}
+
+	printf("Fifth test Passed!!\n" );
+
 	return 1;
 }
 
