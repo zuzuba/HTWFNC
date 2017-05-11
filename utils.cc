@@ -1,6 +1,10 @@
 #define qmin = 0
 #define qmax = 15
 
+struct unsigned_4_bit{
+   uint8_t i : 4;
+};
+
 float inline max(float a, float b){
 	return a < b ? b : a;
 }
