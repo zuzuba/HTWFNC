@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include "utils.h"
 
 
 // Struct to handle integer of 4 bits at a time. ASSUMPTION: when we create a matrix i1 and i2 represent 2 consecutive entries
@@ -41,7 +42,7 @@ void qmm_space_waste(float l_scale, float r_scale, float result_scale, unit4x1_t
 			for(int t=0; t<k;t++){
 				accumulator += (lhs_int_mat[i*n + t].i - lhs_offset.i) * (rhs_int_mat[t*m + j].i - rhs_offset.i);
 			}
-		result_int_mat[i*n+j].i = result_offset.i + (lhs_scale * rhs_scale/result_scale) * accumulator;
+		result_int_mat[i*n+j].i = saturate(result_offset.i + round((lhs_scale * rhs_scale/result_scale) * accumulator));
 		}
 	}
 }
