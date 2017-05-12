@@ -7,6 +7,7 @@
 //    uint8_t i : 4;
 // };
 
+
 float inline max(float a, float b){
 	return a < b ? b : a;
 }
@@ -15,10 +16,9 @@ float inline min(float a, float b){
 	return a < b ? a : b;
 }
 
-int inline saturate(float a){
+int saturate(float a){
 	return (int)max(qmin,min(qmax,a));
 }
-
 
 void quantize_parameter(float min, float max, float *scale, float *zero_point){
 	*scale = (max - min)/(qmax-qmin);
