@@ -1,12 +1,17 @@
+#include "utils.h"
+#include "naive_qmm.h"
+#include <stdio.h>
+#include <stdlib.h>
+
 /* prototype of the function you need to optimize */
-typedef void(*qmm_pointer)(float, float, float, unit4x1_t, unit4x1_t, unit4x1_t, 
-	unit4x1_t*, unit4x1_t*, unit4x1_t*, int , int, int);
+typedef void(*qmm_pointer)(float, float, float, uint4x1_t, uint4x1_t, uint4x1_t, 
+	uint4x1_t*, uint4x1_t*, uint4x1_t*, int , int, int);
 
 #define MAX_FUNCS 32
 
 void register_functions();
 void add_function(qmm_pointer f, char *name, int flop);
-int validation(qmm_pointer f)
+int validation(qmm_pointer f);
 
 
 
@@ -106,6 +111,14 @@ int validation(qmm_pointer f){
 		}
 	}
 
+	// Print result matrix
+	for (int i=0; i<3; i++){
+		for (int j=0; j<3; j++){
+			printf("%f  ", result_float[i][j]);
+		}
+		printf("\n");
+	}
+
 	uint8_t l_array[3][2] = {0, 1,
 							 2, 3,
 							 4, 14};
@@ -117,28 +130,28 @@ int validation(qmm_pointer f){
 								  15, 15, 5,
 								  13, 10, 11};
 
-    unit4x1_t *l_mat = (unit4x1_t*)malloc(sizeof(unit4x1_t * 6));
-    unit4x1_t *r_mar = (unit4x1_t*)malloc(sizeof(unit4x1_t * 6));;
-    unit4x1_t *result_mat = (unit4x1_t*)malloc(sizeof(unit4x1_t * 9));;
+    uint4x1_t *l_mat = (uint4x1_t*)malloc(sizeof(uint4x1_t) * 6);
+    uint4x1_t *r_mat = (uint4x1_t*)malloc(sizeof(uint4x1_t) * 6);;
+    uint4x1_t *result_mat = (uint4x1_t*)malloc(sizeof(uint4x1_t) * 9);;
 
     float l_scale = 0.1;
     float r_scale = 0.1;
     float result_scale = 0.1;
 
-    unit4x1_t l_offset, r_offset, result_offset;
+    uint4x1_t l_offset, r_offset, result_offset;
     l_offset.i = 10;
     r_offset.i = 10;
     result_offset.i = 10;
 
     for (int i=0; i<3; i++){
     	for (int j=0; j<2; j++){
-    		l_mat[2*i + j] = l_array[i][j];
+    		(l_mat[2*i + j]).i = l_array[i][j];
     	}
     }
     
     for (int i=0; i<2; i++){
     	for (int j=0; j<3; j++){
-    		r_mat[3*i + j] = r_array[i][j];
+    		(r_mat[3*i + j]).i = r_array[i][j];
     	}
     }
 
@@ -147,9 +160,9 @@ int validation(qmm_pointer f){
 
     for (int i=0; i<3; i++){
     	for (int j=0; j<3; j++){
-    		if (result_array[i][j] != result_mat[3*i + j]){
+    		if (result_array[i][j] != (result_mat[3*i + j]).i){
     			printf("Error in quantized matrix at [%d][%d]\n\n", i, j);
-				printf("Expected value: %u\t Actual value: %u\n",  result_array[i][j], result_mat[3*i + j]);
+				printf("Expected value: %u\t Actual value: %u\n",  result_array[i][j], (result_mat[3*i + j]).i);
 				return 0;
     		}
 		}
