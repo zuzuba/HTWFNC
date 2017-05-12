@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "utils.h"
+#include "naive_qmm.h"
 #include <math.h>
 
 
@@ -35,15 +36,15 @@ void qmm_space_waste(float l_scale, float r_scale, float result_scale, uint4x1_t
 	uint4x1_t result_offset, uint4x1_t* l_int_mat, uint4x1_t* r_int_mat, uint4x1_t* result_int_mat, 
 	int n, int k, int m){
 
-	uint16_t accumulator;
+	int16_t accumulator;
 
 	for(int i=0;i<n;i++){
 		for(int j=0;j<m;j++){
 			accumulator = 0;
 			for(int t=0; t<k;t++){
-				accumulator += (l_int_mat[i*n + t].i - l_offset.i) * (r_int_mat[t*m + j].i - r_offset.i);
+				accumulator += (l_int_mat[i*k + t].i - l_offset.i) * (r_int_mat[t*m + j].i - r_offset.i);
 			}
-		result_int_mat[i*n+j].i = saturate(result_offset.i + round((l_scale * r_scale/result_scale) * accumulator));
+		result_int_mat[i*n+j].i = saturate(round(result_offset.i + (l_scale * r_scale/result_scale) * accumulator));
 		}
 	}
 }

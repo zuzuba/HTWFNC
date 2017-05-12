@@ -2,6 +2,7 @@
 #include "naive_qmm.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 /* prototype of the function you need to optimize */
 typedef void(*qmm_pointer)(float, float, float, uint4x1_t, uint4x1_t, uint4x1_t, 
@@ -93,42 +94,31 @@ int validation(qmm_pointer f){
 	/* Test input that does not need offset to represent 0 exactly
     Min = -10, Max = 15.5, delta = 0, no offset
     */
-    float l_float[3][2] = {-1, -0.89,
-    					   -0.79, -0.69,
-    					   -0.59, 0.5};
+    // float l_float[3][2] = {-1, -0.89,
+    // 					   -0.79, -0.69,
+    // 					   -0.59, 0.5};
 
-    float r_float[2][3] = {- 1, -0.39, 0.11,
-    						-0.49, -0.29, 0.5};
+    // float r_float[2][3] = {- 1, -0.39, 0.11,
+    // 						-0.49, -0.29, 0.5};
 
-    float result_float[3][3];
+    float l_float[3][2] = {-1, -0.9,
+    					   -0.8, -0.7,
+    					   -0.6, 0.5};
 
-	for (int i=0; i<3; i++){
-		for (int j=0; j<3; j++){
-			result_float[i][j] = 0;
-			for (int k=0; k<2; k++){
-				result_float[i][j] += l_float[i][k] * r_float[k][j];
-			}
-		}
-	}
+    float r_float[2][3] = {- 1, -0.4, 0.11,
+    						-0.5, -0.3, 0.5};
 
-	// Print result matrix
-	for (int i=0; i<3; i++){
-		for (int j=0; j<3; j++){
-			printf("%f  ", result_float[i][j]);
-		}
-		printf("\n");
-	}
 
 	uint8_t l_array[3][2] = {0, 1,
 							 2, 3,
-							 4, 14};
+							 4, 15};
 
 	uint8_t r_array[2][3] = {0, 6, 11,
 							 5, 7, 15};
 
 	uint8_t result_array[3][3] = {15, 15, 4,
-								  15, 15, 5,
-								  13, 10, 11};
+								  15, 15, 6,
+								  14, 11, 12};
 
     uint4x1_t *l_mat = (uint4x1_t*)malloc(sizeof(uint4x1_t) * 6);
     uint4x1_t *r_mat = (uint4x1_t*)malloc(sizeof(uint4x1_t) * 6);;
