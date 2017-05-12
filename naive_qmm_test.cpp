@@ -6,6 +6,7 @@ typedef void(*qmm_pointer)(float, float, float, unit4x1_t, unit4x1_t, unit4x1_t,
 
 void register_functions();
 void add_function(qmm_pointer f, char *name, int flop);
+int validation(qmm_pointer f)
 
 
 
@@ -82,7 +83,7 @@ int main(int argc, char **argv)
 /*
 Validation framework for vanilla implentation
 */
-int validation(quant f){
+int validation(qmm_pointer f){
 
 	/* Test input that does not need offset to represent 0 exactly
     Min = -10, Max = 15.5, delta = 0, no offset
