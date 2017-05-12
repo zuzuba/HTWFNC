@@ -1,6 +1,6 @@
-#ifndef NAIV_H
-#define NAIV_H
+#ifndef NAIV_QUANTIZE_H
+#define NAIV_QUANTIZE_H
 
-void vanilla_quantize(double **d, uint8_t **q, double *mn, double *mx, int n);
+void vanilla_quantize(float *d, uint4x1_t *q, float *min, float *max, int rows, int columns);
 
 #endif

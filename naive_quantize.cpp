@@ -5,14 +5,14 @@
 #include <stdlib.h>
 #include <math.h>
 #include "utils.h"
-#include "naiv.h"
+#include "naive_quantize.h"
 
 
 void vanilla_quantize(float *d, uint4x1_t *q, float *min, float *max, int rows, int columns){
 	
 	float scale, zero_point;
-	get_min_max(d,rows,columns,&min,&max);
-	quantize_parameter(min,max,&scale,&zero_point);
+	get_min_max(d,rows,columns,min,max);
+	quantize_parameter(*min,*max,&scale,&zero_point);
 
 	float t;
 
