@@ -14,4 +14,21 @@ typedef struct unsigned_4_bit {
    uint8_t i : 4;
 } uint4x1_t;
 
+
+/*
+Internal structure of uint4x4_t data type considering it represents 4 elements in a matrix
+-----------------
+| 	i1	|	i2	|
+-----------------
+| 	i3	|	i4	|
+-----------------
+*/
+typedef struct unsigned_4x4_bit
+{
+	uint8_t i1 : 4;
+	uint8_t i2 : 4;
+	uint8_t i3 : 4;
+	uint8_t i4 : 4;
+}uint4x4_t;
+
 #endif
