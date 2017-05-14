@@ -79,9 +79,9 @@ void add_function_4x4(qmm_pointer_4x4 f, char *name, int flops)
 		return;
 	}
 
-	userFuncs_4x4[numFuncs] = f;
-	funcNames_4x4[numFuncs] = name;
-	funcFlops_4x4[numFuncs] = flops;
+	userFuncs_4x4[numFuncs_4x4] = f;
+	funcNames_4x4[numFuncs_4x4] = name;
+	funcFlops_4x4[numFuncs_4x4] = flops;
 
 	numFuncs_4x4++;
 }
@@ -242,19 +242,8 @@ int validation_4x4(qmm_pointer_4x4 f){
     					   -0.6, -0.5,
     					   -0.4, 0.5};
 
-    float r_float[2][4] = {- 1, -0.4, 0.11, 0.31
-    						-0.5, -0.3, 0.21, 0.5};
-
-    for (int i=0; i<4; i++){
-    	for (int j=0; j<4; j++){
-    		float acc = 0;
-    		for (int k=0; k<2; k++){
-    			acc += l_float[i][k] * r_float[k][j];
-    		}
-    		printf("%f\t", acc);
-    	}
-    	printf("\n");
-    }
+    float r_float[2][4] = {- 1, -0.4, 0.1, 0.3,
+    						-0.5, -0.3, 0.2, 0.5};
 
 
 	uint8_t l_array[4][2] = {0, 1,
@@ -265,10 +254,10 @@ int validation_4x4(qmm_pointer_4x4 f){
 	uint8_t r_array[2][4] = {0, 6, 11, 13,
 							 5, 7, 12, 15};
 
-	uint8_t result_array[4][4] = {15, 12, 4, 12,
-								  15, 12, 6, 12,
-								  15, 11, 7, 11,
-								  13, 12, 12, 11};
+	uint8_t result_array[4][4] = {15, 15, 7, 2,
+								  15, 15, 8, 4,
+								  15, 14, 8, 6,
+								  12, 10, 11, 11};
 
     uint4x4_t *l_mat = (uint4x4_t*)malloc(sizeof(uint4x4_t) * 2);
     uint4x4_t *r_mat = (uint4x4_t*)malloc(sizeof(uint4x4_t) * 2);;
@@ -283,56 +272,51 @@ int validation_4x4(qmm_pointer_4x4 f){
     r_offset.i1 = 10;
     result_offset.i1 = 10;
 
-    printf("Initiazing left\n");
-    // for (int i=0; i<2; i = i+1){
-    // 	l_mat[i].i1 = l_array[i*2][0];
-    // 	l_mat[i].i2 = l_array[i*2][1];
-    // 	l_mat[i].i3 = l_array[i*2 + 1][0];
-    // 	l_mat[i].i4 = l_array[i*2 + 1][1];
-    // 	printf("%d, %d, %d, %d\n", l_mat[i].i1, l_mat[i].i2, l_mat[i].i3, l_mat[i].i4);
-    // }
-    // printf("Initiazing right\n");
+    for (int i=0; i<2; i = i+1){
+    	l_mat[i].i1 = l_array[i*2][0];
+    	l_mat[i].i2 = l_array[i*2][1];
+    	l_mat[i].i3 = l_array[i*2 + 1][0];
+    	l_mat[i].i4 = l_array[i*2 + 1][1];
+    }
 
-    // for (int i=0; i<2; i = i+1){
- 	  //   r_mat[i].i1 = r_array[0][2*i];
-    // 	r_mat[i].i2 = r_array[0][2*i + 1];
-    // 	r_mat[i].i3 = r_array[1][2*i];
-    // 	r_mat[i].i4 = r_array[1][2*i + 1];	
-    // 	printf("%d, %d, %d, %d\n", r_mat[i].i1, r_mat[i].i2, r_mat[i].i3, r_mat[i].i4);
-
-    // }
-    printf("%f, %f, %f\n", l_scale, r_scale, result_scale);
-    printf("%d, %d, %d\n", l_offset.i1, r_offset.i1, result_offset.i1);
-    printf("%d, %d,\n %d, %d,\n %d, %d,\n %d, %d,\n", l_mat[0].i1, l_mat[0].i2, l_mat[0].i3,
-    	l_mat[0].i4, l_mat[1].i1, l_mat[1].i2, l_mat[1].i3, l_mat[1].i4);
-    printf("%d, %d, %d, %d,\n %d, %d %d, %d,\n", r_mat[0].i1, r_mat[0].i2, r_mat[1].i1,
-    	r_mat[1].i2, r_mat[0].i3, r_mat[0].i4, r_mat[1].i3, r_mat[1].i4);
-    printf("%d, %d, %d, %d,\n %d, %d %d, %d,\n, %d, %d, %d, %d,\n %d, %d %d, %d,\n", 
-    	result_mat[0].i1, result_mat[0].i2, result_mat[0].i3, result_mat[0].i4,
-    	result_mat[1].i1, result_mat[1].i2, result_mat[1].i3, result_mat[1].i4,
-    	result_mat[2].i1, result_mat[2].i2, result_mat[2].i3, result_mat[2].i4,
-    	result_mat[3].i1, result_mat[3].i2, result_mat[3].i3, result_mat[3].i4);
+    for (int i=0; i<2; i = i+1){
+ 	    r_mat[i].i1 = r_array[0][2*i];
+    	r_mat[i].i2 = r_array[0][2*i + 1];
+    	r_mat[i].i3 = r_array[1][2*i];
+    	r_mat[i].i4 = r_array[1][2*i + 1];	
+    }
     
     
-    printf("Starting function\n");
     f(l_scale, r_scale, result_scale, l_offset, r_offset,
     result_offset, l_mat, r_mat, result_mat, 4, 2, 4);
-    printf("Starting check\n");
 
- //    for (int i=0; i<4; i = i+2){
- //    	for (int j=0; j<4; j = j+2){
- //    		printf("%d\t %d\t", result_mat[2*i/2 + j/2].i1, result_mat[2*i/2 + j/2].i2);
- //    // 		if (result_array[i][j] != (result_mat[3*i + j]).i){
- //    // 			printf("Error in quantized matrix at [%d][%d]\n\n", i, j);
-	// 			// printf("Expected value: %u\t Actual value: %u\n",  result_array[i][j], (result_mat[3*i + j]).i);
-	// 			// return 0;
- //    // 		}
-	// 	}
-	// 	printf("\n");
-	// 	    	for (int j=0; j<4; j = j+2){
- //    		printf("%d\t %d\t", result_mat[2*i/2 + j/2].i3, result_mat[2*i/2 + j/2].i4);		
-	// 	}
-	// }
+    for (int i=0; i<4; i = i+2){
+    	for (int j=0; j<4; j = j+2){
+    		
+    		if (result_mat[2*i/2 + j/2].i1 != result_array[i][j]){
+    			printf("Error in quantized matrix at [%d][%d]\n\n", i, j);
+    			return 0;
+    		}
+
+    		if (result_mat[2*i/2 + j/2].i2 != result_array[i][j +1]){
+    			printf("Error in quantized matrix at [%d][%d]\n\n", i, j +1);
+    			return 0;
+    		}
+
+		}
+		for (int j=0; j<4; j = j+2){
+
+			if (result_mat[2*i/2 + j/2].i3 != result_array[i+1][j]){
+    			printf("Error in quantized matrix at [%d][%d]\n\n", i, j);
+    			return 0;
+    		}
+
+    		if (result_mat[2*i/2 + j/2].i4 != result_array[i+1][j +1]){
+    			printf("Error in quantized matrix at [%d][%d]\n\n", i + 1, j +1);
+    			return 0;
+    		}
+		}
+	}
 
     
 	printf("First test Passed!!\n" );
