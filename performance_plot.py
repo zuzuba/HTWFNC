@@ -33,5 +33,8 @@ plt.plot(dim, performance,'k')
 ax.text(dim[-3],11/10*performance[-1],'quantize_google',color='k')
 
 plt.show()
-fig.savefig('Performance_q.eps', format='eps')
-fig.savefig('Performance_q.png', format='png', dpi=200)
+
+plot_folder = './plots'
+fig.savefig(os.path.join(plot_folder, 'Performance_q.eps'), format='eps')
+fig.savefig(os.path.join(plot_folder, 'Performance_q.png'), format='png',
+            dpi=200)

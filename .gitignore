@@ -2,3 +2,5 @@
 *.s
 test/
 *.eps
+*.csv
+MNIST_data
