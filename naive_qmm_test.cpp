@@ -112,7 +112,7 @@ int main(int argc, char **argv)
 	if (test_success == 0)
 	{
 		printf("Vanilla implementation failed test!!\n");
-		return 0;
+		return 1;
 	}
     
 
@@ -136,7 +136,7 @@ int main(int argc, char **argv)
 	if (test_success == 0)
 	{
 		printf("Vanilla 4x4 implementation failed test!!\n");
-		return 0;
+		return 1;
 	}
 	return 0;
 }
