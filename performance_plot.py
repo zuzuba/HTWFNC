@@ -1,8 +1,10 @@
 import numpy as np
-
+import os
 import matplotlib.pyplot as plt
 
-dim, performance = np.loadtxt("naive_perf.dat", unpack=True)
+data_folder = './data'
+
+dim, performance = np.loadtxt(os.path.join(data_folder, "naive_perf.dat"), unpack=True)
 peak = 4
 
 #TODO: measure or set by hand peak performance
@@ -23,7 +25,7 @@ plt.ylim(1e-3,peak+1)
 ax.text(dim[-3],11/10*performance[-1],'naive',color='b')
 ax.text(dim[-5],7/10*peak,'scalar peak performance',color='r')
 
-dim, performance = np.loadtxt("quantize_google.dat", unpack=True)
+dim, performance = np.loadtxt(os.path.join(data_folder, "quantize_google.dat"), unpack=True)
 
 plt.plot(dim, performance,'kd')
 plt.plot(dim, performance,'k')
