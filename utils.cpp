@@ -35,7 +35,7 @@ void get_min_max(float *d,int rows,int columns, float *mn, float *mx){
 	float el;
 	for(int i = 0; i<rows; i++){
 		for(int j = 0; j<columns; j++){
-			el = d[i*rows+columns];
+			el = d[i*columns+j];
 			*mx = max(*mx,el);
 			*mn = min(*mn,el);
 		}
