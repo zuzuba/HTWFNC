@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+#define TEST_FAILED 0
+
 /* prototype of the function you need to optimize */
 typedef void(*qmm_pointer)(float, float, float, uint4x1_t, uint4x1_t, uint4x1_t, 
 	uint4x1_t*, uint4x1_t*, uint4x1_t*, int , int, int);
@@ -87,7 +89,8 @@ void add_function_4x4(qmm_pointer_4x4 f, char *name, int flops)
 }
 
 
-int main(int argc, char **argv)
+//int main(int argc, char **argv)
+int test_qmm()
 {
 	printf("Starting program\n");
 	int verbosity = 2;
@@ -103,7 +106,7 @@ int main(int argc, char **argv)
 		printf("Register functions by calling register_func(f, name)\n");
 		printf("in register_funcs()\n");
 
-		return 0;
+		return TEST_FAILED;
 	}
 	printf("\n%d functions registered\n", numFuncs);
 
@@ -112,7 +115,7 @@ int main(int argc, char **argv)
 	if (test_success == 0)
 	{
 		printf("Vanilla implementation failed test!!\n");
-		return 1;
+		return TEST_FAILED;
 	}
     
 
@@ -127,7 +130,7 @@ int main(int argc, char **argv)
 		printf("Register functions by calling register_func(f, name)\n");
 		printf("in register_funcs()\n");
 
-		return 0;
+		return TEST_FAILED;
 	}
 	printf("\n%d 4x4 functions registered\n", numFuncs_4x4);
 
@@ -136,9 +139,9 @@ int main(int argc, char **argv)
 	if (test_success == 0)
 	{
 		printf("Vanilla 4x4 implementation failed test!!\n");
-		return 1;
+		return TEST_FAILED;
 	}
-	return 0;
+	return 1;
 }
 
 
