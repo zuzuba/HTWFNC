@@ -46,6 +46,11 @@ test: $(OBJS) $(TEST_OBJ_QMM) $(TEST_OBJ_QUANT)
 	$(CC) $(OBJS) $(TEST_OBJ_QUANT) -o $(TEST_BIN_QUANT)
 	./$(TEST_BIN_QUANT)
 
+perf: $(OBJS) timing_qmm.o
+	$(CC) $(OBJS) timing_qmm.o -o perf_qmm
+	./perf_qmm
+
+
 %.o : %.cpp $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
