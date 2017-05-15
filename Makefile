@@ -29,9 +29,13 @@ CFLAGS += -O3 -fno-tree-vectorize -march=native
 HEADERS=$(wildcard *.h)
 OBJS = naive_qmm.o naive_quantize.o utils.o 
 TEST_OBJ = naive_qmm_test.o
+MAIN_OBJ = main.o
 
 all: $(OBJS) 
 	$(CC) $(OBJS) -o $(BIN)
+
+main : $(OBJS) $(MAIN_OBJ)
+	$(CC) $(OBJS) $(MAIN_OBJ) -o $(BIN)
 
 test: $(OBJS) $(TEST_OBJ)
 	$(CC) $(OBJS) $(TEST_OBJ) -o $(TEST_BIN)
