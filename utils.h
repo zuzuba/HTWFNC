@@ -10,9 +10,12 @@ int saturate(float a);
 void quantize_parameter(float min, float max, float *scale, float *zero_point);
 void get_min_max(float *d,int rows,int columns, float *min, float *max);
 
+float * read_csv_mat(const char *filename, int rows, int cols);
+
 typedef struct unsigned_4_bit {
    uint8_t i : 4;
 } uint4x1_t;
+
 
 
 /*

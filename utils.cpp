@@ -1,8 +1,11 @@
 #include "utils.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define qmin 0
 #define qmax 15
+#define BUFF_SIZE 1024 
 
 // struct unsigned_4_bit{
 //    uint8_t i : 4;
@@ -37,4 +40,31 @@ void get_min_max(float *d,int rows,int columns, float *mn, float *mx){
 			*mn = min(*mn,el);
 		}
 	}
+}
+
+float * read_csv_mat(const char *filename, int rows, int cols){
+	float * mat = (float*)malloc(sizeof(float)* rows * cols);
+	char line[BUFF_SIZE];
+	char * tok;
+	char * ptr;
+	int i = 0;
+	int j = 0;
+	const char * del = ", ";
+
+	FILE* csv = fopen(filename, "r");
+
+	while(fgets(line, BUFF_SIZE, csv)){
+		//printf("%s\n", line);
+		tok = strtok(line, del);
+		j = 0;
+
+		while (tok != NULL){
+			mat[i*cols + j] = strtof(tok, &ptr);
+			//printf("%s\n", tok);
+			tok = strtok(NULL, del);
+			j++;
+		}
+	i++;
+	}
+	return mat;
 }
