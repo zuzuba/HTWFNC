@@ -37,10 +37,10 @@ void quantize_4x4(float *d, uint4x4_t *q, float *min, float *max, int rows, int 
 			t2 = zero_point + d[i*columns + j + 1]/scale;
 			t3 = zero_point + d[(i + 1)*columns + j]/scale;
 			t4 = zero_point + d[(i + 1)*columns + j + 1]/scale;
-			q[i/2*columns + j/2].i1 = (uint8_t)round(saturate(t1));
-			q[i/2*columns + j/2].i2 = (uint8_t)round(saturate(t2));
-			q[i/2*columns + j/2].i3 = (uint8_t)round(saturate(t3));
-			q[i/2*columns + j/2].i4 = (uint8_t)round(saturate(t4));
+			q[i/2*columns/2 + j/2].i1 = (uint8_t)saturate(round(t1));
+			q[i/2*columns/2 + j/2].i2 = (uint8_t)saturate(round(t2));
+			q[i/2*columns/2 + j/2].i3 = (uint8_t)saturate(round(t3));
+			q[i/2*columns/2 + j/2].i4 = (uint8_t)saturate(round(t4));
 		}
 	}	
 

@@ -3,7 +3,8 @@
 # ==================================================================================== #
 
 BIN = program
-TEST_BIN = perftest
+TEST_BIN_QMM = test_qmm
+TEST_BIN_QUANT = test_quant
 
 # ==================================================================================== #
 # = Compiler settings
@@ -28,7 +29,9 @@ CFLAGS += -O3 -fno-tree-vectorize -march=native
 
 HEADERS=$(wildcard *.h)
 OBJS = naive_qmm.o naive_quantize.o utils.o 
-TEST_OBJ = naive_qmm_test.o main_tests.cpp
+
+TEST_OBJ_QMM = naive_qmm_test.o 
+TEST_OBJ_QUANT = quantization_test.o
 MAIN_OBJ = main.o
 
 all: $(OBJS) 
@@ -37,9 +40,11 @@ all: $(OBJS)
 main : $(OBJS) $(MAIN_OBJ)
 	$(CC) $(OBJS) $(MAIN_OBJ) -o $(BIN)
 
-test: $(OBJS) $(TEST_OBJ)
-	$(CC) $(OBJS) $(TEST_OBJ) -o $(TEST_BIN)
-	./$(TEST_BIN)
+test: $(OBJS) $(TEST_OBJ_QMM) $(TEST_OBJ_QUANT)
+	$(CC) $(OBJS) $(TEST_OBJ_QMM) -o $(TEST_BIN_QMM)
+	./$(TEST_BIN_QMM)
+	$(CC) $(OBJS) $(TEST_OBJ_QUANT) -o $(TEST_BIN_QUANT)
+	./$(TEST_BIN_QUANT)
 
 %.o : %.cpp $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
