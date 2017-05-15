@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #define qmin 0
 #define qmax 15
@@ -26,7 +27,7 @@ int saturate(float a){
 
 void quantize_parameter(float min, float max, float *scale, float *zero_point){
 	*scale = (max - min)/(qmax-qmin);
-	*zero_point = -min/(*scale);
+	*zero_point = saturate(round(-min/(*scale)));
 }
 
 void get_min_max(float *d,int rows,int columns, float *mn, float *mx){
