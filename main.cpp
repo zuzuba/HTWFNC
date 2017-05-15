@@ -5,8 +5,9 @@
 #include <math.h>
 #include <string.h>
 
-#define ROWS 784
-#define COLS 10
+#define FEATURES 784
+#define CLASSES 10
+#define TEST_POINTS 10000
 
 
 int main(){
@@ -20,8 +21,11 @@ int main(){
 		printf("\n");
 	}
 
-	float *W = read_csv_mat("weight.csv", ROWS, COLS);
-	float *b = read_csv_mat("bias.csv", ROWS, 1);
+	float *W = read_csv_mat("weight.csv", FEATURES, CLASSES);
+	float *b = read_csv_mat("bias.csv", CLASSES, 1);
+	float *x_test = read_csv_mat("x_test.csv", TEST_POINTS, FEATURES);
+	float *y_test = read_csv_mat("y_test.csv", TEST_POINTS, CLASSES);
+	
 	//...quantize W, b, new inputs x_test...
 	//...quantized W*x_test+b...
 	//...quantized softmax...
