@@ -28,8 +28,10 @@ bias = b.eval()
 
 np.savetxt('weight.csv', weights, delimiter=', ', newline='\n')
 np.savetxt('bias.csv', bias, delimiter=', ', newline='\n')
-np.savetxt('x_test.csv', mnist.test.images, delimiter=', ', newline='\n')
-np.savetxt('y_test.csv', mnist.test.labels, delimiter=', ', newline='\n')
+np.savetxt('x_test.csv', mnist.test.images[:1000, :], delimiter=', ',
+           newline='\n')
+np.savetxt('y_test.csv', mnist.test.labels[:1000, :], delimiter=', ',
+           newline='\n')
 
 
 # Test trained model

@@ -6,7 +6,7 @@
 
 #define qmin 0
 #define qmax 15
-#define BUFF_SIZE 1024 
+#define BUFF_SIZE 100000 
 
 // struct unsigned_4_bit{
 //    uint8_t i : 4;

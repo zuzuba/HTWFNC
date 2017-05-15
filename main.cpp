@@ -7,7 +7,7 @@
 
 #define FEATURES 784
 #define CLASSES 10
-#define TEST_POINTS 10000
+#define TEST_POINTS 1000
 
 
 int main(){
