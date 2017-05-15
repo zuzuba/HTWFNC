@@ -20,17 +20,24 @@ train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
 sess = tf.InteractiveSession()
 tf.global_variables_initializer().run()
 # Train
-for _ in range(5000):
+for _ in range(10000):
     batch_xs, batch_ys = mnist.train.next_batch(100)
     sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys})
 weights = W.eval()
-bias = b.eval()
+bias = np.atleast_2d(b.eval())
 
-np.savetxt('weight.csv', weights, delimiter=', ', newline='\n')
-np.savetxt('bias.csv', bias, delimiter=', ', newline='\n')
-np.savetxt('x_test.csv', mnist.test.images[:1000, :], delimiter=', ',
+weights = np.vstack((weights, np.tile(bias, (2, 1))))
+
+
+n_points = 1000
+np.savetxt('data/weight.csv', weights, delimiter=', ', newline='\n')
+
+x_test = np.hstack((mnist.test.images[:n_points, :], 0.5 *
+                    np.ones((n_points, 2))))
+
+np.savetxt('data/x_test.csv', x_test, delimiter=', ',
            newline='\n')
-np.savetxt('y_test.csv', mnist.test.labels[:1000, :], delimiter=', ',
+np.savetxt('data/y_test.csv', mnist.test.labels[:1000, :], delimiter=', ',
            newline='\n')
 
 
