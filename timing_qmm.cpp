@@ -1,5 +1,6 @@
 #include "utils.h"
 #include "naive_qmm.h"
+#include "naive_quantize.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -22,27 +23,17 @@
 using namespace std;
 
 //headers
-double get_perf_score(quant f);
-void register_functions();
-double perf_test(quant f, char *desc, int flops, int dim);
-int validation(quant f);
-double c_clock(quant f);
-double timeofday(quant f);
-
-#define TEST_FAILED -1
 
 /* prototype of the function you need to optimize */
-typedef void(*qmm_pointer)(float, float, float, uint4x1_t, uint4x1_t, uint4x1_t, 
-	uint4x1_t*, uint4x1_t*, uint4x1_t*, int , int, int);
-
 typedef void(*qmm_pointer_4x4)(float, float, float, uint4x4_t, uint4x4_t, uint4x4_t, 
 	uint4x4_t*, uint4x4_t*, uint4x4_t*, int , int, int);
 
+double perf_test(qmm_pointer_4x4 f, char *desc, int flops,int dim);
+
+#define TEST_FAILED -1
+
 #define MAX_FUNCS 32
 
-void register_functions();
-void add_function(qmm_pointer f, char *name, int flop);
-int validation(qmm_pointer f);
 
 void register_functions_4x4();
 void add_function_4x4(qmm_pointer_4x4 f, char *name, int flop);
@@ -50,10 +41,6 @@ int validation_4x4(qmm_pointer_4x4	 f);
 
 
 /* Global vars, used to keep track of student functions */
-qmm_pointer userFuncs[MAX_FUNCS];
-char *funcNames[MAX_FUNCS];
-int funcFlops[MAX_FUNCS];
-int numFuncs = 0;
 
 qmm_pointer_4x4 userFuncs_4x4[MAX_FUNCS];
 char *funcNames_4x4[MAX_FUNCS];
@@ -77,14 +64,10 @@ float* build_full_mat(unsigned n)
 	return d;
 }
 
-uint8_t** allocate_quantized_mat(unsigned n){
+uint4x4_t* allocate_quantized_mat(unsigned n){
 	int i;
-	uint8_t **q;
-	q  = (uint8_t **)malloc(sizeof(uint8_t *) * n);
-    q[0] = (uint8_t *)malloc(sizeof(uint8_t) * n * n);
- 
-    for(i = 0; i < n; i++)
-        q[i] = (*q + n * i);
+	uint4x4_t* q;
+	q  = (uint4x4_t *)malloc(sizeof(uint4x4_t ) * n*n);
     return q;
 }
 
@@ -93,15 +76,6 @@ void destroy(float * m)
 	free(m);
 }
 
-
-
-void register_functions()
-{	
-	add_function(&qmm_space_waste, (char *)"naive",7);
-	// Add your functions here
-	// add_function(&your_function, "function: Optimization X", nrflops);
-	
-}
 
 void register_functions_4x4()
 {	
@@ -115,21 +89,7 @@ void register_functions_4x4()
 * Registers a user function to be tested by the driver program. Registers a
 * string description of the function as well
 */
-void add_function(qmm_pointer f, char *name, int flops)
-{	
-	if (numFuncs >= MAX_FUNCS)
-	{
-		printf("Couldn't register %s, too many functions registered (Max: %d)",
-			name, MAX_FUNCS);
-		return;
-	}
 
-	userFuncs[numFuncs] = f;
-	funcNames[numFuncs] = name;
-	funcFlops[numFuncs] = flops;
-
-	numFuncs++;
-}
 
 void add_function_4x4(qmm_pointer_4x4 f, char *name, int flops)
 {	
@@ -154,21 +114,8 @@ int main(int argc, char **argv)
 	printf("------Timing qmm-----\n");
 	int verbosity = 2;
     float perf;
-    FILE *fp = fopen("/data/perf_qmm.dat","w+");
+    FILE *fp = fopen("data/perf_qmm.dat","w+");
     // Initialize the vectors of functions, function names and function flops
-	register_functions();
-    
-    // Message if there are zero functions
-	if (numFuncs == 0)
-	{
-		printf("No functions registered - nothing for driver to do\n");
-		printf("Register functions by calling register_func(f, name)\n");
-		printf("in register_funcs()\n");
-
-		return TEST_FAILED;
-	}
-	printf("\n%d functions registered\n", numFuncs);
-
 	// Test of vanilla implementation first
     
 
@@ -189,10 +136,11 @@ int main(int argc, char **argv)
 
 	// Test of vanilla implementation first
 	printf("Performance of qmm:\n");
-	for(int n=100; n<2000;n+=100){
+	for(int n=3; n<20;n+=1){
+		printf("%d \n", n);
 		perf = perf_test(userFuncs_4x4[0],funcNames_4x4[0],funcFlops_4x4[0],n);
-		printf("%s: %f \n",funcNames[0],n, perf);
-		fprintf(fp, "%d %f\n",n ,perf);
+		printf("%s: %d %f \n",funcNames_4x4[0],n, perf);
+		fprintf(fp, "%d %f\n",n,perf);
 	}
 
 	return 0;
@@ -208,10 +156,9 @@ double perf_test(qmm_pointer_4x4 f, char *desc, int flops,int n)
 	myInt64 start, end;
 
 	float *lhs,*rhs;
-	uint4x4_t *lhs_q,*rhs_q;
+	uint4x4_t *lhs_q,*rhs_q,*result_q;
 	float lhs_mn, lhs_mx, rhs_mn, rhs_mx;
-	float lhs_scale,rhs_scale,lhs_offset,rhs_offset;
-	uint4x4_t lhs_offset, rhs_offset;
+	float lhs_scale,rhs_scale,lhs_zero_point,rhs_zero_point;
 
 	lhs = build_full_mat(n);
 	rhs = build_full_mat(n);
@@ -219,9 +166,9 @@ double perf_test(qmm_pointer_4x4 f, char *desc, int flops,int n)
 	rhs_q = allocate_quantized_mat(n);
 	result_q = allocate_quantized_mat(n);
 	
-	quantize_4x4(lhs, lhs_q, &mn_lhs , &mx_lhs, n, n);
+	quantize_4x4(lhs, lhs_q, &lhs_mn , &lhs_mx, n, n);
 	quantize_parameter(lhs_mn, lhs_mx,  &lhs_scale, &lhs_zero_point);
-	quantize_4x4(rhs, rhs_q, &mn_rhs , &mx_rhs, n, n);
+	quantize_4x4(rhs, rhs_q, &rhs_mn , &rhs_mx, n, n);
 	quantize_parameter(rhs_mn, rhs_mx,  &rhs_scale, &rhs_zero_point);
 
 	//
@@ -238,7 +185,7 @@ double perf_test(qmm_pointer_4x4 f, char *desc, int flops,int n)
 		num_runs = num_runs * multiplier;
 		start = start_tsc();
 		for (size_t i = 0; i < num_runs; i++) {
-			f(scale_lhs, scale_rhs, scale_lhs, l_offset,  r_offset, l_offset, lhs_q, rhs_q, result_q,n,n,n);			
+			f(lhs_scale, rhs_scale, lhs_scale, l_offset,  r_offset, l_offset, lhs_q, rhs_q, result_q,n,n,n);			
 		}
 		end = stop_tsc(start);
 
@@ -247,7 +194,7 @@ double perf_test(qmm_pointer_4x4 f, char *desc, int flops,int n)
 		
 	} while (multiplier > 2);
 
-	list< double > cyclesList, perfList;
+	list< double > cyclesList;
 
 	// Actual performance measurements repeated REP times.
 	// We simply store all results and compute medians during post-processing.
@@ -255,22 +202,20 @@ double perf_test(qmm_pointer_4x4 f, char *desc, int flops,int n)
 
 		start = start_tsc();
 		for (size_t i = 0; i < num_runs; ++i) {
-			f(scale_lhs, scale_rhs, scale_lhs, l_offset,  r_offset, l_offset, lhs_q, rhs_q, result_q,n,n,n);
+			f(lhs_scale, rhs_scale, lhs_scale, l_offset,  r_offset, l_offset, lhs_q, rhs_q, result_q,n,n,n);			
 		}
 		end = stop_tsc(start);
 
 		cycles = ((double)end) / num_runs;
 
 		cyclesList.push_back(cycles);
-		perfList.push_back(FLOPS / cycles);
 	}
 
-	//printf("%f", y[0]);
 	free(lhs);
 	free(rhs);
 	free(lhs_q);
 	free(rhs_q);
-	
+
 	cyclesList.sort();
 	cycles = cyclesList.front();
 
