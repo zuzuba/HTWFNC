@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define TEST_FAILED 0
+#define TEST_FAILED -1
 
 /* prototype of the function you need to optimize */
 typedef void(*qmm_pointer)(float, float, float, uint4x1_t, uint4x1_t, uint4x1_t, 
@@ -89,10 +89,10 @@ void add_function_4x4(qmm_pointer_4x4 f, char *name, int flops)
 }
 
 
-//int main(int argc, char **argv)
-int test_qmm()
+int main(int argc, char **argv)
+//int test_qmm()
 {
-	printf("Starting program\n");
+	printf("------Testing qmm-----\n");
 	int verbosity = 2;
 	int test_success = 0;
     
@@ -141,7 +141,7 @@ int test_qmm()
 		printf("Vanilla 4x4 implementation failed test!!\n");
 		return TEST_FAILED;
 	}
-	return 1;
+	return 0;
 }
 
 
