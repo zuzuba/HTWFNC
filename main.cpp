@@ -34,7 +34,12 @@ int main(){
 	float scale_result, zero_point_result;
 
 	quantize_4x4(W, W_q, &min_w, &max_w, FEATURES, CLASSES);
-	quantize_4x4(x_test, x_q, &min_x, &max_x, TEST_POINTS, CLASSES);
+	quantize_4x4(x_test, x_q, &min_x, &max_x, TEST_POINTS, FEATURES);
+
+	//Printing
+	// print_uint4x4_mat(W_q, FEATURES, CLASSES);
+	// printf("Finished printing quantized W\n");
+	// print_uint4x4_mat(x_q, TEST_POINTS, FEATURES);
 
 	quantize_parameter(min_w, max_w, &scale_w, &zero_point_w);
 	quantize_parameter(min_x, max_x, &scale_x, &zero_point_x);
@@ -44,12 +49,14 @@ int main(){
 	offset_x.i1 = zero_point_x;
 
 	scale_result = 2.53;
-	offset_result.i1 = 7;
+	offset_result.i1 = 1;
 
 	// Notice we need to do x * W and not the other way around
 	qmm_naive(scale_x, scale_w, scale_result, offset_x,  offset_w, 
 	offset_result, W_q, x_q, result_q, TEST_POINTS, 
 	FEATURES, CLASSES);	
+
+	print_uint4x4_mat(result_q, TEST_POINTS, CLASSES);
 
 	
 	//Prediciton
