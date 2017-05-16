@@ -69,3 +69,20 @@ float * read_csv_mat(const char *filename, int rows, int cols){
 	}
 	return mat;
 }
+
+
+void print_uint4x4_mat(uint4x4_t* q_mat, int rows, int cols){
+	
+	for (int i = 0; i<rows/2; i++){
+		for (int j = 0; j<cols/2; j++){
+			printf("%d  %d  ", q_mat[i*cols/2 + j].i1, q_mat[i*cols/2 + j].i2);
+		}
+		printf("\n");
+		for (int j = 0; j<cols/2; j++){
+			printf("%d  %d  ", q_mat[i*cols/2 + j].i3, q_mat[i*cols/2 + j].i4);
+		}
+		printf("\n");
+
+	}
+}
+

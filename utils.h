@@ -12,10 +12,11 @@ void get_min_max(float *d,int rows,int columns, float *min, float *max);
 
 float * read_csv_mat(const char *filename, int rows, int cols);
 
+
+
 typedef struct unsigned_4_bit {
    uint8_t i : 4;
 } uint4x1_t;
-
 
 
 /*
@@ -33,5 +34,8 @@ typedef struct unsigned_4x4_bit
 	uint8_t i3 : 4;
 	uint8_t i4 : 4;
 }uint4x4_t;
+
+void print_uint4x4_mat(uint4x4_t* q_mat, int rows, int cols);
+
 
 #endif
