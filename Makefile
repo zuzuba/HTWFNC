@@ -51,6 +51,7 @@ perf: $(OBJS) timing_qmm.o timing_quantize.o
 	./perf_qmm
 	$(CC) $(OBJS) timing_quantize.o -o perf_quantize
 	./perf_quantize
+	python performance_plot.py
 
 
 %.o : %.cpp $(HEADERS)
