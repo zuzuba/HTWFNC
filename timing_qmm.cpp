@@ -79,7 +79,7 @@ void destroy(float * m)
 
 void register_functions_4x4()
 {	
-	add_function_4x4(&qmm_naive, (char *)"naive 4x4",7);
+	add_function_4x4(&qmm_naive, (char *)"naive 4x4",4);
 	// Add your functions here
 	// add_function(&your_function, "function: Optimization X", nrflops);
 	
@@ -219,5 +219,5 @@ double perf_test(qmm_pointer_4x4 f, char *desc, int flops,int n)
 	cyclesList.sort();
 	cycles = cyclesList.front();
 
-	return (n*n*flops*1.0) / cycles;
+	return (n*n*n*flops*1.0) / cycles;
 }
