@@ -298,11 +298,13 @@ int validation_4x4(qmm_pointer_4x4 f){
     		
     		if (result_mat[2*i/2 + j/2].i1 != result_array[i][j]){
     			printf("Error in quantized matrix at [%d][%d]\n\n", i, j);
+    			printf("Expected value: %u\t Actual value: %u\n",  result_array[i][j], result_mat[2*i/2 + j/2].i1 );
     			return 0;
     		}
 
     		if (result_mat[2*i/2 + j/2].i2 != result_array[i][j +1]){
     			printf("Error in quantized matrix at [%d][%d]\n\n", i, j +1);
+    			printf("Expected value: %u\t Actual value: %u\n",  result_array[i][j+1], result_mat[2*i/2 + j/2].i2 );
     			return 0;
     		}
 
@@ -311,11 +313,13 @@ int validation_4x4(qmm_pointer_4x4 f){
 
 			if (result_mat[2*i/2 + j/2].i3 != result_array[i+1][j]){
     			printf("Error in quantized matrix at [%d][%d]\n\n", i, j);
+    			printf("Expected value: %u\t Actual value: %u\n",  result_array[i+1][j], result_mat[2*i/2 + j/2].i3 );
     			return 0;
     		}
 
     		if (result_mat[2*i/2 + j/2].i4 != result_array[i+1][j +1]){
     			printf("Error in quantized matrix at [%d][%d]\n\n", i + 1, j +1);
+    			printf("Expected value: %u\t Actual value: %u\n",  result_array[i+1][j+1], result_mat[2*i/2 + j/2].i4 );
     			return 0;
     		}
 		}
