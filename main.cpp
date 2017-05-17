@@ -8,7 +8,7 @@
 
 #define FEATURES 786
 #define CLASSES 10
-#define TEST_POINTS 1000
+#define TEST_POINTS 10
 
 
 int main(){
@@ -49,16 +49,16 @@ int main(){
 	offset_x.i1 = zero_point_x;
 
 	scale_result = 2.53;
-	offset_result.i1 = 1;
+	offset_result.i1 = 7;
 
 	// Notice we need to do x * W and not the other way around
 	qmm_naive(scale_x, scale_w, scale_result, offset_x,  offset_w, 
-	offset_result, W_q, x_q, result_q, TEST_POINTS, 
+	offset_result, x_q, W_q, result_q, TEST_POINTS, 
 	FEATURES, CLASSES);	
 
 	print_uint4x4_mat(result_q, TEST_POINTS, CLASSES);
 
-	
+	printf("Starting prediction\n");
 	//Prediciton
 	int real_ind_1, real_ind_2;
 	int correct_predictions = 0;
@@ -99,11 +99,14 @@ int main(){
 		//printf("%d\t%d\n", running_ind1, running_ind2);
 		if (real_ind_1 ==running_ind1) correct_predictions++;
 		if (real_ind_2 ==running_ind2) correct_predictions++;
+		// printf("%d\n", running_ind1);
+		// printf("%d\n", running_ind2);
 			
 	}
 	//...quantized softmax...
-
-	printf("Ciao\n");
+	printf("---------------------------------------\n");
+	int *labels = get_real_label(y_test, TEST_POINTS, CLASSES);
+	
 	printf("Correct predictions:\t %d\n", correct_predictions);
 
 	return 0;
