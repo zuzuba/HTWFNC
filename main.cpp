@@ -8,24 +8,17 @@
 
 #define FEATURES 786
 #define CLASSES 10
-#define TEST_POINTS 10
+#define TEST_POINTS 10000
 
 
 int main(){
-	// Reading a test matrix
-	// float *W_test = read_csv_mat("data/weight_test.csv", 3, 2); // Buffer size for row is defined in utils and might be too small for big matrices
-
-	// for (int i=0; i<3; i++){
-	// 	for (int j=0; j<2; j++){
-	// 		printf("%f\t", W_test[i*2 + j]);
-	// 	}
-	// 	printf("\n");
-	// }
-
+	 
+	// Read the trained network and the test points
 	float *W = read_csv_mat("data/weight.csv", FEATURES, CLASSES);
 	float *x_test = read_csv_mat("data/x_test.csv", TEST_POINTS, FEATURES);
 	float *y_test = read_csv_mat("data/y_test.csv", TEST_POINTS, CLASSES);
 	
+	// Initialize quantized variables for the network
 	uint4x4_t *W_q = (uint4x4_t*)malloc(sizeof(uint4x4_t) * FEATURES/2 * CLASSES/2);
 	uint4x4_t *x_q = (uint4x4_t*)malloc(sizeof(uint4x4_t) * TEST_POINTS/2 * FEATURES/2);
 	uint4x4_t *result_q = (uint4x4_t*)malloc(sizeof(uint4x4_t) * TEST_POINTS/2 * CLASSES/2);
@@ -33,13 +26,9 @@ int main(){
 	float min_x, max_x, scale_x, zero_point_x;
 	float scale_result, zero_point_result;
 
+	// Quantization step
 	quantize_4x4(W, W_q, &min_w, &max_w, FEATURES, CLASSES);
 	quantize_4x4(x_test, x_q, &min_x, &max_x, TEST_POINTS, FEATURES);
-
-	//Printing
-	// print_uint4x4_mat(W_q, FEATURES, CLASSES);
-	// printf("Finished printing quantized W\n");
-	// print_uint4x4_mat(x_q, TEST_POINTS, FEATURES);
 
 	quantize_parameter(min_w, max_w, &scale_w, &zero_point_w);
 	quantize_parameter(min_x, max_x, &scale_x, &zero_point_x);
@@ -56,58 +45,16 @@ int main(){
 	offset_result, x_q, W_q, result_q, TEST_POINTS, 
 	FEATURES, CLASSES);	
 
-	print_uint4x4_mat(result_q, TEST_POINTS, CLASSES);
-
-	printf("Starting prediction\n");
-	//Prediciton
-	int real_ind_1, real_ind_2;
-	int correct_predictions = 0;
-	for (int i=0; i<TEST_POINTS; i = i+2){
-		int running_ind1 = 0;
-		int running_ind2 = 0;
-		int runnin_max1 = 0;
-		int runnin_max2 = 0;
-		for (int j=0; j<CLASSES; j = j+2){
-
-			if (y_test[i*CLASSES + j] == 1 || y_test[i*CLASSES + j +1] == 1){
-				real_ind_1 = j;
-			}
-
-			if (y_test[(i +1)*CLASSES] == 1 || y_test[(i+1)*CLASSES + j +1] == 1){
-				real_ind_2 = j;
-			}
-			if(result_q[i/2*CLASSES/2 + j/2].i1 > runnin_max1){
-				runnin_max1 = result_q[i/2*CLASSES/2 + j/2].i1;
-				running_ind1 = j/2;
-			}
-			if(result_q[i/2*CLASSES/2 + j/2].i2 > runnin_max1){
-				runnin_max1 = result_q[i/2*CLASSES/2 + j/2].i2;
-				running_ind1 = j/2 + 1;
-			}
-
-			if(result_q[i/2*CLASSES/2 + j/2].i3 > runnin_max2){
-				runnin_max2 = result_q[i/2*CLASSES/2 + j/2].i3;
-				running_ind2 = j/2;
-			}
-			if(result_q[i/2*CLASSES/2 + j/2].i4 > runnin_max2){
-				runnin_max2 = result_q[i/2*CLASSES/2 + j/2].i4;
-				running_ind2 = j/2 + 1;
-			}
-
-
-		}
-		//printf("%d\t%d\n", running_ind1, running_ind2);
-		if (real_ind_1 ==running_ind1) correct_predictions++;
-		if (real_ind_2 ==running_ind2) correct_predictions++;
-		// printf("%d\n", running_ind1);
-		// printf("%d\n", running_ind2);
-			
-	}
-	//...quantized softmax...
-	printf("---------------------------------------\n");
+	// Prediction
+	printf("\n-------------------Starting prediction--------------------\n");
 	int *labels = get_real_label(y_test, TEST_POINTS, CLASSES);
-	
-	printf("Correct predictions:\t %d\n", correct_predictions);
+	int *labels_predicted = get_predicted_label(result_q, TEST_POINTS, CLASSES);
+	int correct_predictions_new = 0;
+	for (int i=0; i<TEST_POINTS; i++){
+		if (labels[i] == labels_predicted[i]) correct_predictions_new++;
+	}
+	printf("\nCorrect predictions:\t %f%%\n", (float)correct_predictions_new/TEST_POINTS*100);
+
 
 	return 0;
 }

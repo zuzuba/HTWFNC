@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <limits.h>
 
 #define qmin 0
 #define qmax 15
@@ -93,17 +94,57 @@ int* get_real_label(float* y_distribution, int data_points, int classes){
 	for (int i = 0; i<data_points; i++){
 		label[i] = 0;
 		int running_max = y_distribution[i*classes + 0];
-		printf("%f  ", y_distribution[i*classes]);
 		for (int j = 1; j<classes; j++){
 			if (y_distribution[i*classes + j] > running_max){
 				running_max = y_distribution[i*classes + j];
 				label[i] = j;
 			}
-			printf("%f  ", y_distribution[i*classes + j]);
 		}
-	printf("%d\n", label[i]);
 	}
 
 	return label;
 }
+
+
+int* get_predicted_label(uint4x4_t* y_distribution, int data_points, int classes){
+		int* label = (int*)malloc(sizeof(int) * data_points);
+
+		data_points = data_points/2;
+		classes = classes/2;
+
+		for (int i=0; i<data_points; i++){
+			
+			label[i*2] = -1;
+			label[i*2 + 1] = -1;
+			int running_max1 = INT_MIN;
+			int running_max2 = INT_MIN;
+
+			for (int j=0; j<classes; j++){
+				if (y_distribution[i*classes + j].i1 >running_max1){
+					running_max1 = y_distribution[i*classes + j].i1;
+					label[i*2] = j * 2;
+				}
+
+
+				if (y_distribution[i*classes + j].i2 >running_max1){
+					running_max1 = y_distribution[i*classes + j].i2;
+					label[i*2] = j * 2 + 1;
+				}
+
+				if (y_distribution[i*classes + j].i3 >running_max2){
+					running_max2 = y_distribution[i*classes + j].i3;
+					label[i*2 + 1] = j * 2;
+				}
+
+				if (y_distribution[i*classes + j].i4 >running_max2){
+					running_max2 = y_distribution[i*classes + j].i4;
+					label[i*2 + 1] = j * 2 + 1;
+				}
+
+			}
+		}
+
+		return label;
+}
+
 
