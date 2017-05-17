@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "naive_qmm.h"
 #include <math.h>
+#include <stdlib.h>
 
 
 // Implementing the MM with struct the require 8 bits but contain only bits of info
@@ -67,4 +68,90 @@ void qmm_naive(float l_scale, float r_scale, float result_scale, uint4x4_t l_off
 		
 		}
 	}
+}
+
+
+
+void qmm_trick(float l_scale, float r_scale, float result_scale, uint4x4_t l_offset, uint4x4_t r_offset, 
+	uint4x4_t result_offset, uint4x4_t* l_int_mat, uint4x4_t* r_int_mat, uint4x4_t* result_int_mat, 
+	int n, int k, int m){
+
+	int16_t acc1, acc2, acc3, acc4;
+
+	// Internally we divide everything by 2 because one uint4x4_t contains 4 integers of 4 bit organize in 2 cols and 2 rows
+
+	n = n/2;
+	m = m/2;
+	k = k/2;
+
+
+	// Precompute additional terms
+	uint16_t* term2 = (uint16_t*)malloc(sizeof(uint16_t)* m *2);
+	uint16_t* term3 = (uint16_t*)malloc(sizeof(uint16_t)* n *2);
+	uint16_t term4;
+
+	uint16_t sum1, sum2;
+	
+	// Sum over the entries of each col of rhs and multiply by left offset 
+	for(int j =0; j<m; j++){
+		sum1 = 0;
+		sum2 = 0;
+		for(int i = 0; i<k; i++){
+			sum1 += r_int_mat[i*m + j].i1 + r_int_mat[i*m + j].i3;
+			sum2 += r_int_mat[i*m + j].i2 + r_int_mat[i*m + j].i4;
+		}
+		term2[2*j] = l_offset.i1 * sum1;
+		term2[2*j + 1] = l_offset.i1 * sum2;	
+	}
+
+	// Sum over the entries of each row of lhs and multiply by rigt offset
+	for (int i=0; i<n; i++){
+		sum1 = 0;
+		sum2 = 0;
+		for (int j=0; j<k; j++){
+			sum1 += l_int_mat[i*k + j].i1 + l_int_mat[i*k + j].i2;
+			sum2 += l_int_mat[i*k + j].i3 + l_int_mat[i*k + j].i4;
+		}
+		term3[2*i] = r_offset.i1 * sum1;
+		term3[2*i + 1] = r_offset.i1 * sum2;
+	}
+
+	term4 = l_offset.i1 * r_offset.i1 * (k * 2);
+	
+	// It should be correct up until here
+
+	for(int i=0; i<n; i = i+1){
+		for(int j=0; j<m; j = j+1){
+			acc1 = 0;
+			acc2 = 0;
+			acc3 = 0;
+			acc4 = 0;
+			for (int t=0; t<k; t = t+1){
+				acc1 += (l_int_mat[i*k + t].i1) * (r_int_mat[t*m + j].i1) + 
+						(l_int_mat[i*k + t].i2) * (r_int_mat[t*m + j].i3);
+
+				acc2 += (l_int_mat[i*k + t].i1) * (r_int_mat[t*m + j].i2) + 
+						(l_int_mat[i*k + t].i2) * (r_int_mat[t*m + j].i4);
+
+				acc3 += (l_int_mat[i*k + t].i3) * (r_int_mat[t*m + j].i1) + 
+						(l_int_mat[i*k + t].i4) * (r_int_mat[t*m + j].i3);
+
+				acc4 += (l_int_mat[i*k + t].i3) * (r_int_mat[t*m + j].i2) + 
+						(l_int_mat[i*k + t].i4) * (r_int_mat[t*m + j].i4);
+
+			}
+			
+		acc1 = acc1 - term2[2*j] - term3[2*i] + term4;
+		acc2 = acc2 - term2[2*j + 1] - term3[2*i] + term4;
+		acc3 = acc3 - term2[2*j] - term3[2*i + 1] + term4;
+		acc4 = acc4 - term2[2*j + 1] - term3[2*i + 1] + term4;
+
+		result_int_mat[i*m + j].i1 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc1));
+		result_int_mat[i*m + j].i2 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc2));
+		result_int_mat[i*m + j].i3 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc3));
+		result_int_mat[i*m + j].i4 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc4));
+		
+		}
+	}
+
 }
