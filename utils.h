@@ -37,5 +37,7 @@ typedef struct unsigned_4x4_bit
 
 void print_uint4x4_mat(uint4x4_t* q_mat, int rows, int cols);
 
+int* get_real_label(float* y_distribution, int data_points, int classes);
+
 
 #endif

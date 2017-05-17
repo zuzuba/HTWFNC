@@ -86,3 +86,24 @@ void print_uint4x4_mat(uint4x4_t* q_mat, int rows, int cols){
 	}
 }
 
+
+int* get_real_label(float* y_distribution, int data_points, int classes){
+	int* label = (int*)malloc(sizeof(int) * data_points);
+
+	for (int i = 0; i<data_points; i++){
+		label[i] = 0;
+		int running_max = y_distribution[i*classes + 0];
+		printf("%f  ", y_distribution[i*classes]);
+		for (int j = 1; j<classes; j++){
+			if (y_distribution[i*classes + j] > running_max){
+				running_max = y_distribution[i*classes + j];
+				label[i] = j;
+			}
+			printf("%f  ", y_distribution[i*classes + j]);
+		}
+	printf("%d\n", label[i]);
+	}
+
+	return label;
+}
+
