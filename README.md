@@ -11,4 +11,6 @@ After you have added a new function, you can test it by adding it in the registe
 After you have added a new function, you can time it by adding it in the register_functions() of [timing_quantize.cpp](timing_quantize.cpp) or [timing_qmm.cpp](timing_qmm.cpp), saving and typing make perf in the terminal. This should produce automatic performance plots.
 
 
-[Performance plot of for the naive implementation](plots/Performance_q.png)
+[Performance plot of the quantize function](plots/Performance_quantize.png)
+
+[Performance plot of the qmm function](plots/Performance_qmm.png)
