@@ -147,4 +147,25 @@ int* get_predicted_label(uint4x4_t* y_distribution, int data_points, int classes
 		return label;
 }
 
+void uint4x4_to_mm256(int4x4_t* a, __m256i b1, __m256i b2){
+	b1 = _mm256_set_epi8(a[15].i2, a[15].i1, a[14].i2, a[14].i1, a[13].i2, a[13].i1, a[12].i2, a[12].i1, 
+		a[11].i2, a[11].i1, a[10].i2, a[10].i1, a[9].i2, a[9].i1, a[8].i2, a[8].i1, a[7].i2, a[7].i1, 
+		a[6].i2, a[6].i1, a[5].i2, a[5].i1, a[4].i2, a[4].i1, a[3].i2, a[3].i1, a[2].i2, a[2].i1, a[1].i2,
+		 a[1].i1, a[0].i2, a[0].i1);
+
+	b2 = _mm256_set_epi8(a[15].i4, a[15].i3, a[14].i4, a[14].i3, a[13].i4, a[13].i3, a[12].i4, a[12].i3, 
+		a[11].i4, a[11].i3, a[10].i4, a[10].i3, a[9].i4, a[9].i3, a[8].i4, a[8].i3, a[7].i4, a[7].i3, 
+		a[6].i4, a[6].i3, a[5].i4, a[5].i3, a[4].i4, a[4].i3, a[3].i4, a[3].i3, a[2].i4, a[2].i3, a[1].i4,
+		 a[1].i3, a[0].i4, a[0].i3);
+}
+
+uint16_t 4bit_dot_prod_AVX(__m256i a, __m256i b){
+	__m256i c; 
+	c = _mm256_maddubs_epi16 (__m256i a, __m256i b);
+	c = _mm256_hadd_epi16 (c,c);
+	c = _mm256_hadd_epi16 (c,c);
+	c = _mm256_hadd_epi16 (c,c);
+	c = _mm256_hadd_epi16 (c,c);
+	return _mm256_extract_epi16(c,0);
+}
 

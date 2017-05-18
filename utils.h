@@ -39,6 +39,9 @@ void print_uint4x4_mat(uint4x4_t* q_mat, int rows, int cols);
 
 int* get_real_label(float* y_distribution, int data_points, int classes);
 int* get_predicted_label(uint4x4_t* y_distribution, int data_points, int classes);
+void uint4x4_to_mm256(int4x4_t* a, __m256i b1, __m256i b2);
+uint16_t 4bit_dot_prod_AVX(__m256i a, __m256i b);
+}
 
 
 #endif
