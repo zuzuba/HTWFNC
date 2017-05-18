@@ -214,7 +214,7 @@ void qmm_trick_AVX(float l_scale, float r_scale, float result_scale, uint4x4_t l
 			 uint4x4_t column[16];
 			for (int t=0; t<k; t = t+16){
 				uint4x4_to_mm256_row(l_int_mat + i*k + t, &b1, &b2);
-				for (int u = 0; i < 16; ++u)
+				for (int u = 0; u < 16; u++)
 				{
 					column[u] = r_int_mat[(t+u)*m + j];
 				}
