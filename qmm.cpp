@@ -4,6 +4,7 @@
 #include "qmm.h"
 #include <math.h>
 #include <stdlib.h>
+#include <immintrin.h> 
 
 
 // Implementing the MM with struct the require 8 bits but contain only bits of info
@@ -202,8 +203,6 @@ void qmm_trick_AVX(float l_scale, float r_scale, float result_scale, uint4x4_t l
 	}
 
 	term4 = l_offset.i1 * r_offset.i1 * (k * 2);
-	
-	// It should be correct up until here
 
 	for(int i=0; i<n; i = i+1){
 		for(int j=0; j<m; j = j+1){
@@ -221,7 +220,6 @@ void qmm_trick_AVX(float l_scale, float r_scale, float result_scale, uint4x4_t l
 				}
 				uint4x4_to_mm256_column(column, &b3, &b4);
 				
-
 				acc1 += dot_prod_AVX(b1,b3);
 
 				acc2 += dot_prod_AVX(b1,b4);

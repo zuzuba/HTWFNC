@@ -47,6 +47,8 @@ void register_functions()
 void register_functions_4x4()
 {	
 	add_function_4x4(&qmm_naive, (char *)"naive 4x4",7);
+    add_function_4x4(&qmm_trick_AVX, (char *)"trick_avx",4);
+     
 	// Add your functions here
 	// add_function(&your_function, "function: Optimization X", nrflops);
 	
@@ -110,7 +112,6 @@ int main(int argc, char **argv)
 	}
 	printf("\n%d functions registered\n", numFuncs);
 
-	// Test of vanilla implementation first
 	test_success = validation(userFuncs[0]);
 	if (test_success == 0)
 	{
@@ -134,13 +135,15 @@ int main(int argc, char **argv)
 	}
 	printf("\n%d 4x4 functions registered\n", numFuncs_4x4);
 
-	// Test of vanilla implementation first
-	test_success = validation_4x4(userFuncs_4x4[0]);
-	if (test_success == 0)
-	{
-		printf("Vanilla 4x4 implementation failed test!!\n");
-		return TEST_FAILED;
-	}
+    for (int i = 0; i < numFuncs_4x4; i++)
+    {
+        test_success = validation_4x4(userFuncs_4x4[i]);
+        if (test_success == 0){
+            printf("%s implementation failed test!!\n",funcNames_4x4[i]);
+            return TEST_FAILED;
+        }
+    }
+
 	return 0;
 }
 
