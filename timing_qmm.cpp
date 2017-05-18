@@ -3,6 +3,7 @@
 #include "quantize.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include <list>
 #include <time.h>
@@ -28,7 +29,7 @@ using namespace std;
 typedef void(*qmm_pointer_4x4)(float, float, float, uint4x4_t, uint4x4_t, uint4x4_t, 
 	uint4x4_t*, uint4x4_t*, uint4x4_t*, int , int, int);
 
-double perf_test(qmm_pointer_4x4 f, char *desc, int flops,int dim);
+double perf_test(qmm_pointer_4x4 f, char *desc,int dim);
 
 #define TEST_FAILED -1
 
@@ -36,7 +37,7 @@ double perf_test(qmm_pointer_4x4 f, char *desc, int flops,int dim);
 
 
 void register_functions_4x4();
-void add_function_4x4(qmm_pointer_4x4 f, char *name, int flop);
+void add_function_4x4(qmm_pointer_4x4 f, char *name, int flop_cubic_term, int flop_quad_term);
 int validation_4x4(qmm_pointer_4x4	 f);
 
 
@@ -44,7 +45,8 @@ int validation_4x4(qmm_pointer_4x4	 f);
 
 qmm_pointer_4x4 userFuncs_4x4[MAX_FUNCS];
 char *funcNames_4x4[MAX_FUNCS];
-int funcFlops_4x4[MAX_FUNCS];
+int funcFlops_cubic_term_4x4[MAX_FUNCS];
+int funcFlops_quad_term_4x4[MAX_FUNCS];
 int numFuncs_4x4 = 0;
 
 
@@ -79,7 +81,7 @@ void destroy(float * m)
 
 void register_functions_4x4()
 {	
-	add_function_4x4(&qmm_naive, (char *)"naive 4x4",4);
+	add_function_4x4(&qmm_naive, (char *)"naive 4x4",4,0);
 	// Add your functions here
 	// add_function(&your_function, "function: Optimization X", nrflops);
 	
@@ -91,7 +93,7 @@ void register_functions_4x4()
 */
 
 
-void add_function_4x4(qmm_pointer_4x4 f, char *name, int flops)
+void add_function_4x4(qmm_pointer_4x4 f, char *name, int flops_cubic_term, int flops_quad_term)
 {	
 	if (numFuncs_4x4 >= MAX_FUNCS)
 	{
@@ -102,7 +104,8 @@ void add_function_4x4(qmm_pointer_4x4 f, char *name, int flops)
 
 	userFuncs_4x4[numFuncs_4x4] = f;
 	funcNames_4x4[numFuncs_4x4] = name;
-	funcFlops_4x4[numFuncs_4x4] = flops;
+	funcFlops_cubic_term_4x4[numFuncs_4x4] = flops_cubic_term;
+	funcFlops_quad_term_4x4[numFuncs_4x4] = flops_quad_term;
 
 	numFuncs_4x4++;
 }
@@ -113,8 +116,8 @@ int main(int argc, char **argv)
 {
 	printf("------Timing qmm-----\n");
 	int verbosity = 2;
-    float perf;
-    FILE *fp = fopen("data/perf_qmm.dat","w+");
+    float cycles,perf;
+    char file_name[30], func_name[30];
     // Initialize the vectors of functions, function names and function flops
 	// Test of vanilla implementation first
     
@@ -134,20 +137,27 @@ int main(int argc, char **argv)
 	}
 	printf("\n%d 4x4 functions registered\n", numFuncs_4x4);
 
-	// Test of vanilla implementation first
-	printf("Performance of qmm:\n");
-	for(int n=3; n<20;n+=1){
-		printf("%d \n", n);
-		perf = perf_test(userFuncs_4x4[0],funcNames_4x4[0],funcFlops_4x4[0],n);
-		printf("%s: %d %f \n",funcNames_4x4[0],n, perf);
-		fprintf(fp, "%d %f\n",n,perf);
+	for (int i = 0; i < numFuncs_4x4; ++i)
+	{
+		printf("Performance of qmm function: %s \n", funcNames_4x4[i]);
+		strcpy(func_name, funcNames_4x4[i]);
+		strcpy(file_name,"data/perf_qmm_");
+		strcat(file_name, func_name);
+		strcat(file_name, ".dat");
+		FILE *fp = fopen(file_name,"w+");
+		for(int n=3; n<20;n+=1){
+			cycles = perf_test(userFuncs_4x4[i],funcNames_4x4[i],n);
+			perf = (funcFlops_cubic_term_4x4[i]*n*n*n + funcFlops_quad_term_4x4[i]*n*n)/cycles;
+			printf("%s: n:%d cycles:%f perf:%f \n",funcNames_4x4[0],n, cycles,perf);
+			fprintf(fp, "%d %f\n",n,perf);
+		}	
 	}
 
 	return 0;
 }
 
 
-double perf_test(qmm_pointer_4x4 f, char *desc, int flops,int n)
+double perf_test(qmm_pointer_4x4 f, char *desc,int n)
 {
 	double cycles = 0.;
 	double perf = 0.0;
@@ -219,5 +229,5 @@ double perf_test(qmm_pointer_4x4 f, char *desc, int flops,int n)
 	cyclesList.sort();
 	cycles = cyclesList.front();
 
-	return (n*n*n*flops*1.0) / cycles;
+	return cycles;
 }

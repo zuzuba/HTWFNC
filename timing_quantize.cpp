@@ -3,6 +3,7 @@
 #include "quantize.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include <list>
 #include <time.h>
@@ -27,7 +28,7 @@ using namespace std;
 /* prototype of the function you need to optimize */
 typedef void(*quantize_pointer)(float *, uint4x4_t*,  float *, float *, int, int);
 
-double perf_test(quantize_pointer f, char *desc, int flops,int dim);
+double perf_test(quantize_pointer f, char *desc,int dim);
 
 #define TEST_FAILED -1
 
@@ -35,7 +36,7 @@ double perf_test(quantize_pointer f, char *desc, int flops,int dim);
 
 
 void register_functions_4x4();
-void add_function_4x4(quantize_pointer f, char *name, int flop);
+void add_function_4x4(quantize_pointer f, char *name, int flop_quad_term, int flop_linear_term);
 int validation_4x4(quantize_pointer f);
 
 
@@ -43,7 +44,8 @@ int validation_4x4(quantize_pointer f);
 
 quantize_pointer userFuncs_4x4[MAX_FUNCS];
 char *funcNames_4x4[MAX_FUNCS];
-int funcFlops_4x4[MAX_FUNCS];
+int funcFlops_quad_term_4x4[MAX_FUNCS];
+int funcFlops_linear_term_4x4[MAX_FUNCS];
 int numFuncs_4x4 = 0;
 
 
@@ -78,7 +80,7 @@ void destroy(float * m)
 
 void register_functions_4x4()
 {	
-	add_function_4x4(&quantize_4x4, (char *)"naive 4x4",7);
+	add_function_4x4(&quantize_4x4, (char *)"naive 4x4",7,0);
 	// Add your functions here
 	// add_function(&your_function, "function: Optimization X", nrflops);
 	
@@ -90,7 +92,7 @@ void register_functions_4x4()
 */
 
 
-void add_function_4x4(quantize_pointer f, char *name, int flops)
+void add_function_4x4(quantize_pointer f, char *name, int flop_quad_term, int flop_linear_term)
 {	
 	if (numFuncs_4x4 >= MAX_FUNCS)
 	{
@@ -101,7 +103,8 @@ void add_function_4x4(quantize_pointer f, char *name, int flops)
 
 	userFuncs_4x4[numFuncs_4x4] = f;
 	funcNames_4x4[numFuncs_4x4] = name;
-	funcFlops_4x4[numFuncs_4x4] = flops;
+	funcFlops_quad_term_4x4[numFuncs_4x4] = flop_quad_term;
+	funcFlops_linear_term_4x4[numFuncs_4x4] = flop_linear_term;
 
 	numFuncs_4x4++;
 }
@@ -112,8 +115,8 @@ int main(int argc, char **argv)
 {
 	printf("------Timing quantization function-----\n");
 	int verbosity = 2;
-    float perf;
-    FILE *fp = fopen("data/perf_quantize.dat","w+");
+    float cycles, perf;
+    char file_name[30],func_name[30];
     // Initialize the vectors of functions, function names and function flops
 	// Test of vanilla implementation first
     
@@ -133,20 +136,28 @@ int main(int argc, char **argv)
 	}
 	printf("\n%d 4x4 functions registered\n", numFuncs_4x4);
 
-	// Test of vanilla implementation first
-	printf("Performance of quantize function:\n");
-	for(int n=3; n<20;n+=1){
-		printf("%d \n", n);
-		perf = perf_test(userFuncs_4x4[0],funcNames_4x4[0],funcFlops_4x4[0],n);
-		printf("%s: %d %f \n",funcNames_4x4[0],n, perf);
-		fprintf(fp, "%d %f\n",n,perf);
+	for (int i = 0; i < numFuncs_4x4; ++i)
+	{
+		printf("Performance of quantize function: %s \n", funcNames_4x4[i]);
+		strcpy(func_name, funcNames_4x4[i]);
+		strcpy(file_name, "data/perf_quantize_");
+		strcat(file_name, func_name);
+		strcat(file_name, ".dat");
+		FILE *fp = fopen(file_name,"w+");
+
+		for(int n=3; n<20;n+=1){
+			cycles = perf_test(userFuncs_4x4[i],funcNames_4x4[i],n);
+			perf = (funcFlops_quad_term_4x4[i]*n*n + funcFlops_linear_term_4x4[i]*n)/cycles;
+			printf("%s: n:%d  cycles:%f perf:%f \n",funcNames_4x4[i],n, cycles,perf);
+			fprintf(fp, "%d %f\n",n,perf);
+		}	
 	}
 
 	return 0;
 }
 
 
-double perf_test(quantize_pointer f, char *desc, int flops,int n)
+double perf_test(quantize_pointer f, char *desc,int n)
 {
 	double cycles = 0.;
 	double perf = 0.0;
@@ -201,5 +212,5 @@ double perf_test(quantize_pointer f, char *desc, int flops,int n)
 	cyclesList.sort();
 	cycles = cyclesList.front();
 
-	return (n*n*flops*1.0) / cycles;
+	return cycles;
 }
