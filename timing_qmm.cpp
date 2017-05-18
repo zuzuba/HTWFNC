@@ -82,6 +82,7 @@ void destroy(float * m)
 void register_functions_4x4()
 {	
 	add_function_4x4(&qmm_naive, (char *)"naive 4x4",4,0);
+	add_function_4x4(&qmm_trick, (char *)"naive_trick",2,0);
 	// Add your functions here
 	// add_function(&your_function, "function: Optimization X", nrflops);
 	
