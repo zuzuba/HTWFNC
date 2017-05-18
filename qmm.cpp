@@ -169,7 +169,7 @@ void qmm_trick_AVX(float l_scale, float r_scale, float result_scale, uint4x4_t l
 	n = n/2;
 	m = m/2;
 	k = k/2;
-
+	int t;
 
 	// Precompute additional terms
 	uint16_t* term2 = (uint16_t*)malloc(sizeof(uint16_t)* m *2);
@@ -212,7 +212,7 @@ void qmm_trick_AVX(float l_scale, float r_scale, float result_scale, uint4x4_t l
 			acc4 = 0;
 			 __m256i b1,b2,b3,b4;
 			 uint4x4_t column[16];
-			for (int t=0; t<k; t = t+16){
+			for ( t=0; t<(k-16); t = t+16){
 				uint4x4_to_mm256_row(l_int_mat + i*k + t, &b1, &b2);
 				for (int u = 0; u < 16; u++)
 				{
@@ -229,6 +229,23 @@ void qmm_trick_AVX(float l_scale, float r_scale, float result_scale, uint4x4_t l
 				acc4 += dot_prod_AVX(b2,b4);
 
 			}
+
+			for(t; t<k; t = t+1){
+				acc1 += (l_int_mat[i*k + t].i1) * (r_int_mat[t*m + j].i1) + 
+						(l_int_mat[i*k + t].i2) * (r_int_mat[t*m + j].i3);
+
+				acc2 += (l_int_mat[i*k + t].i1) * (r_int_mat[t*m + j].i2) + 
+						(l_int_mat[i*k + t].i2) * (r_int_mat[t*m + j].i4);
+
+				acc3 += (l_int_mat[i*k + t].i3) * (r_int_mat[t*m + j].i1) + 
+						(l_int_mat[i*k + t].i4) * (r_int_mat[t*m + j].i3);
+
+				acc4 += (l_int_mat[i*k + t].i3) * (r_int_mat[t*m + j].i2) + 
+						(l_int_mat[i*k + t].i4) * (r_int_mat[t*m + j].i4);
+
+			}
+
+
 			
 		acc1 = acc1 - term2[2*j] - term3[2*i] + term4;
 		acc2 = acc2 - term2[2*j + 1] - term3[2*i] + term4;
