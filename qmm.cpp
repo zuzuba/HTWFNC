@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "utils.h"
-#include "naive_qmm.h"
+#include "qmm.h"
 #include <math.h>
 #include <stdlib.h>
 

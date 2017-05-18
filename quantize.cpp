@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "utils.h"
-#include "naive_quantize.h"
+#include "quantize.h"
 
 
 void vanilla_quantize(float *d, uint4x1_t *q, float *min, float *max, int rows, int columns){

@@ -1,5 +1,5 @@
 #include "utils.h"
-#include "naive_qmm.h"
+#include "qmm.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>

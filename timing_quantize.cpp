@@ -1,6 +1,6 @@
 #include "utils.h"
-#include "naive_qmm.h"
-#include "naive_quantize.h"
+#include "qmm.h"
+#include "quantize.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>

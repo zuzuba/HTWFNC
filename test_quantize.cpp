@@ -1,5 +1,5 @@
 #include "utils.h"
-#include "naive_quantize.h"
+#include "quantize.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
