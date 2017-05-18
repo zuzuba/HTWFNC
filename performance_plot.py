@@ -32,18 +32,17 @@ for file,c in zip(files_quantize,color):
 	plt.xlim(dim[0], dim[-1])
 	ax.text(dim[-3],11/10*performance[-1],file[len(prefix):-len(suffix)],color=c)
 	
-plt.plot(dim, peak*np.ones(dim.shape),'r')
-ax.text(dim[-5],7/10*peak,'scalar peak performance',color='r')
+plt.plot(dim, peak*np.ones(dim.shape),'k')
+ax.text(dim[-5],7/10*peak,'scalar peak performance',color='k')
 plt.show()
 fig.savefig(os.path.join(plot_folder, 'Performance_quantize.eps'), format='eps')
 fig.savefig(os.path.join(plot_folder, 'Performance_quantize.png'), format='png', dpi=200)
 
 
+
 prefix = 'perf_qmm'
 
 files_qmm = [i for i in os.listdir(data_folder) if os.path.isfile(os.path.join(data_folder,i)) and prefix in i]
-
-dim, performance = np.loadtxt(os.path.join(data_folder, "perf_qmm_naive 4x4.dat"), unpack=True)
 
 fig=plt.figure()
 ax = plt.subplot(111)
@@ -59,13 +58,14 @@ number_func = len(files_qmm)
 color=cm.rainbow(np.linspace(0,1,number_func))
 
 for file,c in zip(files_qmm,color):
+	dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
 	plt.plot(dim, performance,c=c,marker='d')
 	plt.plot(dim, performance,c=c)
 	plt.xlim(dim[0], dim[-1])
-	ax.text(dim[-3],11/10*performance[-1],file[len(prefix):-len(suffix)],color='b')
-	ax.text(dim[-5],7/10*peak,'scalar peak performance',color='r')
+	ax.text(dim[-3],11/10*performance[-1],file[len(prefix):-len(suffix)],color=c)
 
-plt.plot(dim, peak*np.ones(dim.shape),'r')
+plt.plot(dim, peak*np.ones(dim.shape),'k')
+ax.text(dim[-5],7/10*peak,'scalar peak performance',color='k')
 plt.show()
 
 fig.savefig(os.path.join(plot_folder, 'Performance_qmm.eps'), format='eps')
