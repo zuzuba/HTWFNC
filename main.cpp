@@ -41,7 +41,7 @@ int main(){
 	offset_result.i1 = 7;
 
 	// Notice we need to do x * W and not the other way around
-	qmm_naive(scale_x, scale_w, scale_result, offset_x,  offset_w, 
+	qmm_trick_AVX(scale_x, scale_w, scale_result, offset_x,  offset_w, 
 	offset_result, x_q, W_q, result_q, TEST_POINTS, 
 	FEATURES, CLASSES);	
 

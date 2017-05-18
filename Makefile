@@ -14,7 +14,7 @@ TEST_BIN_QUANT = test_quant
 #CFLAGS += -O3 -no-vec
 
 CC      = g++
-CFLAGS += -O3 -fno-tree-vectorize -march=native
+CFLAGS += -O3 -fno-tree-vectorize -march=native -mavx
 
 # ==================================================================================== #
 # = Object Files
