@@ -147,7 +147,7 @@ int main(int argc, char **argv)
 		strcat(file_name, func_name);
 		strcat(file_name, ".dat");
 		FILE *fp = fopen(file_name,"w+");
-		for(int n=3; n<20;n+=1){
+		for(int n=16; n<200;n+=32){
 			cycles = perf_test(userFuncs_4x4[i],funcNames_4x4[i],n);
 			perf = (funcFlops_cubic_term_4x4[i]*n*n*n + funcFlops_quad_term_4x4[i]*n*n)/cycles;
 			printf("%s: n:%d cycles:%f perf:%f \n",funcNames_4x4[i],n, cycles,perf);
