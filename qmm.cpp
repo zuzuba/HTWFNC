@@ -118,8 +118,6 @@ void qmm_trick(float l_scale, float r_scale, float result_scale, uint4x4_t l_off
 	}
 
 	term4 = l_offset.i1 * r_offset.i1 * (k * 2);
-	
-	// It should be correct up until here
 
 	for(int i=0; i<n; i = i+1){
 		for(int j=0; j<m; j = j+1){
@@ -162,7 +160,7 @@ void qmm_trick_AVX(float l_scale, float r_scale, float result_scale, uint4x4_t l
 	uint4x4_t result_offset, uint4x4_t* l_int_mat, uint4x4_t* r_int_mat, uint4x4_t* result_int_mat, 
 	int n, int k, int m){
 
-	int16_t acc1, acc2, acc3, acc4,acc1_, acc2_, acc3_, acc4_;
+	int16_t acc1, acc2, acc3, acc4;
 
 	// Internally we divide everything by 2 because one uint4x4_t contains 4 integers of 4 bit organize in 2 cols and 2 rows
 
@@ -175,7 +173,7 @@ void qmm_trick_AVX(float l_scale, float r_scale, float result_scale, uint4x4_t l
 	uint16_t* term2 = (uint16_t*)malloc(sizeof(uint16_t)* m *2);
 	uint16_t* term3 = (uint16_t*)malloc(sizeof(uint16_t)* n *2);
 	uint16_t term4;
-
+	float scale = l_scale * r_scale/result_scale;
 	uint16_t sum1, sum2;
 	
 	// Sum over the entries of each col of rhs and multiply by left offset 
@@ -210,28 +208,47 @@ void qmm_trick_AVX(float l_scale, float r_scale, float result_scale, uint4x4_t l
 			acc2 = 0;
 			acc3 = 0;
 			acc4 = 0;
-			 __m256i b1,b2,b3,b4;
-			 uint4x4_t column[16];
-			for ( t=0; t<(k-15); t = t+16){
-				uint4x4_to_mm256_row(l_int_mat + i*k + t, &b1, &b2);
+			 __m256i r1,r2,r3,r4,t1,t2,t3,t4,t5,t6,t7,t8,t11,t12,t21,t22;
+			 __m256i c1,c2,c3,c4,acc11,acc12,acc21,acc22;
+			acc11 = _mm256_set1_epi16(0);
+			acc12 = _mm256_set1_epi16(0);
+			acc21 = _mm256_set1_epi16(0);
+			acc22 = _mm256_set1_epi16(0);
+			 uint4x4_t column1[16],column2[16];
+			for ( t=0; t<(k-31); t = t+32){
+				uint4x4_to_mm256_row(l_int_mat + i*k + t, &r1, &r2);
+				uint4x4_to_mm256_row(l_int_mat + i*k + t+16, &r3, &r4);
 				for (int u = 0; u < 16; u++)
 				{
-					column[u].i1 = r_int_mat[(t+u)*m + j].i1;
-					column[u].i2 = r_int_mat[(t+u)*m + j].i2;
-					column[u].i3 = r_int_mat[(t+u)*m + j].i3;
-					column[u].i4 = r_int_mat[(t+u)*m + j].i4;
+					column1[u] = r_int_mat[(t+u)*m + j];
+					column2[u] = r_int_mat[(t+u+16)*m + j];
 				}
-				uint4x4_to_mm256_column(column, &b3, &b4);
+				uint4x4_to_mm256_column(column1, &c1, &c2);
+				uint4x4_to_mm256_column(column2, &c3, &c4);
 
-				acc1 += dot_prod_AVX(b1,b3);
-
-				acc2 += dot_prod_AVX(b1,b4);
-
-				acc3 += dot_prod_AVX(b2,b3);
-
-				acc4 += dot_prod_AVX(b2,b4);
+				t1 = _mm256_maddubs_epi16 (r1,c1);
+				t2 = _mm256_maddubs_epi16 (r3,c3);
+				t3 = _mm256_maddubs_epi16 (r1,c2);
+				t4 = _mm256_maddubs_epi16 (r3,c4);
+				t5 = _mm256_maddubs_epi16 (r2,c1);
+				t6 = _mm256_maddubs_epi16 (r4,c3);
+				t7 = _mm256_maddubs_epi16 (r2,c2);
+				t8 = _mm256_maddubs_epi16 (r4,c4);
+				t11 = _mm256_add_epi16(t1,t2);
+				t12 = _mm256_add_epi16(t3,t4);
+				t21 = _mm256_add_epi16(t5,t6);
+				t22 = _mm256_add_epi16(t7,t8);
+				acc11 = _mm256_add_epi16(acc11,t11);
+				acc12 = _mm256_add_epi16(acc12,t12);
+				acc21 = _mm256_add_epi16(acc21,t21);
+				acc22 = _mm256_add_epi16(acc22,t22);
 
 			}
+
+			acc1 += _mm256_haddsi_epi16(acc11);
+			acc2 += _mm256_haddsi_epi16(acc12);
+			acc3 += _mm256_haddsi_epi16(acc21);
+			acc4 += _mm256_haddsi_epi16(acc22);
 
 			for(int u=t;u<k; u = u+1){
 				acc1 += (l_int_mat[i*k + u].i1) * (r_int_mat[u*m + j].i1) + 
@@ -254,10 +271,10 @@ void qmm_trick_AVX(float l_scale, float r_scale, float result_scale, uint4x4_t l
 		acc3 = acc3 - term2[2*j] - term3[2*i + 1] + term4;
 		acc4 = acc4 - term2[2*j + 1] - term3[2*i + 1] + term4;
 
-		result_int_mat[i*m + j].i1 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc1));
-		result_int_mat[i*m + j].i2 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc2));
-		result_int_mat[i*m + j].i3 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc3));
-		result_int_mat[i*m + j].i4 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc4));
+		result_int_mat[i*m + j].i1 = saturate(round(result_offset.i1 + scale * acc1));
+		result_int_mat[i*m + j].i2 = saturate(round(result_offset.i1 + scale * acc2));
+		result_int_mat[i*m + j].i3 = saturate(round(result_offset.i1 + scale * acc3));
+		result_int_mat[i*m + j].i4 = saturate(round(result_offset.i1 + scale * acc4));
 		
 		}
 	}
