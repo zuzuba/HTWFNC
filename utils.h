@@ -45,6 +45,7 @@ void uint4x4_to_mm256_row(uint4x4_t* a, __m256i *b1, __m256i *b2);
 void uint4x4_to_mm256_column(uint4x4_t* a, __m256i *b1, __m256i *b2);
 
 uint16_t dot_prod_AVX(__m256i a, __m256i b);
+uint16_t _mm256_haddsi_epi16(__m256i a);
 
 
 #endif
