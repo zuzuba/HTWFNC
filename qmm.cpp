@@ -162,7 +162,7 @@ void qmm_trick_AVX(float l_scale, float r_scale, float result_scale, uint4x4_t l
 	uint4x4_t result_offset, uint4x4_t* l_int_mat, uint4x4_t* r_int_mat, uint4x4_t* result_int_mat, 
 	int n, int k, int m){
 
-	int16_t acc1, acc2, acc3, acc4;
+	int16_t acc1, acc2, acc3, acc4,acc1_, acc2_, acc3_, acc4_;
 
 	// Internally we divide everything by 2 because one uint4x4_t contains 4 integers of 4 bit organize in 2 cols and 2 rows
 
@@ -216,10 +216,13 @@ void qmm_trick_AVX(float l_scale, float r_scale, float result_scale, uint4x4_t l
 				uint4x4_to_mm256_row(l_int_mat + i*k + t, &b1, &b2);
 				for (int u = 0; u < 16; u++)
 				{
-					column[u] = r_int_mat[(t+u)*m + j];
+					column[u].i1 = r_int_mat[(t+u)*m + j].i1;
+					column[u].i2 = r_int_mat[(t+u)*m + j].i2;
+					column[u].i3 = r_int_mat[(t+u)*m + j].i3;
+					column[u].i4 = r_int_mat[(t+u)*m + j].i4;
 				}
 				uint4x4_to_mm256_column(column, &b3, &b4);
-				
+
 				acc1 += dot_prod_AVX(b1,b3);
 
 				acc2 += dot_prod_AVX(b1,b4);
@@ -230,21 +233,20 @@ void qmm_trick_AVX(float l_scale, float r_scale, float result_scale, uint4x4_t l
 
 			}
 
-			for(t; t<k; t = t+1){
-				acc1 += (l_int_mat[i*k + t].i1) * (r_int_mat[t*m + j].i1) + 
-						(l_int_mat[i*k + t].i2) * (r_int_mat[t*m + j].i3);
+			for(int u=t;u<k; u = u+1){
+				acc1 += (l_int_mat[i*k + u].i1) * (r_int_mat[u*m + j].i1) + 
+						(l_int_mat[i*k + u].i2) * (r_int_mat[u*m + j].i3);
 
-				acc2 += (l_int_mat[i*k + t].i1) * (r_int_mat[t*m + j].i2) + 
-						(l_int_mat[i*k + t].i2) * (r_int_mat[t*m + j].i4);
+				acc2 += (l_int_mat[i*k + u].i1) * (r_int_mat[u*m + j].i2) + 
+						(l_int_mat[i*k + u].i2) * (r_int_mat[u*m + j].i4);
 
-				acc3 += (l_int_mat[i*k + t].i3) * (r_int_mat[t*m + j].i1) + 
-						(l_int_mat[i*k + t].i4) * (r_int_mat[t*m + j].i3);
+				acc3 += (l_int_mat[i*k + u].i3) * (r_int_mat[u*m + j].i1) + 
+						(l_int_mat[i*k + u].i4) * (r_int_mat[u*m + j].i3);
 
-				acc4 += (l_int_mat[i*k + t].i3) * (r_int_mat[t*m + j].i2) + 
-						(l_int_mat[i*k + t].i4) * (r_int_mat[t*m + j].i4);
+				acc4 += (l_int_mat[i*k + u].i3) * (r_int_mat[u*m + j].i2) + 
+						(l_int_mat[i*k + u].i4) * (r_int_mat[u*m + j].i4);
 
 			}
-
 
 			
 		acc1 = acc1 - term2[2*j] - term3[2*i] + term4;
