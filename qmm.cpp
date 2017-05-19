@@ -212,7 +212,7 @@ void qmm_trick_AVX(float l_scale, float r_scale, float result_scale, uint4x4_t l
 			acc4 = 0;
 			 __m256i b1,b2,b3,b4;
 			 uint4x4_t column[16];
-			for ( t=0; t<(k-16); t = t+16){
+			for ( t=0; t<(k-15); t = t+16){
 				uint4x4_to_mm256_row(l_int_mat + i*k + t, &b1, &b2);
 				for (int u = 0; u < 16; u++)
 				{
