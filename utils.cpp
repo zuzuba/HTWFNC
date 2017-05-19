@@ -77,15 +77,35 @@ void print_uint4x4_mat(uint4x4_t* q_mat, int rows, int cols){
 	
 	for (int i = 0; i<rows/2; i++){
 		for (int j = 0; j<cols/2; j++){
-			printf("%d  %d  ", q_mat[i*cols/2 + j].i1, q_mat[i*cols/2 + j].i2);
+			printf("%d %d ", q_mat[i*cols/2 + j].i1, q_mat[i*cols/2 + j].i2);
 		}
 		printf("\n");
 		for (int j = 0; j<cols/2; j++){
-			printf("%d  %d  ", q_mat[i*cols/2 + j].i3, q_mat[i*cols/2 + j].i4);
+			printf("%d %d ", q_mat[i*cols/2 + j].i3, q_mat[i*cols/2 + j].i4);
 		}
 		printf("\n");
 
 	}
+}
+
+void print_uint8_mm256i(__m256i a){
+		printf("%d ", _mm256_extract_epi8(a,0)); printf("%d ", _mm256_extract_epi8(a,1));
+		printf("%d ", _mm256_extract_epi8(a,2)); printf("%d ", _mm256_extract_epi8(a,3));
+		printf("%d ", _mm256_extract_epi8(a,4)); printf("%d ", _mm256_extract_epi8(a,5));
+		printf("%d ", _mm256_extract_epi8(a,6)); printf("%d ", _mm256_extract_epi8(a,7)); 
+		printf("%d ", _mm256_extract_epi8(a,8)); printf("%d ", _mm256_extract_epi8(a,9)); 
+		printf("%d ", _mm256_extract_epi8(a,10)); printf("%d ", _mm256_extract_epi8(a,11)); 
+		printf("%d ", _mm256_extract_epi8(a,12)); printf("%d ", _mm256_extract_epi8(a,13)); 
+		printf("%d ", _mm256_extract_epi8(a,14)); printf("%d ", _mm256_extract_epi8(a,15)); 
+		printf("%d ", _mm256_extract_epi8(a,16)); printf("%d ", _mm256_extract_epi8(a,17)); 
+		printf("%d ", _mm256_extract_epi8(a,18)); printf("%d ", _mm256_extract_epi8(a,19)); 
+		printf("%d ", _mm256_extract_epi8(a,20)); printf("%d ", _mm256_extract_epi8(a,21)); 
+		printf("%d ", _mm256_extract_epi8(a,22)); printf("%d ", _mm256_extract_epi8(a,23)); 
+		printf("%d ", _mm256_extract_epi8(a,24)); printf("%d ", _mm256_extract_epi8(a,25));
+		printf("%d ", _mm256_extract_epi8(a,26)); printf("%d ", _mm256_extract_epi8(a,27)); 
+		printf("%d ", _mm256_extract_epi8(a,28)); printf("%d ", _mm256_extract_epi8(a,29)); 
+		printf("%d ", _mm256_extract_epi8(a,30)); printf("%d ", _mm256_extract_epi8(a,31)); 
+		printf("\n");
 }
 
 
@@ -175,10 +195,16 @@ void uint4x4_to_mm256_column(uint4x4_t* a, __m256i *b1, __m256i *b2){
 uint16_t dot_prod_AVX(__m256i a, __m256i b){
 	__m256i c; 
 	c = _mm256_maddubs_epi16 (a,b);
-	c = _mm256_hadd_epi16 (c,c);
-	c = _mm256_hadd_epi16 (c,c);
-	c = _mm256_hadd_epi16 (c,c);
-	c = _mm256_hadd_epi16 (c,c);
-	return _mm256_extract_epi16(c,0);
+	uint16_t result =0;
+	result += _mm256_extract_epi16(c,0)+_mm256_extract_epi16(c,1);
+	result += _mm256_extract_epi16(c,2)+_mm256_extract_epi16(c,3);
+	result += _mm256_extract_epi16(c,4)+_mm256_extract_epi16(c,5);
+	result += _mm256_extract_epi16(c,6)+_mm256_extract_epi16(c,7); 
+	result += _mm256_extract_epi16(c,8)+_mm256_extract_epi16(c,9);
+	result += _mm256_extract_epi16(c,10)+_mm256_extract_epi16(c,11);
+	result += _mm256_extract_epi16(c,12)+_mm256_extract_epi16(c,13);
+	result += _mm256_extract_epi16(c,14)+_mm256_extract_epi16(c,15);
+
+	return result;
 }
 
