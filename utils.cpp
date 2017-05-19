@@ -193,18 +193,16 @@ void uint4x4_to_mm256_column(uint4x4_t* a, __m256i *b1, __m256i *b2){
 }
 
 uint16_t dot_prod_AVX(__m256i a, __m256i b){
-	__m256i c; 
+	__m256i c,t1,t2,t3,t4,t5,t6; 
 	c = _mm256_maddubs_epi16 (a,b);
 	uint16_t result =0;
-	result += _mm256_extract_epi16(c,0)+_mm256_extract_epi16(c,1);
-	result += _mm256_extract_epi16(c,2)+_mm256_extract_epi16(c,3);
-	result += _mm256_extract_epi16(c,4)+_mm256_extract_epi16(c,5);
-	result += _mm256_extract_epi16(c,6)+_mm256_extract_epi16(c,7); 
-	result += _mm256_extract_epi16(c,8)+_mm256_extract_epi16(c,9);
-	result += _mm256_extract_epi16(c,10)+_mm256_extract_epi16(c,11);
-	result += _mm256_extract_epi16(c,12)+_mm256_extract_epi16(c,13);
-	result += _mm256_extract_epi16(c,14)+_mm256_extract_epi16(c,15);
+	t1= _mm256_permute4x64_epi64(c,177);
+	t2= _mm256_permute4x64_epi64(c,142);
+	t3= _mm256_permute4x64_epi64(c,27);
+	t4 = _mm256_add_epi16(c,t1);
+	t5 = _mm256_add_epi16(t2,t3);
+	t6 = _mm256_add_epi16(t4,t5);
 
-	return result;
+	return _mm256_extract_epi16(t6,0)+_mm256_extract_epi16(t6,1)+_mm256_extract_epi16(t6,2)+_mm256_extract_epi16(t6,3);
 }
 
