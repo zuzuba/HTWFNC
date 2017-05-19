@@ -217,3 +217,23 @@ uint16_t _mm256_haddsi_epi16(__m256i a){
 	t6 = _mm256_add_epi16(t4,t5);
 	return _mm256_extract_epi16(t6,0)+_mm256_extract_epi16(t6,1)+_mm256_extract_epi16(t6,2)+_mm256_extract_epi16(t6,3);
 }
+
+void uint4x4_to_mm256_row_shuffle(uint4x4_t* a, __m256i *b1, __m256i *b2){
+
+	__m256i tmp = _mm256_loadu_si256((__m256i const *)a);
+
+	__m256i mask13 = _mm256_set1_epi8(15); // Sets a mask 0000 1111 repeated 16 times
+	__m256i odd = _mm256_and_si256(tmp, mask13);
+	
+	__m256i mask24 = _mm256_set1_epi8(240);
+	__m256i even = _mm256_and_si256(tmp, mask24);
+	
+
+	__m256i blend_mask = _mm256_set1_epi16(32768);
+	*b1 = _mm256_blendv_epi8 (odd, _mm256_slli_epi64 (even, 4), blend_mask);
+	*b2 = _mm256_blendv_epi8 (_mm256_srli_epi64 (odd, 8), _mm256_srli_epi64 (even, 4), blend_mask);
+
+}
+
+
+
