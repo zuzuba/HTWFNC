@@ -150,7 +150,7 @@ int main(int argc, char **argv)
 		for(int n=3; n<20;n+=1){
 			cycles = perf_test(userFuncs_4x4[i],funcNames_4x4[i],n);
 			perf = (funcFlops_cubic_term_4x4[i]*n*n*n + funcFlops_quad_term_4x4[i]*n*n)/cycles;
-			printf("%s: n:%d cycles:%f perf:%f \n",funcNames_4x4[0],n, cycles,perf);
+			printf("%s: n:%d cycles:%f perf:%f \n",funcNames_4x4[i],n, cycles,perf);
 			fprintf(fp, "%d %f\n",n,perf);
 		}	
 	}
