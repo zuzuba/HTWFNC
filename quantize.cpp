@@ -43,34 +43,33 @@ void quantize_4x4(float *d, uint4x4_t *q, float *min, float *max, int rows, int 
 			lower_row = _mm256_loadu_ps(d+((i+1)*columns+j));
 			upper_row = _mm256_fmadd_ps(scale_avx,upper_row,zp_avx);
 			lower_row = _mm256_fmadd_ps(scale_avx,lower_row,zp_avx);
-			_mm256_store_ps(temp_upper,upper_row);
-			_mm256_store_ps(temp_lower,lower_row);
+			_mm256_store_ps(temp_upper, _mm256_round_ps(upper_row,_MM_FROUND_TO_NEAREST_INT));
+			_mm256_store_ps(temp_lower, _mm256_round_ps(lower_row,_MM_FROUND_TO_NEAREST_INT));
 			/*
 			t1 = zero_point + d[i*columns + j]/scale;
 			t2 = zero_point + d[i*columns + j + 1]/scale;
 			t3 = zero_point + d[(i + 1)*columns + j]/scale;
 			t4 = zero_point + d[(i + 1)*columns + j + 1]/scale;
 			*/
-			q[i/2*columns/2 + j/2].i1 = (uint8_t)saturate(round(temp_upper[0]));
-			q[i/2*columns/2 + j/2].i2 = (uint8_t)saturate(round(temp_upper[1]));
-			q[i/2*columns/2 + j/2].i3 = (uint8_t)saturate(round(temp_lower[0]));
-			q[i/2*columns/2 + j/2].i4 = (uint8_t)saturate(round(temp_lower[1]));
+			q[i/2*columns/2 + j/2].i1 = (uint8_t)saturate(temp_upper[0]);
+			q[i/2*columns/2 + j/2].i2 = (uint8_t)saturate(temp_upper[1]);
+			q[i/2*columns/2 + j/2].i3 = (uint8_t)saturate(temp_lower[0]);
+			q[i/2*columns/2 + j/2].i4 = (uint8_t)saturate(temp_lower[1]);
 
-			q[i/2*columns/2 + j/2+1].i1 = (uint8_t)saturate(round(temp_upper[2]));
-			q[i/2*columns/2 + j/2+1].i2 = (uint8_t)saturate(round(temp_upper[3]));
-			q[i/2*columns/2 + j/2+1].i3 = (uint8_t)saturate(round(temp_lower[2]));
-			q[i/2*columns/2 + j/2+1].i4 = (uint8_t)saturate(round(temp_lower[3]));
+			q[i/2*columns/2 + j/2+1].i1 = (uint8_t)saturate(temp_upper[2]);
+			q[i/2*columns/2 + j/2+1].i2 = (uint8_t)saturate(temp_upper[3]);
+			q[i/2*columns/2 + j/2+1].i3 = (uint8_t)saturate(temp_lower[2]);
+			q[i/2*columns/2 + j/2+1].i4 = (uint8_t)saturate(temp_lower[3]);
 
-			q[i/2*columns/2 + j/2+2].i1 = (uint8_t)saturate(round(temp_upper[4]));
-			q[i/2*columns/2 + j/2+2].i2 = (uint8_t)saturate(round(temp_upper[5]));
-			q[i/2*columns/2 + j/2+2].i3 = (uint8_t)saturate(round(temp_lower[4]));
-			q[i/2*columns/2 + j/2+2].i4 = (uint8_t)saturate(round(temp_lower[5]));
+			q[i/2*columns/2 + j/2+2].i1 = (uint8_t)saturate(temp_upper[4]);
+			q[i/2*columns/2 + j/2+2].i2 = (uint8_t)saturate(temp_upper[5]);
+			q[i/2*columns/2 + j/2+2].i3 = (uint8_t)saturate(temp_lower[4]);
+			q[i/2*columns/2 + j/2+2].i4 = (uint8_t)saturate(temp_lower[5]);
 
-			q[i/2*columns/2 + j/2+3].i1 = (uint8_t)saturate(round(temp_upper[6]));
-			q[i/2*columns/2 + j/2+3].i2 = (uint8_t)saturate(round(temp_upper[7]));
-			q[i/2*columns/2 + j/2+3].i3 = (uint8_t)saturate(round(temp_lower[6]));
-			q[i/2*columns/2 + j/2+3].i4 = (uint8_t)saturate(round(temp_upper[7]));
-
+			q[i/2*columns/2 + j/2+3].i1 = (uint8_t)saturate(temp_upper[6]);
+			q[i/2*columns/2 + j/2+3].i2 = (uint8_t)saturate(temp_upper[7]);
+			q[i/2*columns/2 + j/2+3].i3 = (uint8_t)saturate(temp_lower[6]);
+			q[i/2*columns/2 + j/2+3].i4 = (uint8_t)saturate(temp_upper[7]);
 		}
 	}	
 
