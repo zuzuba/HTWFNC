@@ -5,9 +5,9 @@
 * Implement a test function that compare the result of the optimized function versus the result of the vanilla implementation (that is tested already).
 
 # Optimizations still need to be done
-* Unroll and scalar replacement for min max loop in quantization
-* Vectorization of min max loop in quantization
-* Vectorization of quantization (saturate would be nice to vectorizeb because it is used in qmm as well)
-* Blocking for qmm
-* In case it reuires a lot of time to execute, we might consider to a vectorized version of round (together with saturate this function is used in both qmm and quantization)
+* [Done(Unroll)-Ladi] Unroll and scalar replacement for min max loop in quantization
+* [Done-Ladi] Vectorization of min max loop in quantization
+* [(semi)Done-Ladi] Vectorization of quantization (saturate would be nice to vectorizeb because it is used in qmm as well)
+* [Ladi: Why do we need this? I thought we would just store the weights in transpose format and use dot-product] Blocking for qmm
+* [Done-Ladi] In case it reuires a lot of time to execute, we might consider to a vectorized version of round (together with saturate this function is used in both qmm and quantization)
 * Suggestions are welcome...
