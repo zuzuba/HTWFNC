@@ -47,8 +47,8 @@ void get_min_max(float *d,int rows,int columns, float *mn, float *mx){
 	}
 	_mm256_store_ps (temp_mx, mx_avx);
 	_mm256_store_ps (temp_mn, mn_avx);
-	*mx = max( temp_mx[0], max( temp_mx[1], max( temp_mx[2], temp_mx[3] )));
-	*mn = max( temp_mn[0], max( temp_mn[1], max( temp_mn[2], temp_mn[3] )));
+	*mx = max( temp_mx[0], max( temp_mx[1], max( temp_mx[2], max( temp_mx[3], max( temp_mx[4], max( temp_mx[5], max( temp_mx[6], temp_mx[7] )))))));
+	*mn = min( temp_mn[0], min( temp_mn[1], min( temp_mn[2], min( temp_mn[3], min( temp_mn[4], min( temp_mn[5], min( temp_mn[6], temp_mn[7] )))))));
 }
 
 float * read_csv_mat(const char *filename, int rows, int cols){
