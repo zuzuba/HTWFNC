@@ -90,34 +90,37 @@ void qmm_trick(float l_scale, float r_scale, float result_scale, uint4x4_t l_off
 	uint16_t* term2 = (uint16_t*)malloc(sizeof(uint16_t)* m *2);
 	uint16_t* term3 = (uint16_t*)malloc(sizeof(uint16_t)* n *2);
 	uint16_t term4;
-
+	uint4x4_t r_elment,l_element;
 	uint16_t sum1, sum2;
-	
+
 	// Sum over the entries of each col of rhs and multiply by left offset 
-	for(int j =0; j<m; j++){
+	for(int j =0; j<m; j+=1){
 		sum1 = 0;
 		sum2 = 0;
 		for(int i = 0; i<k; i++){
-			sum1 += r_int_mat[i*m + j].i1 + r_int_mat[i*m + j].i3;
-			sum2 += r_int_mat[i*m + j].i2 + r_int_mat[i*m + j].i4;
+			r_elment = r_int_mat[i*m + j]; 
+			sum1 += r_elment.i1 + r_elment.i3;
+			sum2 += r_elment.i2 + r_elment.i4;
 		}
 		term2[2*j] = l_offset.i1 * sum1;
 		term2[2*j + 1] = l_offset.i1 * sum2;	
 	}
 
-	// Sum over the entries of each row of lhs and multiply by rigt offset
+	// Sum over the entries of each row of lhs and multiply by right offset
 	for (int i=0; i<n; i++){
 		sum1 = 0;
 		sum2 = 0;
 		for (int j=0; j<k; j++){
-			sum1 += l_int_mat[i*k + j].i1 + l_int_mat[i*k + j].i2;
-			sum2 += l_int_mat[i*k + j].i3 + l_int_mat[i*k + j].i4;
+			l_element = l_int_mat[i*k + j];
+			sum1 += l_element.i1 + l_element.i2;
+			sum2 += l_element.i3 + l_element.i4;
 		}
 		term3[2*i] = r_offset.i1 * sum1;
 		term3[2*i + 1] = r_offset.i1 * sum2;
 	}
 
 	term4 = l_offset.i1 * r_offset.i1 * (k * 2);
+	
 
 	for(int i=0; i<n; i = i+1){
 		for(int j=0; j<m; j = j+1){
@@ -126,17 +129,19 @@ void qmm_trick(float l_scale, float r_scale, float result_scale, uint4x4_t l_off
 			acc3 = 0;
 			acc4 = 0;
 			for (int t=0; t<k; t = t+1){
-				acc1 += (l_int_mat[i*k + t].i1) * (r_int_mat[t*m + j].i1) + 
-						(l_int_mat[i*k + t].i2) * (r_int_mat[t*m + j].i3);
+				l_element = l_int_mat[i*k + t]; 
+				r_elment = r_int_mat[t*m + j];
+				acc1 += (l_element.i1) * (r_elment.i1) + 
+						(l_element.i2) * (r_elment.i3);
 
-				acc2 += (l_int_mat[i*k + t].i1) * (r_int_mat[t*m + j].i2) + 
-						(l_int_mat[i*k + t].i2) * (r_int_mat[t*m + j].i4);
+				acc2 += (l_element.i1) * (r_elment.i2) + 
+						(l_element.i2) * (r_elment.i4);
 
-				acc3 += (l_int_mat[i*k + t].i3) * (r_int_mat[t*m + j].i1) + 
-						(l_int_mat[i*k + t].i4) * (r_int_mat[t*m + j].i3);
+				acc3 += (l_element.i3) * (r_elment.i1) + 
+						(l_element.i4) * (r_elment.i3);
 
-				acc4 += (l_int_mat[i*k + t].i3) * (r_int_mat[t*m + j].i2) + 
-						(l_int_mat[i*k + t].i4) * (r_int_mat[t*m + j].i4);
+				acc4 += (l_element.i3) * (r_elment.i2) + 
+						(l_element.i4) * (r_elment.i4);
 
 			}
 			
@@ -160,14 +165,15 @@ void qmm_trick_AVX(float l_scale, float r_scale, float result_scale, uint4x4_t l
 	uint4x4_t result_offset, uint4x4_t* l_int_mat, uint4x4_t* r_int_mat, uint4x4_t* result_int_mat, 
 	int n, int k, int m){
 
-	int16_t acc1, acc2, acc3, acc4;
-
+	int16_t acc11_int[16],acc12_int[16],acc21_int[16],acc22_int[16];
+	int16_t acc1,acc2,acc3,acc4;
+	uint4x4_t r_elment,l_element;
 	// Internally we divide everything by 2 because one uint4x4_t contains 4 integers of 4 bit organize in 2 cols and 2 rows
 
 	n = n/2;
 	m = m/2;
 	k = k/2;
-	int t;
+	int t,i,j;
 
 	// Precompute additional terms
 	uint16_t* term2 = (uint16_t*)malloc(sizeof(uint16_t)* m *2);
@@ -175,6 +181,9 @@ void qmm_trick_AVX(float l_scale, float r_scale, float result_scale, uint4x4_t l
 	uint16_t term4;
 	float scale = l_scale * r_scale/result_scale;
 	uint16_t sum1, sum2;
+	__m256i r1,r2;
+	__m256i temp[32],temp_t[32];
+	__m256i acc11[16],acc12[16],acc21[16],acc22[16],dot_prod1[32],dot_prod2[32];
 	
 	// Sum over the entries of each col of rhs and multiply by left offset 
 	for(int j =0; j<m; j++){
@@ -202,81 +211,122 @@ void qmm_trick_AVX(float l_scale, float r_scale, float result_scale, uint4x4_t l
 
 	term4 = l_offset.i1 * r_offset.i1 * (k * 2);
 
-	for(int i=0; i<n; i = i+1){
-		for(int j=0; j<m; j = j+1){
+	for( i=0; i<n; i = i+1){
+		for( j=0; j<(m-15); j = j+16){
+			
+			for (int u = 0; u < 16; u++)
+			{
+				acc11_int[u] = 0;
+				acc12_int[u] = 0;
+				acc21_int[u] = 0;
+				acc22_int[u] = 0;
+				acc11[u] = _mm256_set1_epi16(0);
+				acc12[u] = _mm256_set1_epi16(0);
+				acc21[u] = _mm256_set1_epi16(0);
+				acc22[u] = _mm256_set1_epi16(0);	
+			}
+
+			for ( t=0; t<(k-31); t = t+32){
+				uint4x4_to_mm256_row_shuffle(l_int_mat + i*k + t, &r1, &r2);
+				
+				for (int u = 0; u < 16; u++)
+				{
+					uint4x4_to_mm256_row_shuffle(r_int_mat + (t+u)*m + j, &temp[2*u], &temp[2*u+1]);	
+				}
+				
+				transpose(temp,temp_t);
+
+				for (int u = 0; u < 32; u++)
+				{
+					dot_prod1[u] = _mm256_maddubs_epi16 (r1,temp_t[u]);
+					dot_prod2[u] = _mm256_maddubs_epi16 (r2,temp_t[u]);
+				}
+
+				for (int u = 0; u < 16; u++)
+				{
+					acc11[u] = _mm256_add_epi16(acc11[u],dot_prod1[2*u]);
+					acc12[u] = _mm256_add_epi16(acc12[u],dot_prod1[2*u+1]);
+					acc21[u] = _mm256_add_epi16(acc21[u],dot_prod2[2*u]);
+					acc22[u] = _mm256_add_epi16(acc22[u],dot_prod2[2*u+1]);
+				}
+				
+			}
+
+			for (int u = 0; u < 16; u++){
+				acc11_int[u] += _mm256_haddsi_epi16(acc11[u]);
+				acc12_int[u] += _mm256_haddsi_epi16(acc12[u]);
+				acc21_int[u] += _mm256_haddsi_epi16(acc21[u]);
+				acc22_int[u] += _mm256_haddsi_epi16(acc22[u]);
+			}
+
+			for (int t = 0; t < 16; t++)
+			{
+				for(int u=t;u<k; u = u+1){
+					acc11_int[t] += (l_int_mat[i*k + u].i1) * (r_int_mat[u*m + j+t].i1) + 
+							(l_int_mat[i*k + u].i2) * (r_int_mat[u*m + j].i3);
+
+					acc12_int[t] += (l_int_mat[i*k + u].i1) * (r_int_mat[u*m + j+t].i2) + 
+							(l_int_mat[i*k + u].i2) * (r_int_mat[u*m + j+t].i4);
+
+					acc21_int[t] += (l_int_mat[i*k + u].i3) * (r_int_mat[u*m + j+t].i1) + 
+							(l_int_mat[i*k + u].i4) * (r_int_mat[u*m + j].i3);
+
+					acc22_int[t] += (l_int_mat[i*k + u].i3) * (r_int_mat[u*m + j+t].i2) + 
+							(l_int_mat[i*k + u].i4) * (r_int_mat[u*m + j+t].i4);
+
+				}
+			}
+
+		for (int u = 0; u < 16; u++)
+		{
+		acc11_int[u] = acc11_int[u] - term2[2*j] - term3[2*i] + term4;
+		acc12_int[u] = acc12_int[u] - term2[2*j + 1] - term3[2*i] + term4;
+		acc21_int[u] = acc21_int[u] - term2[2*j] - term3[2*i + 1] + term4;
+		acc22_int[u] = acc22_int[u] - term2[2*j + 1] - term3[2*i + 1] + term4;
+
+		result_int_mat[i*m + j+u].i1 = saturate(round(result_offset.i1 + scale * acc11_int[u]));
+		result_int_mat[i*m + j+u].i2 = saturate(round(result_offset.i1 + scale * acc12_int[u]));
+		result_int_mat[i*m + j+u].i3 = saturate(round(result_offset.i1 + scale * acc21_int[u]));
+		result_int_mat[i*m + j+u].i4 = saturate(round(result_offset.i1 + scale * acc22_int[u]));
+			
+		}
+		}
+
+		for(; j<m; j = j+1){
 			acc1 = 0;
 			acc2 = 0;
 			acc3 = 0;
 			acc4 = 0;
-			 __m256i r1,r2,r3,r4,t1,t2,t3,t4,t5,t6,t7,t8,t11,t12,t21,t22;
-			 __m256i c1,c2,c3,c4,acc11,acc12,acc21,acc22;
-			acc11 = _mm256_set1_epi16(0);
-			acc12 = _mm256_set1_epi16(0);
-			acc21 = _mm256_set1_epi16(0);
-			acc22 = _mm256_set1_epi16(0);
-			 uint4x4_t column1[16],column2[16];
-			for ( t=0; t<(k-31); t = t+32){
-				uint4x4_to_mm256_row(l_int_mat + i*k + t, &r1, &r2);
-				uint4x4_to_mm256_row(l_int_mat + i*k + t+16, &r3, &r4);
-				for (int u = 0; u < 16; u++)
-				{
-					column1[u] = r_int_mat[(t+u)*m + j];
-					column2[u] = r_int_mat[(t+u+16)*m + j];
-				}
-				uint4x4_to_mm256_column(column1, &c1, &c2);
-				uint4x4_to_mm256_column(column2, &c3, &c4);
+			for (int t=0; t<k; t = t+1){
+				l_element = l_int_mat[i*k + t]; 
+				r_elment = r_int_mat[t*m + j];
+				acc1 += (l_element.i1) * (r_elment.i1) + 
+						(l_element.i2) * (r_elment.i3);
 
-				t1 = _mm256_maddubs_epi16 (r1,c1);
-				t2 = _mm256_maddubs_epi16 (r3,c3);
-				t3 = _mm256_maddubs_epi16 (r1,c2);
-				t4 = _mm256_maddubs_epi16 (r3,c4);
-				t5 = _mm256_maddubs_epi16 (r2,c1);
-				t6 = _mm256_maddubs_epi16 (r4,c3);
-				t7 = _mm256_maddubs_epi16 (r2,c2);
-				t8 = _mm256_maddubs_epi16 (r4,c4);
-				t11 = _mm256_add_epi16(t1,t2);
-				t12 = _mm256_add_epi16(t3,t4);
-				t21 = _mm256_add_epi16(t5,t6);
-				t22 = _mm256_add_epi16(t7,t8);
-				acc11 = _mm256_add_epi16(acc11,t11);
-				acc12 = _mm256_add_epi16(acc12,t12);
-				acc21 = _mm256_add_epi16(acc21,t21);
-				acc22 = _mm256_add_epi16(acc22,t22);
+				acc2 += (l_element.i1) * (r_elment.i2) + 
+						(l_element.i2) * (r_elment.i4);
+
+				acc3 += (l_element.i3) * (r_elment.i1) + 
+						(l_element.i4) * (r_elment.i3);
+
+				acc4 += (l_element.i3) * (r_elment.i2) + 
+						(l_element.i4) * (r_elment.i4);
 
 			}
-
-			acc1 += _mm256_haddsi_epi16(acc11);
-			acc2 += _mm256_haddsi_epi16(acc12);
-			acc3 += _mm256_haddsi_epi16(acc21);
-			acc4 += _mm256_haddsi_epi16(acc22);
-
-			for(int u=t;u<k; u = u+1){
-				acc1 += (l_int_mat[i*k + u].i1) * (r_int_mat[u*m + j].i1) + 
-						(l_int_mat[i*k + u].i2) * (r_int_mat[u*m + j].i3);
-
-				acc2 += (l_int_mat[i*k + u].i1) * (r_int_mat[u*m + j].i2) + 
-						(l_int_mat[i*k + u].i2) * (r_int_mat[u*m + j].i4);
-
-				acc3 += (l_int_mat[i*k + u].i3) * (r_int_mat[u*m + j].i1) + 
-						(l_int_mat[i*k + u].i4) * (r_int_mat[u*m + j].i3);
-
-				acc4 += (l_int_mat[i*k + u].i3) * (r_int_mat[u*m + j].i2) + 
-						(l_int_mat[i*k + u].i4) * (r_int_mat[u*m + j].i4);
-
-			}
-
 			
 		acc1 = acc1 - term2[2*j] - term3[2*i] + term4;
 		acc2 = acc2 - term2[2*j + 1] - term3[2*i] + term4;
 		acc3 = acc3 - term2[2*j] - term3[2*i + 1] + term4;
 		acc4 = acc4 - term2[2*j + 1] - term3[2*i + 1] + term4;
 
-		result_int_mat[i*m + j].i1 = saturate(round(result_offset.i1 + scale * acc1));
-		result_int_mat[i*m + j].i2 = saturate(round(result_offset.i1 + scale * acc2));
-		result_int_mat[i*m + j].i3 = saturate(round(result_offset.i1 + scale * acc3));
-		result_int_mat[i*m + j].i4 = saturate(round(result_offset.i1 + scale * acc4));
+		result_int_mat[i*m + j].i1 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc1));
+		result_int_mat[i*m + j].i2 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc2));
+		result_int_mat[i*m + j].i3 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc3));
+		result_int_mat[i*m + j].i4 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc4));
 		
 		}
+
+
 	}
 
 }

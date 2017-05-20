@@ -235,24 +235,6 @@ void uint4x4_to_mm256_row_shuffle(uint4x4_t* a, __m256i *b1, __m256i *b2){
 
 }
 
-// void uint4x4_to_mm256_row_shuffle(uint4x4_t* a, __m256i *b1, __m256i *b2){
-
-// 	__m256i tmp = _mm256_loadu_si256((__m256i const *)a);
-
-// 	__m256i mask13 = _mm256_set1_epi8(15); // Sets a mask 0000 1111 repeated 16 times
-// 	__m256i odd = _mm256_and_si256(tmp, mask13);
-	
-// 	__m256i mask24 = _mm256_set1_epi8(240);
-// 	__m256i even = _mm256_and_si256(tmp, mask24);
-	
-
-// 	__m256i blend_mask = _mm256_set1_epi16(32768);
-// 	*b1 = _mm256_blendv_epi8 (odd, _mm256_slli_epi64 (even, 4), blend_mask);
-// 	*b2 = _mm256_blendv_epi8 (_mm256_srli_epi64 (odd, 8), _mm256_srli_epi64 (even, 4), blend_mask);
-
-//}
-
-
 void transpose(__m256i *a, __m256i *a_t){
 	__m256i b[32],c[32],d[32],e[32];
 	for (int i = 0; i < 32; i+=2)
@@ -337,22 +319,6 @@ void transpose(__m256i *a, __m256i *a_t){
 	a_t[i+30] =  _mm256_permute2f128_si256 (e[i+14], e[i+30], 50);
 	a_t[i+15] =  _mm256_permute2f128_si256 (e[i+15], e[i+31], 32);
 	a_t[i+31] =  _mm256_permute2f128_si256 (e[i+15], e[i+31], 50);
-
-
-	
-	
-
-	// for (int i = 0; i < 32; i+=2)
-	// {
-	// 	e[i] = _mm256_unpacklo_epi64 (d[i], d[i+1]);
-	// 	e[i+1] = _mm256_unpackhi_epi64 (d[i], d[i+1]);
-	// }
-
-	// for (int i = 0; i < 32; i+=2)
-	// {
-	// 	a_t[i] = _mm256_permute2f128_si256 (e[i],e[i+1], 8);
-	// 	a_t[i+1] = _mm256_permute2f128_si256 (e[i],e[i+1], 13);
-	// }
 
 }
 
