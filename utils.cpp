@@ -33,16 +33,22 @@ void quantize_parameter(float min, float max, float *scale, float *zero_point){
 }
 
 void get_min_max(float *d,int rows,int columns, float *mn, float *mx){
-	*mx = d[0];
-	*mn = *mx;
-	float el;
+	__m256 mx_avx = _mm256_loadu_ps(d);
+	__m256 mn_avx = mx_avx;
+	__m256 elements;
+	float * temp_mn = new float[8];
+	float * temp_mx = new float[8];
 	for(int i = 0; i<rows; i++){
-		for(int j = 0; j<columns; j++){
-			el = d[i*columns+j];
-			*mx = max(*mx,el);
-			*mn = min(*mn,el);
+		for(int j = 0; j<columns; j+=8){
+			elements = _mm256_loadu_ps(d+(i*columns+j));
+			mx_avx = _mm256_max_ps(mx_avx,elements);
+			mn_avx = _mm256_min_ps(mn_avx,elements);
 		}
 	}
+	_mm256_store_ps (temp_mx, mx_avx);
+	_mm256_store_ps (temp_mn, mn_avx);
+	*mx = max( temp_mx[0], max( temp_mx[1], max( temp_mx[2], temp_mx[3] )));
+	*mn = max( temp_mn[0], max( temp_mn[1], max( temp_mn[2], temp_mn[3] )));
 }
 
 float * read_csv_mat(const char *filename, int rows, int cols){
