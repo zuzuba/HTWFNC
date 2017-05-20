@@ -33,20 +33,28 @@ void quantize_parameter(float min, float max, float *scale, float *zero_point){
 }
 
 void get_min_max(float *d,int rows,int columns, float *mn, float *mx){
-	__m256 mx_avx = _mm256_loadu_ps(d);
-	__m256 mn_avx = mx_avx;
-	__m256 elements;
+	__m256 mx_avx1 = _mm256_loadu_ps(d);
+	__m256 mx_avx2 = mx_avx1;
+	__m256 mn_avx1 = mx_avx1;
+	__m256 mn_avx2 = mn_avx1;
+	__m256 elements1;
+	__m256 elements2;
 	float * temp_mn = new float[8];
 	float * temp_mx = new float[8];
 	for(int i = 0; i<rows; i++){
-		for(int j = 0; j<columns; j+=8){
-			elements = _mm256_loadu_ps(d+(i*columns+j));
-			mx_avx = _mm256_max_ps(mx_avx,elements);
-			mn_avx = _mm256_min_ps(mn_avx,elements);
+		for(int j = 0; j<columns; j+=16){
+			elements1 = _mm256_loadu_ps(d+(i*columns+j));
+			elements2 = _mm256_loadu_ps(d+(i*columns+j+8));
+			mx_avx1 = _mm256_max_ps(mx_avx1,elements1);
+			mx_avx2 = _mm256_max_ps(mx_avx2,elements2);
+			mn_avx1 = _mm256_min_ps(mn_avx1,elements1);
+			mn_avx2 = _mm256_min_ps(mn_avx2,elements2);
 		}
 	}
-	_mm256_store_ps (temp_mx, mx_avx);
-	_mm256_store_ps (temp_mn, mn_avx);
+	mn_avx1 = _mm256_min_ps(mn_avx1,mn_avx2);
+	mx_avx1 = _mm256_max_ps(mx_avx1,mx_avx2);
+	_mm256_store_ps (temp_mx, mx_avx1);
+	_mm256_store_ps (temp_mn, mn_avx1);
 	*mx = max( temp_mx[0], max( temp_mx[1], max( temp_mx[2], max( temp_mx[3], max( temp_mx[4], max( temp_mx[5], max( temp_mx[6], temp_mx[7] )))))));
 	*mn = min( temp_mn[0], min( temp_mn[1], min( temp_mn[2], min( temp_mn[3], min( temp_mn[4], min( temp_mn[5], min( temp_mn[6], temp_mn[7] )))))));
 }
