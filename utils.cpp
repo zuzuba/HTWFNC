@@ -235,22 +235,23 @@ void uint4x4_to_mm256_row_shuffle(uint4x4_t* a, __m256i *b1, __m256i *b2){
 
 }
 
-void uint4x4_to_mm256_row_shuffle(uint4x4_t* a, __m256i *b1, __m256i *b2){
+// void uint4x4_to_mm256_row_shuffle(uint4x4_t* a, __m256i *b1, __m256i *b2){
 
-	__m256i tmp = _mm256_loadu_si256((__m256i const *)a);
+// 	__m256i tmp = _mm256_loadu_si256((__m256i const *)a);
 
-	__m256i mask13 = _mm256_set1_epi8(15); // Sets a mask 0000 1111 repeated 16 times
-	__m256i odd = _mm256_and_si256(tmp, mask13);
+// 	__m256i mask13 = _mm256_set1_epi8(15); // Sets a mask 0000 1111 repeated 16 times
+// 	__m256i odd = _mm256_and_si256(tmp, mask13);
 	
-	__m256i mask24 = _mm256_set1_epi8(240);
-	__m256i even = _mm256_and_si256(tmp, mask24);
+// 	__m256i mask24 = _mm256_set1_epi8(240);
+// 	__m256i even = _mm256_and_si256(tmp, mask24);
 	
 
-	__m256i blend_mask = _mm256_set1_epi16(32768);
-	*b1 = _mm256_blendv_epi8 (odd, _mm256_slli_epi64 (even, 4), blend_mask);
-	*b2 = _mm256_blendv_epi8 (_mm256_srli_epi64 (odd, 8), _mm256_srli_epi64 (even, 4), blend_mask);
+// 	__m256i blend_mask = _mm256_set1_epi16(32768);
+// 	*b1 = _mm256_blendv_epi8 (odd, _mm256_slli_epi64 (even, 4), blend_mask);
+// 	*b2 = _mm256_blendv_epi8 (_mm256_srli_epi64 (odd, 8), _mm256_srli_epi64 (even, 4), blend_mask);
 
-}
+//}
+
 
 void transpose(__m256i *a, __m256i *a_t){
 	__m256i b[32],c[32],d[32],e[32];
@@ -260,29 +261,98 @@ void transpose(__m256i *a, __m256i *a_t){
 		b[i+1] = _mm256_unpackhi_epi8 (a[i], a[i+1]);
 	}
 
-	for (int i = 0; i < 32; i+=2)
+	for (int i = 0; i < 32; i+=4)
 	{
-		c[i] = _mm256_unpacklo_epi16 (b[i], b[i+1]);
-		c[i+1] = _mm256_unpackhi_epi16 (b[i], b[i+1]);
+		c[i] = _mm256_unpacklo_epi16 (b[i], b[i+2]);
+		c[i+1] = _mm256_unpackhi_epi16 (b[i], b[i+2]);
+		c[i+2] = _mm256_unpacklo_epi16 (b[i+1], b[i+3]);
+		c[i+3] = _mm256_unpackhi_epi16 (b[i+1], b[i+3]);
+			
 	}
 
-	for (int i = 0; i < 32; i+=2)
+
+	for (int i = 0; i < 32; i+=8)
 	{
-		d[i] = _mm256_unpacklo_epi32 (c[i], c[i+1]);
-		d[i+1] = _mm256_unpackhi_epi32 (c[i], c[i+1]);
+		d[i] = _mm256_unpacklo_epi32 (c[i], c[i+4]);
+		d[i+1] = _mm256_unpackhi_epi32 (c[i], c[i+4]);
+		d[i+2] = _mm256_unpacklo_epi32 (c[i+1], c[i+5]);
+		d[i+3] = _mm256_unpackhi_epi32 (c[i+1], c[i+5]);
+		d[i+4] = _mm256_unpacklo_epi32 (c[i+2], c[i+6]);
+		d[i+5] = _mm256_unpackhi_epi32 (c[i+2], c[i+6]);
+		d[i+6] = _mm256_unpacklo_epi32 (c[i+3], c[i+7]);
+		d[i+7] = _mm256_unpackhi_epi32 (c[i+3], c[i+7]);
+			
 	}
 
-	for (int i = 0; i < 32; i+=2)
+	for (int i = 0; i < 32; i+=16)
 	{
-		e[i] = _mm256_unpacklo_epi64 (d[i], d[i+1]);
-		e[i+1] = _mm256_unpackhi_epi64 (d[i], d[i+1]);
+		e[i] = _mm256_unpacklo_epi64 (d[i], d[i+8]);
+		e[i+1] = _mm256_unpackhi_epi64 (d[i], d[i+8]);
+		e[i+2] = _mm256_unpacklo_epi64 (d[i+1], d[i+9]);
+		e[i+3] = _mm256_unpackhi_epi64 (d[i+1], d[i+9]);
+		e[i+4] = _mm256_unpacklo_epi64 (d[i+2], d[i+10]);
+		e[i+5] = _mm256_unpackhi_epi64 (d[i+2], d[i+10]);
+		e[i+6] = _mm256_unpacklo_epi64 (d[i+3], d[i+11]);
+		e[i+7] = _mm256_unpackhi_epi64 (d[i+3], d[i+11]);
+		e[i+8] = _mm256_unpacklo_epi64 (d[i+4], d[i+12]);
+		e[i+9] = _mm256_unpackhi_epi64 (d[i+4], d[i+12]);
+		e[i+10] = _mm256_unpacklo_epi64 (d[i+5], d[i+13]);
+		e[i+11] = _mm256_unpackhi_epi64 (d[i+5], d[i+13]);
+		e[i+12] = _mm256_unpacklo_epi64 (d[i+6], d[i+14]);
+		e[i+13] = _mm256_unpackhi_epi64 (d[i+6], d[i+14]);
+		e[i+14] = _mm256_unpacklo_epi64 (d[i+7], d[i+15]);
+		e[i+15] = _mm256_unpackhi_epi64 (d[i+7], d[i+15]);	
 	}
 
-	for (int i = 0; i < 32; i+=2)
-	{
-		a_t[i] = _mm256_permute2f128_si256 (e[i],e[i+1], 8);
-		a_t[i+1] = _mm256_permute2f128_si256 (e[i],e[i+1], 13);
-	}
+	int i = 0;
+	a_t[i] =  _mm256_permute2f128_si256 (e[i], e[i+16], 32);
+	a_t[i+16] =  _mm256_permute2f128_si256 (e[i], e[i+16], 50);
+	a_t[i+1] =  _mm256_permute2f128_si256 (e[i+1], e[i+17], 32);
+	a_t[i+17] =  _mm256_permute2f128_si256 (e[i+1], e[i+17], 50);
+	a_t[i+2] =  _mm256_permute2f128_si256 (e[i+2], e[i+19], 32);
+	a_t[i+18] =  _mm256_permute2f128_si256 (e[i+2], e[i+19], 50);
+	a_t[i+3] =  _mm256_permute2f128_si256 (e[i+3], e[i+19], 32);
+	a_t[i+19] =  _mm256_permute2f128_si256 (e[i+3], e[i+19], 50);
+	a_t[i+4] =  _mm256_permute2f128_si256 (e[i+4], e[i+20], 32);
+	a_t[i+20] =  _mm256_permute2f128_si256 (e[i+4], e[i+20], 50);
+	a_t[i+5] =  _mm256_permute2f128_si256 (e[i+5], e[i+21], 32);
+	a_t[i+21] =  _mm256_permute2f128_si256 (e[i+5], e[i+21], 50);
+	a_t[i+6] =  _mm256_permute2f128_si256 (e[i+6], e[i+22], 32);
+	a_t[i+22] =  _mm256_permute2f128_si256 (e[i+6], e[i+22], 50);
+	a_t[i+7] =  _mm256_permute2f128_si256 (e[i+7], e[i+23], 32);
+	a_t[i+23] =  _mm256_permute2f128_si256 (e[i+7], e[i+23], 50);	
+	a_t[i+8] =  _mm256_permute2f128_si256 (e[i+8], e[i+24], 32);
+	a_t[i+24] =  _mm256_permute2f128_si256 (e[i+8], e[i+24], 50);
+	a_t[i+9] =  _mm256_permute2f128_si256 (e[i+9], e[i+25], 32);
+	a_t[i+25] =  _mm256_permute2f128_si256 (e[i+9], e[i+25], 50);
+	a_t[i+10] =  _mm256_permute2f128_si256 (e[i+10], e[i+26], 32);
+	a_t[i+26] =  _mm256_permute2f128_si256 (e[i+10], e[i+26], 50);
+	a_t[i+11] =  _mm256_permute2f128_si256 (e[i+11], e[i+27], 32);
+	a_t[i+27] =  _mm256_permute2f128_si256 (e[i+11], e[i+27], 50);
+	a_t[i+12] =  _mm256_permute2f128_si256 (e[i+12], e[i+28], 32);
+	a_t[i+28] =  _mm256_permute2f128_si256 (e[i+12], e[i+28], 50);
+	a_t[i+13] =  _mm256_permute2f128_si256 (e[i+13], e[i+29], 32);
+	a_t[i+29] =  _mm256_permute2f128_si256 (e[i+13], e[i+29], 50);
+	a_t[i+14] =  _mm256_permute2f128_si256 (e[i+14], e[i+30], 32);
+	a_t[i+30] =  _mm256_permute2f128_si256 (e[i+14], e[i+30], 50);
+	a_t[i+15] =  _mm256_permute2f128_si256 (e[i+15], e[i+31], 32);
+	a_t[i+31] =  _mm256_permute2f128_si256 (e[i+15], e[i+31], 50);
+
+
+	
+	
+
+	// for (int i = 0; i < 32; i+=2)
+	// {
+	// 	e[i] = _mm256_unpacklo_epi64 (d[i], d[i+1]);
+	// 	e[i+1] = _mm256_unpackhi_epi64 (d[i], d[i+1]);
+	// }
+
+	// for (int i = 0; i < 32; i+=2)
+	// {
+	// 	a_t[i] = _mm256_permute2f128_si256 (e[i],e[i+1], 8);
+	// 	a_t[i+1] = _mm256_permute2f128_si256 (e[i],e[i+1], 13);
+	// }
 
 }
 
