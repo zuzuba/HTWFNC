@@ -30,8 +30,12 @@ void quantize_4x4(float *d, uint4x4_t *q, float *min, float *max, int rows, int 
 	get_min_max(d,rows,columns,min,max);
 	quantize_parameter(*min,*max,&scale,&zero_point);
 	scale = 1/scale;
+	float qmin = 0.0;
+	float qmax = 15.0;
 	__m256 scale_avx = _mm256_broadcast_ss(&scale);
 	__m256 zp_avx = _mm256_broadcast_ss(&zero_point);
+	__m256 qmin_avx = _mm256_broadcast_ss(&qmin);
+	__m256 qmax_avx = _mm256_broadcast_ss(&qmax);
 	__m256 upper_row;
 	__m256 lower_row;
 	float *temp_upper = new float[8];
@@ -43,33 +47,30 @@ void quantize_4x4(float *d, uint4x4_t *q, float *min, float *max, int rows, int 
 			lower_row = _mm256_loadu_ps(d+((i+1)*columns+j));
 			upper_row = _mm256_fmadd_ps(scale_avx,upper_row,zp_avx);
 			lower_row = _mm256_fmadd_ps(scale_avx,lower_row,zp_avx);
-			_mm256_store_ps(temp_upper, _mm256_round_ps(upper_row,_MM_FROUND_TO_NEAREST_INT));
-			_mm256_store_ps(temp_lower, _mm256_round_ps(lower_row,_MM_FROUND_TO_NEAREST_INT));
-			/*
-			t1 = zero_point + d[i*columns + j]/scale;
-			t2 = zero_point + d[i*columns + j + 1]/scale;
-			t3 = zero_point + d[(i + 1)*columns + j]/scale;
-			t4 = zero_point + d[(i + 1)*columns + j + 1]/scale;
-			*/
-			q[i/2*columns/2 + j/2].i1 = (uint8_t)saturate(temp_upper[0]);
-			q[i/2*columns/2 + j/2].i2 = (uint8_t)saturate(temp_upper[1]);
-			q[i/2*columns/2 + j/2].i3 = (uint8_t)saturate(temp_lower[0]);
-			q[i/2*columns/2 + j/2].i4 = (uint8_t)saturate(temp_lower[1]);
+			//_mm256_store_ps(temp_upper, _mm256_round_ps(upper_row,_MM_FROUND_TO_NEAREST_INT));
+			//_mm256_store_ps(temp_lower, _mm256_round_ps(lower_row,_MM_FROUND_TO_NEAREST_INT));
+			_mm256_store_ps(temp_upper, _mm256_max_ps( qmin_avx, _mm256_min_ps( qmax_avx, _mm256_round_ps(upper_row,_MM_FROUND_TO_NEAREST_INT))));
+			_mm256_store_ps(temp_lower, _mm256_max_ps( qmin_avx, _mm256_min_ps( qmax_avx, _mm256_round_ps(lower_row,_MM_FROUND_TO_NEAREST_INT))));
+			
+			q[i/2*columns/2 + j/2].i1 = (uint8_t)(temp_upper[0]);
+			q[i/2*columns/2 + j/2].i2 = (uint8_t)(temp_upper[1]);
+			q[i/2*columns/2 + j/2].i3 = (uint8_t)(temp_lower[0]);
+			q[i/2*columns/2 + j/2].i4 = (uint8_t)(temp_lower[1]);
 
-			q[i/2*columns/2 + j/2+1].i1 = (uint8_t)saturate(temp_upper[2]);
-			q[i/2*columns/2 + j/2+1].i2 = (uint8_t)saturate(temp_upper[3]);
-			q[i/2*columns/2 + j/2+1].i3 = (uint8_t)saturate(temp_lower[2]);
-			q[i/2*columns/2 + j/2+1].i4 = (uint8_t)saturate(temp_lower[3]);
+			q[i/2*columns/2 + j/2+1].i1 = (uint8_t)(temp_upper[2]);
+			q[i/2*columns/2 + j/2+1].i2 = (uint8_t)(temp_upper[3]);
+			q[i/2*columns/2 + j/2+1].i3 = (uint8_t)(temp_lower[2]);
+			q[i/2*columns/2 + j/2+1].i4 = (uint8_t)(temp_lower[3]);
 
-			q[i/2*columns/2 + j/2+2].i1 = (uint8_t)saturate(temp_upper[4]);
-			q[i/2*columns/2 + j/2+2].i2 = (uint8_t)saturate(temp_upper[5]);
-			q[i/2*columns/2 + j/2+2].i3 = (uint8_t)saturate(temp_lower[4]);
-			q[i/2*columns/2 + j/2+2].i4 = (uint8_t)saturate(temp_lower[5]);
+			q[i/2*columns/2 + j/2+2].i1 = (uint8_t)(temp_upper[4]);
+			q[i/2*columns/2 + j/2+2].i2 = (uint8_t)(temp_upper[5]);
+			q[i/2*columns/2 + j/2+2].i3 = (uint8_t)(temp_lower[4]);
+			q[i/2*columns/2 + j/2+2].i4 = (uint8_t)(temp_lower[5]);
 
-			q[i/2*columns/2 + j/2+3].i1 = (uint8_t)saturate(temp_upper[6]);
-			q[i/2*columns/2 + j/2+3].i2 = (uint8_t)saturate(temp_upper[7]);
-			q[i/2*columns/2 + j/2+3].i3 = (uint8_t)saturate(temp_lower[6]);
-			q[i/2*columns/2 + j/2+3].i4 = (uint8_t)saturate(temp_upper[7]);
+			q[i/2*columns/2 + j/2+3].i1 = (uint8_t)(temp_upper[6]);
+			q[i/2*columns/2 + j/2+3].i2 = (uint8_t)(temp_upper[7]);
+			q[i/2*columns/2 + j/2+3].i3 = (uint8_t)(temp_lower[6]);
+			q[i/2*columns/2 + j/2+3].i4 = (uint8_t)(temp_upper[7]);
 		}
 	}	
 
