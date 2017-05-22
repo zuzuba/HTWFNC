@@ -180,11 +180,20 @@ void qmm_trick_AVX(float l_scale, float r_scale, float result_scale, uint4x4_t l
 	uint16_t* term3 = (uint16_t*)malloc(sizeof(uint16_t)* n *2);
 	uint16_t term4;
 	float scale = l_scale * r_scale/result_scale;
+	__m256 scale_avx = _mm256_broadcast_ss(&scale);
+	float offset = (float)result_offset.i1;
+	__m256 zp_avx = _mm256_broadcast_ss(&offset);
+	__m256 trick_m256;
+	float qmin=0;
+	float qmax=15;
+	__m256 qmin_avx = _mm256_broadcast_ss(&qmin);
+	__m256 qmax_avx = _mm256_broadcast_ss(&qmax);
+	__m256 acc_m256[8];
 	uint16_t sum1, sum2;
 	__m256i r1,r2;
 	__m256i temp[32],temp_t[32];
 	__m256i acc11[16],acc12[16],acc21[16],acc22[16],dot_prod1[32],dot_prod2[32];
-	
+	float store[8][8];
 	// Sum over the entries of each col of rhs and multiply by left offset 
 	for(int j =0; j<m; j++){
 		sum1 = 0;
@@ -277,19 +286,34 @@ void qmm_trick_AVX(float l_scale, float r_scale, float result_scale, uint4x4_t l
 				}
 			}
 
-		for (int u = 0; u < 16; u++)
-		{
-		acc11_int[u] = acc11_int[u] - term2[2*j] - term3[2*i] + term4;
-		acc12_int[u] = acc12_int[u] - term2[2*j + 1] - term3[2*i] + term4;
-		acc21_int[u] = acc21_int[u] - term2[2*j] - term3[2*i + 1] + term4;
-		acc22_int[u] = acc22_int[u] - term2[2*j + 1] - term3[2*i + 1] + term4;
+			for (int u = 0; i < 8; u+=1)
+			{
+				acc_m256[u] = _mm256_set_ps(acc22_int[2*u+1], acc21_int[2*u+1], acc12_int[2*u+1], acc11_int[2*u+1], acc22_int[2*u], acc21_int[2*u], acc12_int[2*u],acc11_int[2*u]);
+			}
+			float trick11 = - term2[2*j] - term3[2*i] + term4;
+			float trick12 = - term2[2*j + 1] - term3[2*i] + term4;
+			float trick21 = - term2[2*j] - term3[2*i + 1] + term4;
+			float trick22 = - term2[2*j + 1] - term3[2*i + 1] + term4;
 
-		result_int_mat[i*m + j+u].i1 = saturate(round(result_offset.i1 + scale * acc11_int[u]));
-		result_int_mat[i*m + j+u].i2 = saturate(round(result_offset.i1 + scale * acc12_int[u]));
-		result_int_mat[i*m + j+u].i3 = saturate(round(result_offset.i1 + scale * acc21_int[u]));
-		result_int_mat[i*m + j+u].i4 = saturate(round(result_offset.i1 + scale * acc22_int[u]));
-			
-		}
+			trick_m256 = _mm256_set_ps(trick22,trick21,trick12,trick11,trick22,trick21,trick12,trick11);
+
+			for (int u = 0; u < 8; u++)
+			{
+
+				acc_m256[u] = _mm256_add_ps(acc_m256[u],trick_m256);
+				acc_m256[u] = _mm256_fmadd_ps(scale_avx,acc_m256[u],zp_avx);
+				_mm256_store_ps(store[u], _mm256_max_ps( qmin_avx, _mm256_min_ps( qmax_avx, _mm256_round_ps(acc_m256[u],_MM_FROUND_TO_NEAREST_INT))));
+
+				result_int_mat[i*m + j+2*u].i1 = (uint8_t)(store[u][0]);
+				result_int_mat[i*m + j+2*u].i2 = (uint8_t)(store[u][1]);
+				result_int_mat[i*m + j+2*u].i3 = (uint8_t)(store[u][2]);
+				result_int_mat[i*m + j+2*u].i4 = (uint8_t)(store[u][3]);
+				result_int_mat[i*m + j+2*u+1].i1 = (uint8_t)(store[u][4]);
+				result_int_mat[i*m + j+2*u+1].i2 = (uint8_t)(store[u][5]);
+				result_int_mat[i*m + j+2*u+1].i3 = (uint8_t)(store[u][6]);
+				result_int_mat[i*m + j+2*u+1].i4 = (uint8_t)(store[u][7]);
+				
+			}
 		}
 
 		for(; j<m; j = j+1){
