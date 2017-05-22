@@ -29,29 +29,48 @@ void quantize_4x4(float *d, uint4x4_t *q, float *min, float *max, int rows, int 
 	float scale, zero_point;
 	get_min_max(d,rows,columns,min,max);
 	quantize_parameter(*min,*max,&scale,&zero_point);
+
+	float t1, t2, t3, t4;
+	for(int i = 0; i<rows; i = i+2){
+		for(int j = 0; j<columns; j = j+2){
+			t1 = zero_point + d[i*columns + j]/scale;
+			t2 = zero_point + d[i*columns + j + 1]/scale;
+			t3 = zero_point + d[(i + 1)*columns + j]/scale;
+			t4 = zero_point + d[(i + 1)*columns + j + 1]/scale;
+			q[i/2*columns/2 + j/2].i1 = (uint8_t)saturate(round(t1));
+			q[i/2*columns/2 + j/2].i2 = (uint8_t)saturate(round(t2));
+			q[i/2*columns/2 + j/2].i3 = (uint8_t)saturate(round(t3));
+			q[i/2*columns/2 + j/2].i4 = (uint8_t)saturate(round(t4));
+		}
+	}	
+}
+
+void quantize_AVX(float *d, uint4x4_t *q, float *min, float *max, int rows, int columns){
+
+	float scale, zero_point;
+	get_min_max_AVX(d,rows,columns,min,max);
+	quantize_parameter(*min,*max,&scale,&zero_point);
 	scale = 1/scale;
 	float qmin = 0.0;
 	float qmax = 15.0;
+	int j;
 	__m256 scale_avx = _mm256_broadcast_ss(&scale);
 	__m256 zp_avx = _mm256_broadcast_ss(&zero_point);
 	__m256 qmin_avx = _mm256_broadcast_ss(&qmin);
 	__m256 qmax_avx = _mm256_broadcast_ss(&qmax);
 	__m256 upper_row;
 	__m256 lower_row;
-	float *temp_upper = new float[8];
-	float *temp_lower = new float[8];
+	float temp_upper[8];
+	float temp_lower[8];
 	float t1, t2, t3, t4;
 	for(int i = 0; i<rows; i = i+2){
-		for(int j = 0; j<columns; j = j+8){
+		for(j = 0; j<(columns-7); j = j+8){
 			upper_row = _mm256_loadu_ps(d+(i*columns+j));
 			lower_row = _mm256_loadu_ps(d+((i+1)*columns+j));
 			upper_row = _mm256_fmadd_ps(scale_avx,upper_row,zp_avx);
 			lower_row = _mm256_fmadd_ps(scale_avx,lower_row,zp_avx);
-			//_mm256_store_ps(temp_upper, _mm256_round_ps(upper_row,_MM_FROUND_TO_NEAREST_INT));
-			//_mm256_store_ps(temp_lower, _mm256_round_ps(lower_row,_MM_FROUND_TO_NEAREST_INT));
 			_mm256_store_ps(temp_upper, _mm256_max_ps( qmin_avx, _mm256_min_ps( qmax_avx, _mm256_round_ps(upper_row,_MM_FROUND_TO_NEAREST_INT))));
 			_mm256_store_ps(temp_lower, _mm256_max_ps( qmin_avx, _mm256_min_ps( qmax_avx, _mm256_round_ps(lower_row,_MM_FROUND_TO_NEAREST_INT))));
-			
 			q[i/2*columns/2 + j/2].i1 = (uint8_t)(temp_upper[0]);
 			q[i/2*columns/2 + j/2].i2 = (uint8_t)(temp_upper[1]);
 			q[i/2*columns/2 + j/2].i3 = (uint8_t)(temp_lower[0]);
@@ -72,6 +91,16 @@ void quantize_4x4(float *d, uint4x4_t *q, float *min, float *max, int rows, int 
 			q[i/2*columns/2 + j/2+3].i3 = (uint8_t)(temp_lower[6]);
 			q[i/2*columns/2 + j/2+3].i4 = (uint8_t)(temp_upper[7]);
 		}
+		for(; j<columns; j = j+2){
+			t1 = zero_point + d[i*columns + j]*scale;
+			t2 = zero_point + d[i*columns + j + 1]*scale;
+			t3 = zero_point + d[(i + 1)*columns + j]*scale;
+			t4 = zero_point + d[(i + 1)*columns + j + 1]*scale;
+			q[i/2*columns/2 + j/2].i1 = (uint8_t)saturate(round(t1));
+			q[i/2*columns/2 + j/2].i2 = (uint8_t)saturate(round(t2));
+			q[i/2*columns/2 + j/2].i3 = (uint8_t)saturate(round(t3));
+			q[i/2*columns/2 + j/2].i4 = (uint8_t)saturate(round(t4));
+		}
 	}	
 
 }
@@ -80,7 +109,9 @@ void quantize_4x4(float *d, uint4x4_t *q, float *min, float *max, int rows, int 
 void dequantize(double **d, uint8_t **q, double *mn, double *mx, int n){
 	double delta = (*mx - *mn)/256; // size of linear cell
 	double runner = 0.0;
-	for(int i = 0; i<n; i++)
-		for(int j = 0; j<n; j++)
-			d[i][j] = *mn + q[i][j]*delta; // if q[i][j] == 0, then d[i][j] == mn
+	for(int i = 0; i<n; i++){
+		for(int j = 0; j<n; j++){
+			d[i][j] = *mn + q[i][j]*delta;
+		}
+	}
 }

@@ -10,6 +10,7 @@ int saturate(float a);
 
 void quantize_parameter(float min, float max, float *scale, float *zero_point);
 void get_min_max(float *d,int rows,int columns, float *min, float *max);
+void get_min_max_AVX(float *d,int rows,int columns, float *min, float *max);
 
 float * read_csv_mat(const char *filename, int rows, int cols);
 
@@ -44,7 +45,6 @@ int* get_predicted_label(uint4x4_t* y_distribution, int data_points, int classes
 void uint4x4_to_mm256_row(uint4x4_t* a, __m256i *b1, __m256i *b2);
 void uint4x4_to_mm256_column(uint4x4_t* a, __m256i *b1, __m256i *b2);
 
-uint16_t dot_prod_AVX(__m256i a, __m256i b);
 uint16_t _mm256_haddsi_epi16(__m256i a);
 void uint4x4_to_mm256_row_shuffle(uint4x4_t* a, __m256i *b1, __m256i *b2);
 void transpose(__m256i *a, __m256i *a_t);

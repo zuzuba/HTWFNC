@@ -81,8 +81,7 @@ void destroy(float * m)
 void register_functions_4x4()
 {	
 	add_function_4x4(&quantize_4x4, (char *)"naive 4x4",7,0);
-	// Add your functions here
-	// add_function(&your_function, "function: Optimization X", nrflops);
+	add_function_4x4(&quantize_AVX, (char *)"quantize_AVX",7,0);
 	
 }
 
@@ -145,7 +144,7 @@ int main(int argc, char **argv)
 		strcat(file_name, ".dat");
 		FILE *fp = fopen(file_name,"w+");
 
-		for(int n=3; n<20;n+=1){
+		for(int n=16; n<=100;n+=16){
 			cycles = perf_test(userFuncs_4x4[i],funcNames_4x4[i],n);
 			perf = (funcFlops_quad_term_4x4[i]*n*n + funcFlops_linear_term_4x4[i]*n)/cycles;
 			printf("%s: n:%d  cycles:%f perf:%f \n",funcNames_4x4[i],n, cycles,perf);

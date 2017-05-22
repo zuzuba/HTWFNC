@@ -33,16 +33,33 @@ void quantize_parameter(float min, float max, float *scale, float *zero_point){
 }
 
 void get_min_max(float *d,int rows,int columns, float *mn, float *mx){
+	*mx = d[0];
+	*mn = *mx;
+	float el;
+	for(int i = 0; i<rows; i++){
+		for(int j = 0; j<columns; j++){
+			el = d[i*columns+j];
+			*mx = max(*mx,el);
+			*mn = min(*mn,el);
+		}
+	}
+}
+
+void get_min_max_AVX(float *d,int rows,int columns, float *mn, float *mx){
 	__m256 mx_avx1 = _mm256_loadu_ps(d);
 	__m256 mx_avx2 = mx_avx1;
 	__m256 mn_avx1 = mx_avx1;
 	__m256 mn_avx2 = mn_avx1;
 	__m256 elements1;
 	__m256 elements2;
-	float * temp_mn = new float[8];
-	float * temp_mx = new float[8];
+	float temp_mn[8];
+	float temp_mx[8];
+	int j;
+	float el;
+	*mx = d[0];
+	*mn = *mx; 
 	for(int i = 0; i<rows; i++){
-		for(int j = 0; j<columns; j+=16){
+		for(j = 0; j<columns-15; j+=16){
 			elements1 = _mm256_loadu_ps(d+(i*columns+j));
 			elements2 = _mm256_loadu_ps(d+(i*columns+j+8));
 			mx_avx1 = _mm256_max_ps(mx_avx1,elements1);
@@ -50,13 +67,18 @@ void get_min_max(float *d,int rows,int columns, float *mn, float *mx){
 			mn_avx1 = _mm256_min_ps(mn_avx1,elements1);
 			mn_avx2 = _mm256_min_ps(mn_avx2,elements2);
 		}
+		for(; j<columns; j++){
+			el = d[i*columns+j];
+			*mx = max(*mx,el);
+			*mn = min(*mn,el);
+		}
 	}
 	mn_avx1 = _mm256_min_ps(mn_avx1,mn_avx2);
 	mx_avx1 = _mm256_max_ps(mx_avx1,mx_avx2);
 	_mm256_store_ps (temp_mx, mx_avx1);
 	_mm256_store_ps (temp_mn, mn_avx1);
-	*mx = max( temp_mx[0], max( temp_mx[1], max( temp_mx[2], max( temp_mx[3], max( temp_mx[4], max( temp_mx[5], max( temp_mx[6], temp_mx[7] )))))));
-	*mn = min( temp_mn[0], min( temp_mn[1], min( temp_mn[2], min( temp_mn[3], min( temp_mn[4], min( temp_mn[5], min( temp_mn[6], temp_mn[7] )))))));
+	*mx = max( *mx,max( temp_mx[0], max( temp_mx[1], max( temp_mx[2], max( temp_mx[3], max( temp_mx[4], max( temp_mx[5], max( temp_mx[6], temp_mx[7] ))))))));
+	*mn = min( *mn,min( temp_mn[0], min( temp_mn[1], min( temp_mn[2], min( temp_mn[3], min( temp_mn[4], min( temp_mn[5], min( temp_mn[6], temp_mn[7] ))))))));
 }
 
 float * read_csv_mat(const char *filename, int rows, int cols){
@@ -204,20 +226,6 @@ void uint4x4_to_mm256_column(uint4x4_t* a, __m256i *b1, __m256i *b2){
 		a[11].i4, a[11].i2, a[10].i4, a[10].i2, a[9].i4, a[9].i2, a[8].i4, a[8].i2, a[7].i4, a[7].i2, 
 		a[6].i4, a[6].i2, a[5].i4, a[5].i2, a[4].i4, a[4].i2, a[3].i4, a[3].i2, a[2].i4, a[2].i2, a[1].i4,
 		a[1].i2, a[0].i4, a[0].i2);
-}
-
-uint16_t dot_prod_AVX(__m256i a, __m256i b){
-	__m256i c,t1,t2,t3,t4,t5,t6; 
-	c = _mm256_maddubs_epi16 (a,b);
-	uint16_t result =0;
-	t1= _mm256_permute4x64_epi64(c,177);
-	t2= _mm256_permute4x64_epi64(c,142);
-	t3= _mm256_permute4x64_epi64(c,27);
-	t4 = _mm256_add_epi16(c,t1);
-	t5 = _mm256_add_epi16(t2,t3);
-	t6 = _mm256_add_epi16(t4,t5);
-
-	return _mm256_extract_epi16(t6,0)+_mm256_extract_epi16(t6,1)+_mm256_extract_epi16(t6,2)+_mm256_extract_epi16(t6,3);
 }
 
 

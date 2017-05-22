@@ -27,9 +27,8 @@ int numFuncs = 0;
 
 void register_functions()
 {	
-	add_function(&quantize_4x4, (char *)"naive",7);
-	// Add your functions here
-	// add_function(&your_function, "function: Optimization X", nrflops);
+	add_function(&quantize_4x4, (char *)"quantize_naive",7);
+	add_function(&quantize_AVX, (char *)"quantize_AVX",7);
 }
 
 void add_function(quantize_pointer f, char *name, int flops)
@@ -70,13 +69,16 @@ int main()
 	}
 	printf("\n%d functions registered\n", numFuncs);
 
-	// Test of vanilla implementation first
-	test_success = validation(userFuncs[0]);
-	if (test_success == 0)
+	for (int i = 0; i < numFuncs; ++i)
 	{
-		printf("Vanilla implementation failed test!!\n");
-		return TEST_FAILED;
+		test_success = validation(userFuncs[i]);
+		if (test_success == 0)
+		{
+			printf("Vanilla implementation failed test!!\n");
+			return TEST_FAILED;
+		}		
 	}
+
 	return 0;
 
 }
