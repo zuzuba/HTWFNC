@@ -14,7 +14,6 @@ files_quantize = [i for i in os.listdir(data_folder) if os.path.isfile(os.path.j
 
 fig=plt.figure()
 ax = plt.subplot(111)
-plt.yscale("log")
 plt.xlabel("n")
 label = ax.set_ylabel('[flops/cycle]', rotation = 0)
 ax.yaxis.set_label_coords(0, 1.05)
@@ -46,7 +45,6 @@ files_qmm = [i for i in os.listdir(data_folder) if os.path.isfile(os.path.join(d
 
 fig=plt.figure()
 ax = plt.subplot(111)
-plt.yscale("log")
 plt.xlabel("n")
 label = ax.set_ylabel('[flops/cycle]', rotation = 0)
 ax.yaxis.set_label_coords(0, 1.05)
