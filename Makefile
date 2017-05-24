@@ -5,7 +5,7 @@
 BIN = program
 TEST_BIN_QMM = test_qmm
 TEST_BIN_QUANT = test_quant
-
+TEST_BIN_ALL = validation
 # ==================================================================================== #
 # = Compiler settings
 # ==================================================================================== #
@@ -32,6 +32,7 @@ OBJS = qmm.o quantize.o utils.o
 
 TEST_OBJ_QMM = test_qmm.o 
 TEST_OBJ_QUANT = test_quantize.o
+TEST_OBJ_ALL = validation.o
 MAIN_OBJ = main.o
 
 all: $(OBJS) 
@@ -45,6 +46,10 @@ test: $(OBJS) $(TEST_OBJ_QMM) $(TEST_OBJ_QUANT)
 	./$(TEST_BIN_QMM)
 	$(CC) $(OBJS) $(TEST_OBJ_QUANT) -o $(TEST_BIN_QUANT)
 	./$(TEST_BIN_QUANT)
+
+validation: $(OBJS) $(TEST_OBJ_ALL)
+	$(CC) $(OBJS) $(TEST_OBJ_ALL) -o $(TEST_BIN_ALL)
+	./$(TEST_BIN_ALL)
 
 perf: $(OBJS) timing_qmm.o timing_quantize.o
 	$(CC) $(OBJS) timing_qmm.o -o perf_qmm
