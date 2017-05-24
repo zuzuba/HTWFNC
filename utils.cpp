@@ -108,6 +108,14 @@ float * read_csv_mat(const char *filename, int rows, int cols){
 	return mat;
 }
 
+float * generate_rand_mat(int rows, int cols) {
+	float * mat = (float*)malloc(sizeof(float)* rows * cols);
+	for(int i = 0; i < rows; i ++) 
+		for(int j = 0; j < cols; j ++)
+			mat[i*cols + j] = (float)rand()/RAND_MAX;
+	return mat;
+}
+
 
 void print_uint4x4_mat(uint4x4_t* q_mat, int rows, int cols){
 	

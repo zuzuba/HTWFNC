@@ -13,7 +13,7 @@ void get_min_max(float *d,int rows,int columns, float *min, float *max);
 void get_min_max_AVX(float *d,int rows,int columns, float *min, float *max);
 
 float * read_csv_mat(const char *filename, int rows, int cols);
-
+float * generate_rand_mat(int rows, int cols);
 
 
 typedef struct unsigned_4_bit {
@@ -38,7 +38,7 @@ typedef struct unsigned_4x4_bit
 }uint4x4_t;
 
 void print_uint4x4_mat(uint4x4_t* q_mat, int rows, int cols);
-void print_uint8_mm256i(__m256i a);
+// void print_uint8_mm256i(__m256i a);
 
 int* get_real_label(float* y_distribution, int data_points, int classes);
 int* get_predicted_label(uint4x4_t* y_distribution, int data_points, int classes);
