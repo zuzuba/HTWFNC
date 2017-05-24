@@ -1,6 +1,6 @@
 #include "utils.h"
-#include "naive_quantize.h"
-#include "naive_qmm.h"
+#include "quantize.h"
+#include "qmm.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -11,6 +11,7 @@
 #define FEATURES 786
 #define CLASSES 10
 #define TEST_POINTS 10000
+#define IS_USE_MNIST_DATA false
 
 
 /* prototype of the function you need to optimize */
@@ -90,10 +91,20 @@ void add_function_4x4(qmm_pointer_4x4 f, char *name, int flops)
 
 int main() {
     // Read the trained network and the test points
-	float *W = read_csv_mat("data/weight.csv", FEATURES, CLASSES);
-	float *x_test = read_csv_mat("data/x_test.csv", TEST_POINTS, FEATURES);
-	float *y_test = read_csv_mat("data/y_test.csv", TEST_POINTS, CLASSES);
-	
+
+	float *W;
+	float *x_test;
+	float *y_test;
+	if(IS_USE_MNIST_DATA) {
+		W = read_csv_mat("data/weight.csv", FEATURES, CLASSES);
+		x_test = read_csv_mat("data/x_test.csv", TEST_POINTS, FEATURES);
+		y_test = read_csv_mat("data/y_test.csv", TEST_POINTS, CLASSES);
+	}else {
+		W = generate_rand_mat(FEATURES, CLASSES);
+		x_test = generate_rand_mat(TEST_POINTS, FEATURES);
+		y_test = generate_rand_mat(TEST_POINTS, CLASSES);
+	}
+
     // Initialize quantized variables for the network
 	uint4x4_t *W_q = (uint4x4_t*)malloc(sizeof(uint4x4_t) * FEATURES/2 * CLASSES/2);
 	uint4x4_t *x_q = (uint4x4_t*)malloc(sizeof(uint4x4_t) * TEST_POINTS/2 * FEATURES/2);
