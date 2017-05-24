@@ -144,16 +144,16 @@ void qmm_trick(float l_scale, float r_scale, float result_scale, uint4x4_t l_off
 						(l_element.i4) * (r_elment.i4);
 
 			}
-			
-		acc1 = acc1 - term2[2*j] - term3[2*i] + term4;
-		acc2 = acc2 - term2[2*j + 1] - term3[2*i] + term4;
-		acc3 = acc3 - term2[2*j] - term3[2*i + 1] + term4;
-		acc4 = acc4 - term2[2*j + 1] - term3[2*i + 1] + term4;
 
-		result_int_mat[i*m + j].i1 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc1));
-		result_int_mat[i*m + j].i2 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc2));
-		result_int_mat[i*m + j].i3 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc3));
-		result_int_mat[i*m + j].i4 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc4));
+			acc1 = acc1 - term2[2*j] - term3[2*i] + term4;
+			acc2 = acc2 - term2[2*j + 1] - term3[2*i] + term4;
+			acc3 = acc3 - term2[2*j] - term3[2*i + 1] + term4;
+			acc4 = acc4 - term2[2*j + 1] - term3[2*i + 1] + term4;
+
+			result_int_mat[i*m + j].i1 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc1));
+			result_int_mat[i*m + j].i2 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc2));
+			result_int_mat[i*m + j].i3 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc3));
+			result_int_mat[i*m + j].i4 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc4));
 		
 		}
 	}
@@ -183,7 +183,7 @@ void qmm_trick_blocking(float l_scale, float r_scale, float result_scale, uint4x
 	uint16_t t211,t212,t213,t214,t221,t222,t223,t224;
 	uint4x4_t r_elment,l_element,c00,c01,c02,c10,c11,c12,c20,c21,c22,l0,l1,l2,r0,r1,r2;
 	uint16_t sum1, sum2;
-	uint16_t* acc = (uint16_t*)malloc(sizeof(uint16_t)*2* n *2*m);
+	int16_t* acc = (int16_t*)malloc(sizeof(int16_t)*2*n*2*m);
 
 	for (int i = 0; i < 4*n*m; ++i)
 	{
@@ -224,50 +224,50 @@ void qmm_trick_blocking(float l_scale, float r_scale, float result_scale, uint4x
 				for(int i_p = i;i_p<i+Nb;i_p += 3){
 					for(int j_p=j;j_p<j+Nb;j_p += 3){
 						//loads of the accumulator matrix
-						t001 = acc[2*i_p*m + 2*j_p];
-						t002 = acc[2*i_p*m + 2*j_p+1];
-						t003 = acc[(2*i_p+1)*m + 2*j_p];
-						t004 = acc[(2*i_p+1)*m + 2*j_p+1];
+						t001 = acc[2*i_p*2*m + 2*j_p];
+						t002 = acc[2*i_p*2*m + 2*j_p+1];
+						t003 = acc[(2*i_p+1)*2*m + 2*j_p];
+						t004 = acc[(2*i_p+1)*2*m + 2*j_p+1];
 
-						t011 = acc[2*i_p*m + 2*(j_p+1)];
-						t012 = acc[2*i_p*m + 2*(j_p+1)+1];
-						t013 = acc[(2*i_p+1)*m + 2*(j_p+1)];
-						t014 = acc[(2*i_p+1)*m + 2*(j_p+1)+1];
+						t011 = acc[2*i_p*2*m + 2*(j_p+1)];
+						t012 = acc[2*i_p*2*m + 2*(j_p+1)+1];
+						t013 = acc[(2*i_p+1)*2*m + 2*(j_p+1)];
+						t014 = acc[(2*i_p+1)*2*m + 2*(j_p+1)+1];
 
-						t021 = acc[2*i_p*m + 2*(j_p+2)];
-						t022 = acc[2*i_p*m + 2*(j_p+2)+1];
-						t023 = acc[(2*i_p+1)*m + 2*(j_p+2)];
-						t024 = acc[(2*i_p+1)*m + 2*(j_p+2)+1];
+						t021 = acc[2*i_p*2*m + 2*(j_p+2)];
+						t022 = acc[2*i_p*2*m + 2*(j_p+2)+1];
+						t023 = acc[(2*i_p+1)*2*m + 2*(j_p+2)];
+						t024 = acc[(2*i_p+1)*2*m + 2*(j_p+2)+1];
 
-						t101 = acc[(2*(i_p+1))*m + 2*j_p];
-						t102 = acc[(2*(i_p+1))*m + 2*j_p+1];
-						t103 = acc[(2*(i_p+1)+1)*m + 2*j_p];
-						t104 = acc[(2*(i_p+1)+1)*m + 2*j_p+1];
+						t101 = acc[(2*(i_p+1))*2*m + 2*j_p];
+						t102 = acc[(2*(i_p+1))*2*m + 2*j_p+1];
+						t103 = acc[(2*(i_p+1)+1)*2*m + 2*j_p];
+						t104 = acc[(2*(i_p+1)+1)*2*m + 2*j_p+1];
 
-						t111 = acc[(2*(i_p+1))*m + 2*(j_p+1)];
-						t112 = acc[(2*(i_p+1))*m + 2*(j_p+1)+1];
-						t113 = acc[(2*(i_p+1)+1)*m + 2*(j_p+1)];
-						t114 = acc[(2*(i_p+1)+1)*m + 2*(j_p+1)+1];
+						t111 = acc[(2*(i_p+1))*2*m + 2*(j_p+1)];
+						t112 = acc[(2*(i_p+1))*2*m + 2*(j_p+1)+1];
+						t113 = acc[(2*(i_p+1)+1)*2*m + 2*(j_p+1)];
+						t114 = acc[(2*(i_p+1)+1)*2*m + 2*(j_p+1)+1];
 
-						t121 = acc[(2*(i_p+1))*m + 2*(j_p+2)];
-						t122 = acc[(2*(i_p+1))*m + 2*(j_p+2)+1];
-						t123 = acc[(2*(i_p+1)+1)*m + 2*(j_p+2)];
-						t124 = acc[(2*(i_p+1)+1)*m + 2*(j_p+2)+1];
+						t121 = acc[(2*(i_p+1))*2*m + 2*(j_p+2)];
+						t122 = acc[(2*(i_p+1))*2*m + 2*(j_p+2)+1];
+						t123 = acc[(2*(i_p+1)+1)*2*m + 2*(j_p+2)];
+						t124 = acc[(2*(i_p+1)+1)*2*m + 2*(j_p+2)+1];
 
-						t201 = acc[(2*(i_p+2))*m + 2*(j_p)];
-						t202 = acc[(2*(i_p+2))*m + 2*(j_p)+1];
-						t203 = acc[(2*(i_p+2)+1)*m + 2*(j_p)];
-						t204 = acc[(2*(i_p+2)+1)*m + 2*(j_p)+1];
+						t201 = acc[(2*(i_p+2))*2*m + 2*(j_p)];
+						t202 = acc[(2*(i_p+2))*2*m + 2*(j_p)+1];
+						t203 = acc[(2*(i_p+2)+1)*2*m + 2*(j_p)];
+						t204 = acc[(2*(i_p+2)+1)*2*m + 2*(j_p)+1];
 
-						t211 = acc[(2*(i_p+2))*m + 2*(j_p+1)];
-						t212 = acc[(2*(i_p+2))*m + 2*(j_p+1)+1];
-						t213 = acc[(2*(i_p+2)+1)*m + 2*(j_p+1)];
-						t214 = acc[(2*(i_p+2)+1)*m + 2*(j_p+1)+1];
+						t211 = acc[(2*(i_p+2))*2*m + 2*(j_p+1)];
+						t212 = acc[(2*(i_p+2))*2*m + 2*(j_p+1)+1];
+						t213 = acc[(2*(i_p+2)+1)*2*m + 2*(j_p+1)];
+						t214 = acc[(2*(i_p+2)+1)*2*m + 2*(j_p+1)+1];
 
-						t221 = acc[(2*(i_p+2))*m + 2*(j_p+2)];
-						t222 = acc[(2*(i_p+2))*m + 2*(j_p+2)+1];
-						t223 = acc[(2*(i_p+2)+1)*m + 2*(j_p+2)];
-						t224 = acc[(2*(i_p+2)+1)*m + 2*(j_p+2)+1];
+						t221 = acc[(2*(i_p+2))*2*m + 2*(j_p+2)];
+						t222 = acc[(2*(i_p+2))*2*m + 2*(j_p+2)+1];
+						t223 = acc[(2*(i_p+2)+1)*2*m + 2*(j_p+2)];
+						t224 = acc[(2*(i_p+2)+1)*2*m + 2*(j_p+2)+1];
 
 						for(int t_p=t;t_p<t+Nb;t_p += 3){
 							//loads of left and right hand side
@@ -326,70 +326,70 @@ void qmm_trick_blocking(float l_scale, float r_scale, float result_scale, uint4x
 						}
 
 						//store
-						acc[2*i_p*m + 2*j_p] = t001;
-						acc[2*i_p*m + 2*j_p+1] = t002;
-						acc[(2*i_p+1)*m + 2*j_p] = t003;
-						acc[(2*i_p+1)*m + 2*j_p+1] = t004;
+						acc[2*i_p*2*m + 2*j_p] = t001;
+						acc[2*i_p*2*m + 2*j_p+1] = t002;
+						acc[(2*i_p+1)*2*m + 2*j_p] = t003;
+						acc[(2*i_p+1)*2*m + 2*j_p+1] = t004;
 
-						acc[2*i_p*m + 2*(j_p+1)] = t011;
-						acc[2*i_p*m + 2*(j_p+1)+1] = t012;
-						acc[(2*i_p+1)*m + 2*(j_p+1)] = t013;
-						acc[(2*i_p+1)*m + 2*(j_p+1)+1] = t014;
+						acc[2*i_p*2*m + 2*(j_p+1)] = t011;
+						acc[2*i_p*2*m + 2*(j_p+1)+1] = t012;
+						acc[(2*i_p+1)*2*m + 2*(j_p+1)] = t013;
+						acc[(2*i_p+1)*2*m + 2*(j_p+1)+1] = t014;
 
-						acc[2*i_p*m + 2*(j_p+2)]  = t021;
-						acc[2*i_p*m + 2*(j_p+2)+1] = t022;
-						acc[(2*i_p+1)*m + 2*(j_p+2)] = t023;
-						acc[(2*i_p+1)*m + 2*(j_p+2)+1] = t024;
+						acc[2*i_p*2*m + 2*(j_p+2)]  = t021;
+						acc[2*i_p*2*m + 2*(j_p+2)+1] = t022;
+						acc[(2*i_p+1)*2*m + 2*(j_p+2)] = t023;
+						acc[(2*i_p+1)*2*m + 2*(j_p+2)+1] = t024;
 
-						acc[(2*(i_p+1))*m + 2*j_p] = t101;
-						acc[(2*(i_p+1))*m + 2*j_p+1] = t102;
-					    acc[(2*(i_p+1)+1)*m + 2*j_p] = t103;
-						acc[(2*(i_p+1)+1)*m + 2*j_p+1] = t104;
+						acc[(2*(i_p+1))*2*m + 2*j_p] = t101;
+						acc[(2*(i_p+1))*2*m + 2*j_p+1] = t102;
+					    acc[(2*(i_p+1)+1)*2*m + 2*j_p] = t103;
+						acc[(2*(i_p+1)+1)*2*m + 2*j_p+1] = t104;
 
-						acc[(2*(i_p+1))*m + 2*(j_p+1)] = t111;
-						acc[(2*(i_p+1))*m + 2*(j_p+1)+1] = t112;
-						acc[(2*(i_p+1)+1)*m + 2*(j_p+1)] = t113;
-						acc[(2*(i_p+1)+1)*m + 2*(j_p+1)+1] = t114;
+						acc[(2*(i_p+1))*2*m + 2*(j_p+1)] = t111;
+						acc[(2*(i_p+1))*2*m + 2*(j_p+1)+1] = t112;
+						acc[(2*(i_p+1)+1)*2*m + 2*(j_p+1)] = t113;
+						acc[(2*(i_p+1)+1)*2*m + 2*(j_p+1)+1] = t114;
 
-						acc[(2*(i_p+1))*m + 2*(j_p+2)] = t121;
-						acc[(2*(i_p+1))*m + 2*(j_p+2)+1] = t122;
-						acc[(2*(i_p+1)+1)*m + 2*(j_p+2)] = t123;
-						acc[(2*(i_p+1)+1)*m + 2*(j_p+2)+1] = t124;
+						acc[(2*(i_p+1))*2*m + 2*(j_p+2)] = t121;
+						acc[(2*(i_p+1))*2*m + 2*(j_p+2)+1] = t122;
+						acc[(2*(i_p+1)+1)*2*m + 2*(j_p+2)] = t123;
+						acc[(2*(i_p+1)+1)*2*m + 2*(j_p+2)+1] = t124;
 
-						acc[(2*(i_p+2))*m + 2*(j_p)] = t201;
-						acc[(2*(i_p+2))*m + 2*(j_p)+1] = t202;
-						acc[(2*(i_p+2)+1)*m + 2*(j_p)] = t203;
-						acc[(2*(i_p+2)+1)*m + 2*(j_p)+1] = t204;
+						acc[(2*(i_p+2))*2*m + 2*(j_p)] = t201;
+						acc[(2*(i_p+2))*2*m + 2*(j_p)+1] = t202;
+						acc[(2*(i_p+2)+1)*2*m + 2*(j_p)] = t203;
+						acc[(2*(i_p+2)+1)*2*m + 2*(j_p)+1] = t204;
 
-						acc[(2*(i_p+2))*m + 2*(j_p+1)] = t211;
-						acc[(2*(i_p+2))*m + 2*(j_p+1)+1] = t212;
-						acc[(2*(i_p+2)+1)*m + 2*(j_p+1)] = t213;
-						acc[(2*(i_p+2)+1)*m + 2*(j_p+1)+1] = t214;
+						acc[(2*(i_p+2))*2*m + 2*(j_p+1)] = t211;
+						acc[(2*(i_p+2))*2*m + 2*(j_p+1)+1] = t212;
+						acc[(2*(i_p+2)+1)*2*m + 2*(j_p+1)] = t213;
+						acc[(2*(i_p+2)+1)*2*m + 2*(j_p+1)+1] = t214;
 
-						acc[(2*(i_p+2))*m + 2*(j_p+2)] = t221;
-						acc[(2*(i_p+2))*m + 2*(j_p+2)+1] = t222;
-						acc[(2*(i_p+2)+1)*m + 2*(j_p+2)] = t223;
-						acc[(2*(i_p+2)+1)*m + 2*(j_p+2)+1] = t224;
+						acc[(2*(i_p+2))*2*m + 2*(j_p+2)] = t221;
+						acc[(2*(i_p+2))*2*m + 2*(j_p+2)+1] = t222;
+						acc[(2*(i_p+2)+1)*2*m + 2*(j_p+2)] = t223;
+						acc[(2*(i_p+2)+1)*2*m + 2*(j_p+2)+1] = t224;
 
 					}
 				}
 			}
 
 			for (; t<k; t++ ){
-				acc[2*i*m + 2*j] += l_int_mat[i*k + t].i1*r_int_mat[t*m + j].i1 + l_int_mat[i*k + t].i2*r_int_mat[t*m + j].i3;
-				acc[2*i*m + 2*j+1] += l_int_mat[i*k + t].i1*r_int_mat[t*m + j].i2 + l_int_mat[i*k + t].i2*r_int_mat[t*m + j].i4;
-				acc[(2*i+1)*m + 2*j] += l_int_mat[i*k + t].i3*r_int_mat[t*m + j].i1 + l_int_mat[i*k + t].i4*r_int_mat[t*m + j].i3;
-				acc[(2*i+1)*m + 2*j+1] += l_int_mat[i*k + t].i3*r_int_mat[t*m + j].i2 + l_int_mat[i*k + t].i4*r_int_mat[t*m + j].i4;
+				acc[2*i*2*m + 2*j] += l_int_mat[i*k + t].i1*r_int_mat[t*m + j].i1 + l_int_mat[i*k + t].i2*r_int_mat[t*m + j].i3;
+				acc[2*i*2*m + 2*j+1] += l_int_mat[i*k + t].i1*r_int_mat[t*m + j].i2 + l_int_mat[i*k + t].i2*r_int_mat[t*m + j].i4;
+				acc[(2*i+1)*2*m + 2*j] += l_int_mat[i*k + t].i3*r_int_mat[t*m + j].i1 + l_int_mat[i*k + t].i4*r_int_mat[t*m + j].i3;
+				acc[(2*i+1)*2*m + 2*j+1] += l_int_mat[i*k + t].i3*r_int_mat[t*m + j].i2 + l_int_mat[i*k + t].i4*r_int_mat[t*m + j].i4;
 			}
 		}
 
 		for (; j < m; j++)
 		{
 			for (t=0; t<k; t++ ){
-				acc[2*i*m + 2*j] += l_int_mat[i*k + t].i1*r_int_mat[t*m + j].i1 + l_int_mat[i*k + t].i2*r_int_mat[t*m + j].i3;
-				acc[2*i*m + 2*j+1] += l_int_mat[i*k + t].i1*r_int_mat[t*m + j].i2 + l_int_mat[i*k + t].i2*r_int_mat[t*m + j].i4;
-				acc[(2*i+1)*m + 2*j] += l_int_mat[i*k + t].i3*r_int_mat[t*m + j].i1 + l_int_mat[i*k + t].i4*r_int_mat[t*m + j].i3;
-				acc[(2*i+1)*m + 2*j+1] += l_int_mat[i*k + t].i3*r_int_mat[t*m + j].i2 + l_int_mat[i*k + t].i4*r_int_mat[t*m + j].i4;
+				acc[2*i*2*m + 2*j] += l_int_mat[i*k + t].i1*r_int_mat[t*m + j].i1 + l_int_mat[i*k + t].i2*r_int_mat[t*m + j].i3;
+				acc[2*i*2*m + 2*j+1] += l_int_mat[i*k + t].i1*r_int_mat[t*m + j].i2 + l_int_mat[i*k + t].i2*r_int_mat[t*m + j].i4;
+				acc[(2*i+1)*2*m + 2*j] += l_int_mat[i*k + t].i3*r_int_mat[t*m + j].i1 + l_int_mat[i*k + t].i4*r_int_mat[t*m + j].i3;
+				acc[(2*i+1)*2*m + 2*j+1] += l_int_mat[i*k + t].i3*r_int_mat[t*m + j].i2 + l_int_mat[i*k + t].i4*r_int_mat[t*m + j].i4;
 			}
 		}
 	}
@@ -399,10 +399,10 @@ void qmm_trick_blocking(float l_scale, float r_scale, float result_scale, uint4x
 		for (j=0; j < m; j++)
 		{
 			for (t=0; t<k; t++ ){
-				acc[2*i*m + 2*j] += l_int_mat[i*k + t].i1*r_int_mat[t*m + j].i1 + l_int_mat[i*k + t].i2*r_int_mat[t*m + j].i3;
-				acc[2*i*m + 2*j+1] += l_int_mat[i*k + t].i1*r_int_mat[t*m + j].i2 + l_int_mat[i*k + t].i2*r_int_mat[t*m + j].i4;
-				acc[(2*i+1)*m + 2*j] += l_int_mat[i*k + t].i3*r_int_mat[t*m + j].i1 + l_int_mat[i*k + t].i4*r_int_mat[t*m + j].i3;
-				acc[(2*i+1)*m + 2*j+1] += l_int_mat[i*k + t].i3*r_int_mat[t*m + j].i2 + l_int_mat[i*k + t].i4*r_int_mat[t*m + j].i4;
+				acc[2*i*2*m + 2*j] += l_int_mat[i*k + t].i1*r_int_mat[t*m + j].i1 + l_int_mat[i*k + t].i2*r_int_mat[t*m + j].i3;
+				acc[2*i*2*m + 2*j+1] += l_int_mat[i*k + t].i1*r_int_mat[t*m + j].i2 + l_int_mat[i*k + t].i2*r_int_mat[t*m + j].i4;
+				acc[(2*i+1)*2*m + 2*j] += l_int_mat[i*k + t].i3*r_int_mat[t*m + j].i1 + l_int_mat[i*k + t].i4*r_int_mat[t*m + j].i3;
+				acc[(2*i+1)*2*m + 2*j+1] += l_int_mat[i*k + t].i3*r_int_mat[t*m + j].i2 + l_int_mat[i*k + t].i4*r_int_mat[t*m + j].i4;
 			}
 		}
 	}
@@ -411,15 +411,15 @@ void qmm_trick_blocking(float l_scale, float r_scale, float result_scale, uint4x
 	{
 		for (j = 0; j < m; j++)
 		{
-			acc[2*i*m + 2*j] +=  - term2[2*j] - term3[2*i] + term4;
-			acc[2*i*m + 2*j+1] +=  - term2[2*j + 1] - term3[2*i] + term4;
-			acc[(2*i+1)*m + 2*j] += - term2[2*j] - term3[2*i + 1] + term4;
-			acc[(2*i+1)*m + 2*j+1] += - term2[2*j + 1] - term3[2*i + 1] + term4;
+			acc[2*i*2*m + 2*j]       += - term2[2*j]     - term3[2*i]     + term4;
+			acc[2*i*2*m + 2*j+1]     += - term2[2*j + 1] - term3[2*i]     + term4;
+			acc[(2*i+1)*2*m + 2*j]   += - term2[2*j]     - term3[2*i + 1] + term4;
+			acc[(2*i+1)*2*m + 2*j+1] += - term2[2*j + 1] - term3[2*i + 1] + term4;
 
-			result_int_mat[i*m + j].i1 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc[2*i*m + 2*j]));
-			result_int_mat[i*m + j].i2 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc[2*i*m + 2*j+1]));
-			result_int_mat[i*m + j].i3 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc[(2*i+1)*m + 2*j]));
-			result_int_mat[i*m + j].i4 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc[(2*i+1)*m + 2*j+1]));
+			result_int_mat[i*m + j].i1 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc[2*i*2*m + 2*j]));
+			result_int_mat[i*m + j].i2 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc[2*i*2*m + 2*j+1]));
+			result_int_mat[i*m + j].i3 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc[(2*i+1)*2*m + 2*j]));
+			result_int_mat[i*m + j].i4 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc[(2*i+1)*2*m + 2*j+1]));
 		}
 	}
 
