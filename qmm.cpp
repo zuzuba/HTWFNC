@@ -167,7 +167,7 @@ void qmm_trick_blocking(float l_scale, float r_scale, float result_scale, uint4x
 	int n, int k, int m){
 
 	int16_t acc1, acc2, acc3, acc4;
-	int Nb=6;
+	int Nb=90;
 	int i,j,t,i_f,j_f,t_f;
 	// Internally we divide everything by 2 because one uint4x4_t contains 4 integers of 4 bit organize in 2 cols and 2 rows
 
@@ -184,7 +184,7 @@ void qmm_trick_blocking(float l_scale, float r_scale, float result_scale, uint4x
 	uint16_t sum1, sum2;
 	int16_t* acc = (int16_t*)malloc(sizeof(int16_t)*2*n*2*m);
 
-	for (int i = 0; i < 4*n*m; ++i)
+	for (i = 0; i < 4*n*m; ++i)
 	{
 		acc[i]=0;
 	}
@@ -222,7 +222,7 @@ void qmm_trick_blocking(float l_scale, float r_scale, float result_scale, uint4x
 			for (t=0; t<k-Nb+1; t +=Nb){
 				for(int i_p = i;i_p<i+Nb;i_p += 3){
 					for(int j_p=j;j_p<j+Nb;j_p += 3){
-
+						//LR
 						//loads of the accumulator matrix
 						t001 = acc[2*i_p*2*m + 2*j_p];
 						t002 = acc[2*i_p*2*m + 2*j_p+1];
@@ -370,25 +370,30 @@ void qmm_trick_blocking(float l_scale, float r_scale, float result_scale, uint4x
 						acc[(2*(i_p+2))*2*m + 2*(j_p+2)+1] = t222;
 						acc[(2*(i_p+2)+1)*2*m + 2*(j_p+2)] = t223;
 						acc[(2*(i_p+2)+1)*2*m + 2*(j_p+2)+1] = t224;
-
 					}
 				}
+				t_f = t;
 			}
-			t_f = t;
-			//LcRr
+			j_f=j;
+		}
+		i_f=i;
+	}
+
+	//LcRr
+	for (i = i_f; i < n; ++i){
+		for ( j = j_f; j < m; ++j){
 			for (; t<k; t++ ){
 				acc[2*i*2*m + 2*j] += l_int_mat[i*k + t].i1*r_int_mat[t*m + j].i1 + l_int_mat[i*k + t].i2*r_int_mat[t*m + j].i3;
 				acc[2*i*2*m + 2*j+1] += l_int_mat[i*k + t].i1*r_int_mat[t*m + j].i2 + l_int_mat[i*k + t].i2*r_int_mat[t*m + j].i4;
 				acc[(2*i+1)*2*m + 2*j] += l_int_mat[i*k + t].i3*r_int_mat[t*m + j].i1 + l_int_mat[i*k + t].i4*r_int_mat[t*m + j].i3;
 				acc[(2*i+1)*2*m + 2*j+1] += l_int_mat[i*k + t].i3*r_int_mat[t*m + j].i2 + l_int_mat[i*k + t].i4*r_int_mat[t*m + j].i4;
-			}
+			}		
 		}
+	}
 
-		j_f =j;
-
-		//LRc + LcRs
-		for (; j < m; j++)
-		{
+	//LRc + LcRs
+	for(i=0;i<n-Nb+1;i++){
+		for (j=j_f; j < m; j++){
 			for (t=0; t<k; t++ ){
 				acc[2*i*2*m + 2*j] += l_int_mat[i*k + t].i1*r_int_mat[t*m + j].i1 + l_int_mat[i*k + t].i2*r_int_mat[t*m + j].i3;
 				acc[2*i*2*m + 2*j+1] += l_int_mat[i*k + t].i1*r_int_mat[t*m + j].i2 + l_int_mat[i*k + t].i2*r_int_mat[t*m + j].i4;
@@ -398,27 +403,10 @@ void qmm_trick_blocking(float l_scale, float r_scale, float result_scale, uint4x
 		}
 	}
 
-	i_f = i;
-	//LrR + LsRr
-	for (; i < n; i++)
-	{
-		for (j=0; j < j_f; j++)
-		{
+	//LrR + LsRr  || LrRc + LsRs
+	for (i=i_f; i < n; i++){
+		for (j=0; j < m; j++){
 			for (t=0; t<k; t++ ){
-				acc[2*i*2*m + 2*j] += l_int_mat[i*k + t].i1*r_int_mat[t*m + j].i1 + l_int_mat[i*k + t].i2*r_int_mat[t*m + j].i3;
-				acc[2*i*2*m + 2*j+1] += l_int_mat[i*k + t].i1*r_int_mat[t*m + j].i2 + l_int_mat[i*k + t].i2*r_int_mat[t*m + j].i4;
-				acc[(2*i+1)*2*m + 2*j] += l_int_mat[i*k + t].i3*r_int_mat[t*m + j].i1 + l_int_mat[i*k + t].i4*r_int_mat[t*m + j].i3;
-				acc[(2*i+1)*2*m + 2*j+1] += l_int_mat[i*k + t].i3*r_int_mat[t*m + j].i2 + l_int_mat[i*k + t].i4*r_int_mat[t*m + j].i4;
-			}
-		}
-	}
-
-	//LrRc + LsRs
-	for (i = i_f; i < n; ++i)
-	{
-		for (j = j_f; j < m; ++j)
-		{
-			for(t=0;t<k;t++){
 				acc[2*i*2*m + 2*j] += l_int_mat[i*k + t].i1*r_int_mat[t*m + j].i1 + l_int_mat[i*k + t].i2*r_int_mat[t*m + j].i3;
 				acc[2*i*2*m + 2*j+1] += l_int_mat[i*k + t].i1*r_int_mat[t*m + j].i2 + l_int_mat[i*k + t].i2*r_int_mat[t*m + j].i4;
 				acc[(2*i+1)*2*m + 2*j] += l_int_mat[i*k + t].i3*r_int_mat[t*m + j].i1 + l_int_mat[i*k + t].i4*r_int_mat[t*m + j].i3;
@@ -442,8 +430,6 @@ void qmm_trick_blocking(float l_scale, float r_scale, float result_scale, uint4x
 			result_int_mat[i*m + j].i4 = saturate(round(result_offset.i1 + (l_scale * r_scale/result_scale) * acc[(2*i+1)*2*m + 2*j+1]));
 		}
 	}
-
-	printf("%d %d %d %d %d %d\n",n,m,k,i_f,j_f,t_f );
 
 }
 
