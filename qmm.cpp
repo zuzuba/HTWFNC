@@ -116,6 +116,6 @@ void qmm_trick_AVX(float l_scale, float r_scale, float result_scale, uint4x4_t l
 	
 	trick_vector_naive(l_int_mat,r_int_mat,l_offset,r_offset,n,k,m,term2,term3,&term4);
 	qmm_kernel_trick_AVX(l_int_mat, r_int_mat,acc,n,k,m);
-	add_trick_vector_naive(acc,term2,term3,term4,n,m);
+	add_trick_vector_AVX(acc,term2,term3,term4,n,m);
 	round_saturation_naive(acc,result_int_mat,l_scale,r_scale,result_scale,result_offset,n,m);
 }
