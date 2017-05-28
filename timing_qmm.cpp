@@ -85,6 +85,7 @@ void register_functions_4x4()
 	add_function_4x4(&qmm_trick, (char *)"naive_trick",2,0);
 	add_function_4x4(&qmm_trick_AVX, (char *)"trick_AVX",2,0);
 	add_function_4x4(&qmm_trick_blocking, (char *)"trick_blocking",2,0);
+	add_function_4x4(&qmm_trick_AVX_unrolled, (char *)"trick_AVX_unrolled",2,0);
 	// Add your functions here
 	// add_function(&your_function, "function: Optimization X", nrflops);
 	
@@ -120,7 +121,7 @@ int main(int argc, char **argv)
 	printf("------Timing qmm-----\n");
 	int verbosity = 2;
     float cycles,perf;
-    char file_name[30], func_name[30];
+    char file_name[30], func_name[30],file_name_cycles[30];
     // Initialize the vectors of functions, function names and function flops
 	// Test of vanilla implementation first
     
@@ -145,14 +146,19 @@ int main(int argc, char **argv)
 		printf("Performance of qmm function: %s \n", funcNames_4x4[i]);
 		strcpy(func_name, funcNames_4x4[i]);
 		strcpy(file_name,"data/perf_qmm_");
+		strcpy(file_name_cycles,"data/cycles_qmm_");
 		strcat(file_name, func_name);
 		strcat(file_name, ".dat");
+		strcat(file_name_cycles, func_name);
+		strcat(file_name_cycles, ".dat");
 		FILE *fp = fopen(file_name,"w+");
-		for(int n=32; n<300;n+=32){
+		FILE *fp_cycles = fopen(file_name_cycles,"w+");
+		for(int n=30; n<500;n+=30){
 			cycles = perf_test(userFuncs_4x4[i],funcNames_4x4[i],n);
 			perf = (funcFlops_cubic_term_4x4[i]*n*n*n + funcFlops_quad_term_4x4[i]*n*n)/cycles;
 			printf("%s: n:%d cycles:%f perf:%f \n",funcNames_4x4[i],n, cycles,perf);
 			fprintf(fp, "%d %f\n",n,perf);
+			fprintf(fp_cycles, "%d %f\n",n,cycles);
 		}	
 	}
 
@@ -215,7 +221,7 @@ double perf_test(qmm_pointer_4x4 f, char *desc,int n)
 
 		start = start_tsc();
 		for (size_t i = 0; i < num_runs; ++i) {
-			f(lhs_scale, rhs_scale, lhs_scale, l_offset,  r_offset, l_offset, lhs_q, rhs_q, result_q,n,n,n);			
+			f(lhs_scale, rhs_scale, lhs_scale, l_offset,  r_offset, l_offset, lhs_q, rhs_q, result_q,n,n,n);
 		}
 		end = stop_tsc(start);
 
@@ -228,6 +234,7 @@ double perf_test(qmm_pointer_4x4 f, char *desc,int n)
 	free(rhs);
 	free(lhs_q);
 	free(rhs_q);
+	free(result_q);
 
 	cyclesList.sort();
 	cycles = cyclesList.front();

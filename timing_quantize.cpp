@@ -115,7 +115,7 @@ int main(int argc, char **argv)
 	printf("------Timing quantization function-----\n");
 	int verbosity = 2;
     float cycles, perf;
-    char file_name[30],func_name[30];
+    char file_name[30],func_name[30],file_name_cycles[30];
     // Initialize the vectors of functions, function names and function flops
 	// Test of vanilla implementation first
     
@@ -139,16 +139,21 @@ int main(int argc, char **argv)
 	{
 		printf("Performance of quantize function: %s \n", funcNames_4x4[i]);
 		strcpy(func_name, funcNames_4x4[i]);
-		strcpy(file_name, "data/perf_quantize_");
+		strcpy(file_name,"data/perf_quantize_");
+		strcpy(file_name_cycles,"data/cycles_quantize_");
 		strcat(file_name, func_name);
 		strcat(file_name, ".dat");
+		strcat(file_name_cycles, func_name);
+		strcat(file_name_cycles, ".dat");
 		FILE *fp = fopen(file_name,"w+");
+		FILE *fp_cycles = fopen(file_name_cycles,"w+");
 
-		for(int n=16; n<=100;n+=16){
+		for(int n=30; n<=500;n+=30){
 			cycles = perf_test(userFuncs_4x4[i],funcNames_4x4[i],n);
 			perf = (funcFlops_quad_term_4x4[i]*n*n + funcFlops_linear_term_4x4[i]*n)/cycles;
 			printf("%s: n:%d  cycles:%f perf:%f \n",funcNames_4x4[i],n, cycles,perf);
 			fprintf(fp, "%d %f\n",n,perf);
+			fprintf(fp_cycles, "%d %f\n",n,cycles);
 		}	
 	}
 
