@@ -19,7 +19,7 @@ void add_trick_vector_naive(int16_t* acc, uint16_t* term2, uint16_t* term3, uint
 
 void add_trick_vector_AVX(int16_t* acc, uint16_t* term2, uint16_t* term3, uint16_t term4, int n, int m){
 
-	__m256i term4_m256 =  _mm256_set1_epi16(term4);
+	__m256i term4_m256 = _mm256_set1_epi16(term4);
 	__m256i term3_m256;
 	__m256i term2_m256;
 	__m256i acc_m256;
@@ -31,14 +31,14 @@ void add_trick_vector_AVX(int16_t* acc, uint16_t* term2, uint16_t* term3, uint16
 	{
 		term3_ = term3[i];
 		term3_m256 = _mm256_set1_epi16(term3_);
-		for (j = 0; i < m-15; j+=16)
+		for (j = 0; j < m-15; j+=16)
 		{
 			term2_m256 = _mm256_loadu_si256((__m256i const *) (term2 + 2*j));
 			acc_m256 = _mm256_loadu_si256((__m256i *) (acc + i*2*m + 2*j) );
 			t = _mm256_add_epi16 (term2_m256,term3_m256);
 			t = _mm256_sub_epi16 (term4_m256,t);
 			t = _mm256_add_epi16 (t, acc_m256);
-			_mm256_storeu_si256 ((__m256i *) acc + i*2*m + 2*j, t);
+			_mm256_storeu_si256((__m256i *) (acc + i*2*m + 2*j), t);
 		}
 
 		for (; j < m; ++j)
