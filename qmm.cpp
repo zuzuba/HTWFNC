@@ -47,7 +47,7 @@ void qmm_naive(float l_scale, float r_scale, float result_scale, uint4x4_t l_off
 
 	qmm_kernel_naive(l_int_mat,r_int_mat,l_offset,r_offset,acc,n,k,m);
 	round_saturation_naive(acc,result_int_mat,l_scale,r_scale,result_scale,result_offset,n,m);
-
+	free(acc);
 }
 
 
@@ -71,7 +71,9 @@ void qmm_trick(float l_scale, float r_scale, float result_scale, uint4x4_t l_off
 	qmm_kernel_trick(l_int_mat,r_int_mat,acc,n,k,m);
 	add_trick_vector_naive(acc,term2,term3,term4,n,m);
 	round_saturation_naive(acc,result_int_mat,l_scale,r_scale,result_scale,result_offset,n,m);
-
+	free(term2);
+	free(term3);
+	free(acc);
 }
 
 
@@ -95,6 +97,9 @@ void qmm_trick_blocking(float l_scale, float r_scale, float result_scale, uint4x
 	qmm_kernel_trick_blocking(l_int_mat,r_int_mat,acc,n,k,m);
 	add_trick_vector_naive(acc,term2,term3,term4,n,m);
 	round_saturation_naive(acc,result_int_mat,l_scale,r_scale,result_scale,result_offset,n,m);
+	free(term2);
+	free(term3);
+	free(acc);
 }
 
 
@@ -118,6 +123,9 @@ void qmm_trick_AVX(float l_scale, float r_scale, float result_scale, uint4x4_t l
 	qmm_kernel_trick_AVX(l_int_mat, r_int_mat,acc,n,k,m);
 	add_trick_vector_AVX(acc,term2,term3,term4,n,m);
 	round_saturation_naive(acc,result_int_mat,l_scale,r_scale,result_scale,result_offset,n,m);
+	free(term2);
+	free(term3);
+	free(acc);
 }
 
 
@@ -140,4 +148,7 @@ void qmm_trick_AVX_unrolled(float l_scale, float r_scale, float result_scale, ui
 	qmm_kernel_trick_AVX_unrolled(l_int_mat, r_int_mat,acc,n,k,m);
 	add_trick_vector_AVX(acc,term2,term3,term4,n,m);
 	round_saturation_naive(acc,result_int_mat,l_scale,r_scale,result_scale,result_offset,n,m);
+	free(term2);
+	free(term3);
+	free(acc);
 }
