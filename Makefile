@@ -28,7 +28,7 @@ CFLAGS += -O3 -fno-tree-vectorize -march=native -mavx
 
 
 HEADERS=$(wildcard *.h)
-OBJS = qmm.o quantize.o utils.o 
+OBJS = qmm.o quantize.o utils.o trick_vector.o qmm_kernel.o round_saturation.o add_trick_vector.o
 
 TEST_OBJ_QMM = test_qmm.o 
 TEST_OBJ_QUANT = test_quantize.o
@@ -51,11 +51,17 @@ validation: $(OBJS) $(TEST_OBJ_ALL)
 	$(CC) $(OBJS) $(TEST_OBJ_ALL) -o $(TEST_BIN_ALL)
 	./$(TEST_BIN_ALL)
 
-perf: $(OBJS) timing_qmm.o timing_quantize.o
+perf: $(OBJS) timing_qmm.o timing_quantize.o timing_add_trick_vector.o timing_trick_vector.o timing_round_saturation.o
 	$(CC) $(OBJS) timing_qmm.o -o perf_qmm
 	./perf_qmm
 	$(CC) $(OBJS) timing_quantize.o -o perf_quantize
 	./perf_quantize
+	$(CC) $(OBJS) timing_add_trick_vector.o -o perf_add_trick_vector
+	./perf_add_trick_vector
+	$(CC) $(OBJS) timing_trick_vector.o -o perf_trick_vector
+	./perf_trick_vector
+	$(CC) $(OBJS) timing_round_saturation.o -o perf_round_saturation
+	./perf_round_saturation
 	python performance_plot.py
 
 
