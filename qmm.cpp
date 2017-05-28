@@ -114,8 +114,30 @@ void qmm_trick_AVX(float l_scale, float r_scale, float result_scale, uint4x4_t l
 	m = m/2;
 	k = k/2;
 	
-	trick_vector_naive(l_int_mat,r_int_mat,l_offset,r_offset,n,k,m,term2,term3,&term4);
+	trick_vector_AVX(l_int_mat,r_int_mat,l_offset,r_offset,n,k,m,term2,term3,&term4);
 	qmm_kernel_trick_AVX(l_int_mat, r_int_mat,acc,n,k,m);
+	add_trick_vector_AVX(acc,term2,term3,term4,n,m);
+	round_saturation_naive(acc,result_int_mat,l_scale,r_scale,result_scale,result_offset,n,m);
+}
+
+
+void qmm_trick_AVX_unrolled(float l_scale, float r_scale, float result_scale, uint4x4_t l_offset, uint4x4_t r_offset, 
+	uint4x4_t result_offset, uint4x4_t* l_int_mat, uint4x4_t* r_int_mat, uint4x4_t* result_int_mat, 
+	int n, int k, int m){
+
+	uint16_t* term2 = (uint16_t*)malloc(sizeof(uint16_t)*m);
+	uint16_t* term3 = (uint16_t*)malloc(sizeof(uint16_t)*n);
+	uint16_t term4;
+	int16_t* acc = (int16_t*)malloc(sizeof(int16_t)*n*m);
+	for (int i = 0; i < n*m; ++i) acc[i]=0;
+
+	// Internally we divide everything by 2 because one uint4x4_t contains 4 integers of 4 bit organize in 2 cols and 2 rows
+	n = n/2;
+	m = m/2;
+	k = k/2;
+	
+	trick_vector_naive(l_int_mat,r_int_mat,l_offset,r_offset,n,k,m,term2,term3,&term4);
+	qmm_kernel_trick_AVX_unrolled(l_int_mat, r_int_mat,acc,n,k,m);
 	add_trick_vector_AVX(acc,term2,term3,term4,n,m);
 	round_saturation_naive(acc,result_int_mat,l_scale,r_scale,result_scale,result_offset,n,m);
 }
