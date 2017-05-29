@@ -108,51 +108,6 @@ void quantize_AVX(float *d, uint4x4_t *q, float *min, float *max, int rows, int 
 			upper_row = _mm256_fmadd_ps(scale_avx,upper_row,zp_avx);
 			lower_row = _mm256_fmadd_ps(scale_avx,lower_row,zp_avx);
 
-			/* Now, we do rounding and saturation in AVX using intrinsics, note that
-			 * qmin_avx and qmax_avx are float AVX registers
-			 */ 
-			
-			upper_row = _mm256_max_ps( qmin_avx, _mm256_min_ps( qmax_avx, _mm256_round_ps(upper_row,_MM_FROUND_TO_NEAREST_INT)));
-        		lower_row = _mm256_max_ps( qmin_avx, _mm256_min_ps( qmax_avx, _mm256_round_ps(lower_row,_MM_FROUND_TO_NEAREST_INT)));
-        		
-			/* Now the upper_row and lower_row have fthe float values that we need. They are rounded and saturated
-			 * All that remains is to cast them to uint4_t
-			 * In order to achieve the cast, we begin by casting each float to a 32-bit uint, but since we know
-			 * that for each 32-bit uint, only the first 4 bits are non-zero (due to our saturation above), we
-			 * want to shift them first. Every element of even index in the upper_row AVX register has to be shifted 12 bits to
-			 * to the left and every element of uneven index has to be shifted 8-bits to the left.
-			 * For lower_row, every element of even index has to be shifted 4-bits to the left, e.g.
-			 * upper_row = [ ur1<<12, ur2<<8, ur3<<12, ur4<<8, ... ]
-			 * lower_row = [ lr1<<4, lr2, lr3<<4, lr4, ... ]
-			 * Since shifting different number of bits for different indexes is somewhat cumbersome, a simple floating point
-			 * multiplication does the job just fine, so I allocated top_shift and bottom_shift to do the job.
-			 * Once done, we just cast to 32-bit uints.
-			 */
-
-			upper_row = _mm256_cvttps_epi32( _mm256_mul_ps( top_shift, upper_row) );
-        		lower_row = _mm256_cvttps_epi32( _mm256_mul_ps( bottom_shift, lower_row) );
-
-			/* Now we or the two registers upper_row and lower_row
-			 * The result is that i1 and i3 are in the elements of even index, while i2 and i4 are in the elements of 
-			 * uneven index. That is:
-			 * lower_row = [ (ur1<<12) | (lr1<<4) , (ur2<<8) | (lr2) , (ur3<<12) | (lr3<<4) , (ur4<<8) | (lr4) , ... ]
-			 */
-
-			lower_row = _mm256_or_si256(upper_row, lower_row);
-
-			/* Now we need to OR the lower_row register with itself (shifted left 32-bits).
-			 * BUT, we don't actually need the entire register to be shifted left, we only need every other element to be shifted 32-bits
-			 * to the left of where it is in lower_row (because we only need to OR pairwise neighoring 32-bit elements). Coincidentally, we can achieve this
-			 * by actually cycling the elements in a lane, i.e. 0,1,2,3 -> 1,2,3,0 for both lanes. Therefore, we can just use the permute functionality
-			 * that places the 32-bit ints at index 1,3,5,7 in the positions at index 0,2,4,6
-			 * NOTE:
-			 * lower_row = [ (ur1<<12) | (lr1<<4) , (ur2<<8) | (lr2) , (ur3<<12) | (lr3<<4) , (ur4<<8) | (lr4) , ... ]
-			 * _mm256_permute_ps( lower_row, 57 ) =
-			 * 		[ (ur2<<8) | (lr2) , (ur3<<12) | (lr3<<4) , (ur4<<8) | (lr4) , (ur1<<12) | (lr1<<4) , ... ] (analogous for the other lane)
-			 */
-
-			upper_row = _mm256_or_si256(lower_row, _mm256_permute_ps(lower_row, 57 ) );
-
 			/* Since we only
 			 * 1. Require the 16 most significant bits of every 32-bit int
 			 * 2. Only require every other 32-bit register in the first place
@@ -160,7 +115,7 @@ void quantize_AVX(float *d, uint4x4_t *q, float *min, float *max, int rows, int 
 			 * We will only need fi[0], fi[4], fi[8], fi[12]
 			 */
 
-			_mm256_store_si256( (__m256i*)&fi, upper_row);
+			round_saturate_AVX(upper_row, lower_row, (__m256i*)&fi);
 
 		//BEGIN_DEBUGGING
 
