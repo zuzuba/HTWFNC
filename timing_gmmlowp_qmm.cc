@@ -235,7 +235,7 @@ int main(int argc, char **argv)
 
   for(int n=30; n<500;n+=30){
     cycles = perf_test(n);
-    perf = 1*n*n/cycles;
+    perf = 2*n*n*n/cycles;
     printf("gemmlowp: n:%d cycles:%f perf:%f \n", n, cycles,perf);
     fprintf(fp, "%d %f\n",n,perf);
     fprintf(fp_cycles, "%d %f\n",n,cycles);
