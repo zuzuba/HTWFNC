@@ -11,6 +11,7 @@ int saturate(float a);
 void quantize_parameter(float min, float max, float *scale, float *zero_point);
 void get_min_max(float *d,int rows,int columns, float *min, float *max);
 void get_min_max_AVX(float *d,int rows,int columns, float *min, float *max);
+void round_saturate_AVX( __m256 upper_row, __m256 lower_row, __m256i* fi);
 
 float * read_csv_mat(const char *filename, int rows, int cols);
 float * generate_rand_mat(int rows, int cols);
