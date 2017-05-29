@@ -54,13 +54,9 @@ void quantize_AVX(float *d, uint4x4_t *q, float *min, float *max, int rows, int 
 	get_min_max_AVX(d,rows,columns,min,max);
 	quantize_parameter(*min,*max,&scale,&zero_point);
 	scale = 1/scale;
-	float qmin = 0.0;
-	float qmax = 15.0;
 	int j;
 	__m256 scale_avx = _mm256_broadcast_ss(&scale);
 	__m256 zp_avx = _mm256_broadcast_ss(&zero_point);
-	__m256 qmin_avx = _mm256_broadcast_ss(&qmin);
-	__m256 qmax_avx = _mm256_broadcast_ss(&qmax);
 	__m256 upper_row;
 	__m256 lower_row;
 
@@ -77,9 +73,6 @@ void quantize_AVX(float *d, uint4x4_t *q, float *min, float *max, int rows, int 
 	//__m256 top_shift = _mm256_set_ps(16.0,1.0,16.0,1.0,16.0,1.0,16.0,1.0);
 	//__m256 bottom_shift = _mm256_set_ps(4096.0,256.0,4096.0,256.0,4096.0,256.0,4096.0,256.0);
 //END_WIP
-	
-	__m256 top_shift = _mm256_set_ps(256.0,4096.0,256.0,4096.0,256.0,4096.0,256.0,4096.0);
-	__m256 bottom_shift = _mm256_set_ps(1.0,16.0,1.0,16.0,1.0,16.0,1.0,16.0);
 
 	uint32_t temp_upper[8];
 	uint16_t fi[16];
