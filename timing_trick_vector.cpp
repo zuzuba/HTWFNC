@@ -116,7 +116,7 @@ int main(int argc, char **argv)
 	printf("------Timing function trick vector-----\n");
 	int verbosity = 2;
     float cycles,perf;
-    char file_name[30], func_name[30],file_name_cycles[30];
+    char file_name[60], func_name[60],file_name_cycles[60];
     // Initialize the vectors of functions, function names and function flops
 	// Test of vanilla implementation first
     
@@ -146,13 +146,15 @@ int main(int argc, char **argv)
 		FILE *fp = fopen(file_name,"w+");
 		FILE *fp_cycles = fopen(file_name_cycles,"w+");
 
-		for(int n=30; n<500;n+=30){
+		for(int n=30; n<400;n+=30){
 			cycles = perf_test(userFuncs[i],funcNames[i],n);
 			perf = Flops[i]*n*n/cycles;
 			printf("%s: n:%d cycles:%f perf:%f \n",funcNames[i],n, cycles,perf);
 			fprintf(fp, "%d %f\n",n,perf);
 			fprintf(fp_cycles, "%d %f\n",n,cycles);
 		}	
+		fclose(fp);
+		fclose(fp_cycles);
 	}
 
 	return 0;
@@ -193,6 +195,7 @@ double perf_test(function_trick_vector f, char *desc,int n)
 	uint4x4_t r_offset;
 	r_offset.i1= (int)rhs_zero_point;
 	
+	n=n/2;
 	// Warm-up phase: we determine a number of executions that allows
 	// the code to be executed for at least CYCLES_REQUIRED cycles.
 	// This helps excluding timing overhead when measuring small runtimes.

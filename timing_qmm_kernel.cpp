@@ -158,6 +158,8 @@ int main(int argc, char **argv)
 			fprintf(fp, "%d %f\n",n,perf);
 			fprintf(fp_cycles, "%d %f\n",n,cycles);
 		}	
+		fclose(fp);
+		fclose(fp_cycles);
 	}
 
 	return 0;
@@ -182,11 +184,9 @@ double perf_test(qmm_kernel_pointer f, char *desc,int n)
 	rhs = build_full_mat(n);
 	lhs_q = allocate_quantized_mat(n);
 	rhs_q = allocate_quantized_mat(n);
-	result_q = allocate_quantized_mat(n);
 
-	uint16_t * term2 = (uint16_t *)malloc(sizeof(uint16_t)*n);
-	uint16_t * term3 = (uint16_t *)malloc(sizeof(uint16_t)*n);
 	int16_t *acc = (int16_t *)malloc(sizeof(int16_t)*n*n); 
+	for (int i = 0; i < n*n; ++i) acc[i]=0;
 	
 	quantize_4x4(lhs, lhs_q, &lhs_mn , &lhs_mx, n, n);
 	quantize_parameter(lhs_mn, lhs_mx,  &lhs_scale, &lhs_zero_point);
@@ -198,8 +198,8 @@ double perf_test(qmm_kernel_pointer f, char *desc,int n)
 	l_offset.i1= (int)lhs_zero_point;
 	uint4x4_t r_offset;
 	r_offset.i1= (int)rhs_zero_point;
-	
-	trick_vector_naive(lhs_q,rhs_q,l_offset,r_offset,n,n,n,term2,term3,&term4);
+
+	n=n/2;
 
 	// Warm-up phase: we determine a number of executions that allows
 	// the code to be executed for at least CYCLES_REQUIRED cycles.
@@ -234,11 +234,12 @@ double perf_test(qmm_kernel_pointer f, char *desc,int n)
 		cyclesList.push_back(cycles);
 	}
 
-	free(lhs);
-	free(rhs);
-	free(lhs_q);
+	
+	free(acc);
 	free(rhs_q);
-	free(result_q);
+	free(lhs_q);
+	free(rhs);
+	free(lhs);
 
 	cyclesList.sort();
 	cycles = cyclesList.front();

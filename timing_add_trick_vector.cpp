@@ -79,7 +79,6 @@ void destroy(float * m)
 	free(m);
 }
 
-
 void register_functions()
 {	
 	add_function(&add_trick_vector_naive, (char *)"naive",1);
@@ -115,7 +114,7 @@ int main(int argc, char **argv)
 	printf("------Timing function add vector-----\n");
 	int verbosity = 2;
     float cycles,perf;
-    char file_name[30], func_name[30],file_name_cycles[30];
+    char file_name[60], func_name[60],file_name_cycles[60];
     // Initialize the vectors of functions, function names and function flops
 	// Test of vanilla implementation first
     
@@ -134,7 +133,7 @@ int main(int argc, char **argv)
 
 	for (int i = 0; i < numFuncs; ++i)
 	{
-		printf("Performance of qmm function: %s \n", funcNames[i]);
+		printf("Performance of add vector function: %s \n", funcNames[i]);
 		strcpy(func_name, funcNames[i]);
 		strcpy(file_name,"data/perf_add_vector_");
 		strcpy(file_name_cycles,"data/cycles_add_vector_");
@@ -144,13 +143,15 @@ int main(int argc, char **argv)
 		strcat(file_name_cycles, ".dat");
 		FILE *fp = fopen(file_name,"w+");
 		FILE *fp_cycles = fopen(file_name_cycles,"w+");
-		for(int n=30; n<500;n+=30){
+		for(int n=30; n<400;n+=30){
 			cycles = perf_test(userFuncs[i],funcNames[i],n);
 			perf = Flops[i]*n*n/cycles;
 			printf("%s: n:%d cycles:%f perf:%f \n",funcNames[i],n, cycles,perf);
 			fprintf(fp, "%d %f\n",n,perf);
 			fprintf(fp_cycles, "%d %f\n",n,cycles);
 		}	
+		fclose(fp);
+		fclose(fp_cycles);
 	}
 
 	return 0;
@@ -178,24 +179,24 @@ double perf_test(function_add_vector f, char *desc,int n)
 
 	lhs = build_full_mat(n);
 	rhs = build_full_mat(n);
-	lhs_q = allocate_quantized_mat(n);
-	rhs_q = allocate_quantized_mat(n);
-	result_q = allocate_quantized_mat(n);
-	
+	lhs_q = (uint4x4_t*)malloc(sizeof(uint4x4_t)*n*n);
+	rhs_q = (uint4x4_t*)malloc(sizeof(uint4x4_t)*n*n);
+
 	quantize_4x4(lhs, lhs_q, &lhs_mn , &lhs_mx, n, n);
 	quantize_parameter(lhs_mn, lhs_mx,  &lhs_scale, &lhs_zero_point);
 	quantize_4x4(rhs, rhs_q, &rhs_mn , &rhs_mx, n, n);
 	quantize_parameter(rhs_mn, rhs_mx,  &rhs_scale, &rhs_zero_point);
 
-	//
 	uint4x4_t l_offset;
 	l_offset.i1= (int)lhs_zero_point;
 	uint4x4_t r_offset;
 	r_offset.i1= (int)rhs_zero_point;
+	
+	n=n/2;
 
 	trick_vector_naive(lhs_q,rhs_q,l_offset,r_offset,n,n,n,term2,term3,&term4);
 	qmm_kernel_trick(lhs_q,rhs_q,acc,n,n,n);
-	
+
 	// Warm-up phase: we determine a number of executions that allows
 	// the code to be executed for at least CYCLES_REQUIRED cycles.
 	// This helps excluding timing overhead when measuring small runtimes.
@@ -228,15 +229,14 @@ double perf_test(function_add_vector f, char *desc,int n)
 
 		cyclesList.push_back(cycles);
 	}
-
+	
 	free(lhs);
 	free(rhs);
 	free(lhs_q);
 	free(rhs_q);
-	free(acc);
 	free(term2);
 	free(term3);
-	free(result_q);
+	free(acc);
 
 	cyclesList.sort();
 	cycles = cyclesList.front();
