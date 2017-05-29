@@ -51,11 +51,13 @@ validation: $(OBJS) $(TEST_OBJ_ALL)
 	$(CC) $(OBJS) $(TEST_OBJ_ALL) -o $(TEST_BIN_ALL)
 	./$(TEST_BIN_ALL)
 
-perf: $(OBJS) timing_qmm.o timing_quantize.o timing_add_trick_vector.o timing_trick_vector.o timing_round_saturation.o
+perf: $(OBJS) timing_qmm.o timing_quantize.o timing_add_trick_vector.o timing_trick_vector.o timing_round_saturation.o timing_qmm_kernel.o
 	$(CC) $(OBJS) timing_qmm.o -o perf_qmm
 	./perf_qmm
 	$(CC) $(OBJS) timing_quantize.o -o perf_quantize
 	./perf_quantize
+	$(CC) $(OBJS) timing_qmm_kernel.o -o perf_qmm_kernel
+	./perf_qmm_kernel
 	$(CC) $(OBJS) timing_add_trick_vector.o -o perf_add_trick_vector
 	./perf_add_trick_vector
 	$(CC) $(OBJS) timing_trick_vector.o -o perf_trick_vector
