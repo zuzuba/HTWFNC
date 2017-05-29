@@ -16,6 +16,7 @@ TEST_BIN_ALL = validation
 CC      = g++
 CFLAGS += -O3 -fno-tree-vectorize -march=native -mavx
 
+
 # ==================================================================================== #
 # = Object Files
 # ==================================================================================== #
@@ -66,6 +67,12 @@ perf: $(OBJS) timing_qmm.o timing_quantize.o timing_add_trick_vector.o timing_tr
 	./perf_round_saturation
 	python performance_plot.py
 
+gemm_quant: 
+	clang++ -std=c++11 -stdlib=libc++ -O3 -fno-tree-vectorize -march=native -mavx timing_gmmlowp_quantize.cc -o timing_gmmlowp_quantize
+	./timing_gmmlowp_quantize
+gemm_qmm:
+	clang++ -std=c++11 -stdlib=libc++ -O3 -fno-tree-vectorize -march=native -mavx timing_gmmlowp_qmm.cc -o timing_gmmlowp_qmm
+	./timing_gmmlowp_qmm
 
 %.o : %.cpp $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
