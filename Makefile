@@ -66,6 +66,7 @@ perf: $(OBJS) timing_qmm.o timing_quantize.o timing_add_trick_vector.o timing_tr
 	$(CC) $(OBJS) timing_round_saturation.o -o perf_round_saturation
 	./perf_round_saturation
 	python performance_plot.py
+	python cycle_plot.py
 
 gemm_quant: 
 	clang++ -std=c++11 -stdlib=libc++ -O3 -fno-tree-vectorize -march=native -mavx timing_gmmlowp_quantize.cc -o timing_gmmlowp_quantize
