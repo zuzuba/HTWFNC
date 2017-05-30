@@ -371,8 +371,8 @@ void round_saturate_AVX( __m256 upper_row, __m256 lower_row, __m256i* fi) {
 	*/ 
 
 	upper_row = _mm256_max_ps( qmin_avx, _mm256_min_ps( qmax_avx, _mm256_round_ps(upper_row,_MM_FROUND_TO_NEAREST_INT)));
-        lower_row = _mm256_max_ps( qmin_avx, _mm256_min_ps( qmax_avx, _mm256_round_ps(lower_row,_MM_FROUND_TO_NEAREST_INT)));
-        		
+    lower_row = _mm256_max_ps( qmin_avx, _mm256_min_ps( qmax_avx, _mm256_round_ps(lower_row,_MM_FROUND_TO_NEAREST_INT)));
+    	
 	/* Now the upper_row and lower_row have fthe float values that we need. They are rounded and saturated
 	 * All that remains is to cast them to uint4_t
 	 * In order to achieve the cast, we begin by casting each float to a 32-bit uint, but since we know
@@ -388,8 +388,8 @@ void round_saturate_AVX( __m256 upper_row, __m256 lower_row, __m256i* fi) {
 	 */
 
 	upper_row_int = _mm256_cvttps_epi32( _mm256_mul_ps( top_shift, upper_row) );
-        lower_row_int = _mm256_cvttps_epi32( _mm256_mul_ps( bottom_shift, lower_row) );
-
+    lower_row_int = _mm256_cvttps_epi32( _mm256_mul_ps( bottom_shift, lower_row) );
+   
 	/* Now we or the two registers upper_row and lower_row
 	 * The result is that i1 and i3 are in the elements of even index, while i2 and i4 are in the elements of 
 	 * uneven index. That is:
@@ -411,8 +411,7 @@ void round_saturate_AVX( __m256 upper_row, __m256 lower_row, __m256i* fi) {
 
 	upper_row_int = _mm256_or_si256(lower_row_int, _mm256_castps_si256( _mm256_permute_ps( _mm256_castsi256_ps(lower_row_int) , 57 ) ) );
 
-	_mm256_store_si256( fi, upper_row_int );
-
+	_mm256_storeu_si256( fi, upper_row_int );
 }
 
 

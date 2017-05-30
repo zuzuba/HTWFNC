@@ -85,6 +85,7 @@ void destroy(float * m)
 void register_functions()
 {	
 	add_function(&round_saturation_naive, (char *)"naive",5);
+	add_function(&round_saturation_AVX, (char *)"AVX",5);
 }
 
 
