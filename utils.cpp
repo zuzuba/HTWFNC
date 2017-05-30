@@ -409,7 +409,7 @@ void round_saturate_AVX( __m256 upper_row, __m256 lower_row, __m256i* fi) {
 	 * 		[ (ur2<<8) | (lr2) , (ur3<<12) | (lr3<<4) , (ur4<<8) | (lr4) , (ur1<<12) | (lr1<<4) , ... ] (analogous for the other lane)
 	 */
 
-	upper_row_int = _mm256_or_si256(lower_row_int, _mm256_permute_ps( _mm256_castsi256_ps(lower_row_int) , 57 ) );
+	upper_row_int = _mm256_or_si256(lower_row_int, _mm256_castps_si256( _mm256_permute_ps( _mm256_castsi256_ps(lower_row_int) , 57 ) ) );
 
 	_mm256_store_si256( fi, upper_row_int );
 
