@@ -80,7 +80,8 @@ void destroy(float * m)
 
 
 void register_functions_4x4()
-{	
+{
+    add_function_4x4(&qmm_kernel_naive, (char *)"naive",4);
 	add_function_4x4(&qmm_kernel_trick, (char *)"naive_trick",4);
 	add_function_4x4(&qmm_kernel_trick_blocking, (char *)"trick_blocking",2);
 	add_function_4x4(&qmm_kernel_trick_AVX, (char *)"trick_AVX",2);
