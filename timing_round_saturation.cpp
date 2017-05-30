@@ -84,7 +84,7 @@ void destroy(float * m)
 
 void register_functions()
 {	
-	add_function(&round_saturation_naive, (char *)"naive",1);
+	add_function(&round_saturation_naive, (char *)"naive",5);
 }
 
 

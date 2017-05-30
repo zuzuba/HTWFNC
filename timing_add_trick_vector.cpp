@@ -81,8 +81,8 @@ void destroy(float * m)
 
 void register_functions()
 {	
-	add_function(&add_trick_vector_naive, (char *)"naive",1);
-	add_function(&add_trick_vector_AVX, (char *)"AVX",1);
+	add_function(&add_trick_vector_naive, (char *)"naive",3);
+	add_function(&add_trick_vector_AVX, (char *)"AVX",3);
 }
 
 /*

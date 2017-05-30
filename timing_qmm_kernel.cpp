@@ -75,14 +75,14 @@ uint4x4_t* allocate_quantized_mat(unsigned n){
 
 void destroy(float * m)
 {/* Free memory*/
-	free(m);
+	free(m);	
 }
 
 
 void register_functions_4x4()
 {
-    add_function_4x4(&qmm_kernel_naive, (char *)"naive",4);
-	add_function_4x4(&qmm_kernel_trick, (char *)"naive_trick",4);
+    //add_function_4x4(&qmm_kernel_naive, (char *)"naive",4);
+	add_function_4x4(&qmm_kernel_trick, (char *)"naive_trick",2);
 	add_function_4x4(&qmm_kernel_trick_blocking, (char *)"trick_blocking",2);
 	add_function_4x4(&qmm_kernel_trick_AVX, (char *)"trick_AVX",2);
 	add_function_4x4(&qmm_kernel_trick_AVX_unrolled, (char *)"AVX_unrolled",2);

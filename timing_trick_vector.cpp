@@ -40,7 +40,7 @@ double perf_test(function_trick_vector f, char *desc,int dim);
 
 
 void register_functions();
-void add_function(function_trick_vector f, char *name, int flops);
+void add_function(function_trick_vector f, char *name, int flops_quad, int flops_lin);
 int validation(function_trick_vector f);
 
 
@@ -48,7 +48,8 @@ int validation(function_trick_vector f);
 
 function_trick_vector userFuncs[MAX_FUNCS];
 char *funcNames[MAX_FUNCS];
-int Flops[MAX_FUNCS];
+int Flops_quad[MAX_FUNCS];
+int Flops_lin[MAX_FUNCS];
 int numFuncs = 0;
 
 
@@ -83,8 +84,8 @@ void destroy(float * m)
 
 void register_functions()
 {	
-	add_function(&trick_vector_naive, (char *)"naive",1);
-	add_function(&trick_vector_AVX, (char *)"AVX",1);
+	add_function(&trick_vector_naive, (char *)"naive",2,2);
+	add_function(&trick_vector_AVX, (char *)"AVX",2,2);
 }
 
 /*
@@ -93,7 +94,7 @@ void register_functions()
 */
 
 
-void add_function(function_trick_vector f, char *name, int flops)
+void add_function(function_trick_vector f, char *name, int flops_quad,int flops_lin)
 {	
 	if (numFuncs >= MAX_FUNCS)
 	{
@@ -104,7 +105,8 @@ void add_function(function_trick_vector f, char *name, int flops)
 
 	userFuncs[numFuncs] = f;
 	funcNames[numFuncs] = name;
-	Flops[numFuncs] = flops;
+	Flops_quad[numFuncs] = flops_quad;
+	Flops_lin[numFuncs] = flops_lin;
 	
 	numFuncs++;
 }
@@ -148,7 +150,7 @@ int main(int argc, char **argv)
 
 		for(int n=30; n<400;n+=30){
 			cycles = perf_test(userFuncs[i],funcNames[i],n);
-			perf = Flops[i]*n*n/cycles;
+			perf = (Flops_quad[i]*n*n + Flops_lin[i])/cycles;
 			printf("%s: n:%d cycles:%f perf:%f \n",funcNames[i],n, cycles,perf);
 			fprintf(fp, "%d %f\n",n,perf);
 			fprintf(fp_cycles, "%d %f\n",n,cycles);
