@@ -9,10 +9,10 @@
 void add_trick_vector_naive(int16_t* acc, uint16_t* term2, uint16_t* term3, uint16_t term4, int n, int m){
 	for(int i=0; i<n; i = i+1){
 		for(int j=0; j<m; j = j+1){
-			acc[2*i*2*m + 2*j]       += - term2[2*j]     - term3[2*i]     + term4;
-			acc[2*i*2*m + 2*j+1]     += - term2[2*j + 1] - term3[2*i]     + term4;
-			acc[(2*i+1)*2*m + 2*j]   += - term2[2*j]     - term3[2*i + 1] + term4;
-			acc[(2*i+1)*2*m + 2*j+1] += - term2[2*j + 1] - term3[2*i + 1] + term4;
+			acc[2*i*2*m + 2*j]       -=  term2[2*j]     + term3[2*i]     - term4;
+			acc[2*i*2*m + 2*j+1]     -=  term2[2*j + 1] + term3[2*i]     - term4;
+			acc[(2*i+1)*2*m + 2*j]   -=  term2[2*j]     + term3[2*i + 1] - term4;
+			acc[(2*i+1)*2*m + 2*j+1] -=  term2[2*j + 1] + term3[2*i + 1] - term4;
 		}
 	}
 }
@@ -43,8 +43,8 @@ void add_trick_vector_AVX(int16_t* acc, uint16_t* term2, uint16_t* term3, uint16
 
 		for (; j < m; ++j)
 		{
-			acc[i*2*m + 2*j]       += - term2[2*j]     - term3_     + term4;
-			acc[i*2*m + 2*j+1]     += - term2[2*j + 1] - term3_     + term4;
+			acc[i*2*m + 2*j]       -=  term2[2*j]     + term3_   - term4;
+			acc[i*2*m + 2*j+1]     -=  term2[2*j + 1] + term3_   - term4;
 		}
 	}
 
