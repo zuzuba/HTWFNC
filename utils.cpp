@@ -357,17 +357,19 @@ void round_saturate_AVX( __m256 upper_row, __m256 lower_row, __m256i* fi) {
 	float qmin_f = 0.0;
 	float qmax_f = 15.0;
 
+	__m256i upper_row_int;
+	__m256i lower_row_int;
+
 	__m256 qmin_avx = _mm256_broadcast_ss(&qmin_f);
 	__m256 qmax_avx = _mm256_broadcast_ss(&qmax_f);
 
 	__m256 top_shift = _mm256_set_ps(256.0,4096.0,256.0,4096.0,256.0,4096.0,256.0,4096.0);
 	__m256 bottom_shift = _mm256_set_ps(1.0,16.0,1.0,16.0,1.0,16.0,1.0,16.0);
 
-
 	/* Now, we do rounding and saturation in AVX using intrinsics, note that
 	* qmin_avx and qmax_avx are float AVX registers
 	*/ 
-			
+
 	upper_row = _mm256_max_ps( qmin_avx, _mm256_min_ps( qmax_avx, _mm256_round_ps(upper_row,_MM_FROUND_TO_NEAREST_INT)));
         lower_row = _mm256_max_ps( qmin_avx, _mm256_min_ps( qmax_avx, _mm256_round_ps(lower_row,_MM_FROUND_TO_NEAREST_INT)));
         		
@@ -385,8 +387,8 @@ void round_saturate_AVX( __m256 upper_row, __m256 lower_row, __m256i* fi) {
 	 * Once done, we just cast to 32-bit uints.
 	 */
 
-	upper_row = _mm256_cvttps_epi32( _mm256_mul_ps( top_shift, upper_row) );
-        lower_row = _mm256_cvttps_epi32( _mm256_mul_ps( bottom_shift, lower_row) );
+	upper_row_int = _mm256_cvttps_epi32( _mm256_mul_ps( top_shift, upper_row) );
+        lower_row_int = _mm256_cvttps_epi32( _mm256_mul_ps( bottom_shift, lower_row) );
 
 	/* Now we or the two registers upper_row and lower_row
 	 * The result is that i1 and i3 are in the elements of even index, while i2 and i4 are in the elements of 
@@ -394,7 +396,7 @@ void round_saturate_AVX( __m256 upper_row, __m256 lower_row, __m256i* fi) {
 	 * lower_row = [ (ur1<<12) | (lr1<<4) , (ur2<<8) | (lr2) , (ur3<<12) | (lr3<<4) , (ur4<<8) | (lr4) , ... ]
 	 */
 
-	lower_row = _mm256_or_si256(upper_row, lower_row);
+	lower_row_int = _mm256_or_si256(upper_row_int, lower_row_int);
 
 	/* Now we need to OR the lower_row register with itself (shifted left 32-bits).
 	 * BUT, we don't actually need the entire register to be shifted left, we only need every other element to be shifted 32-bits
@@ -407,9 +409,9 @@ void round_saturate_AVX( __m256 upper_row, __m256 lower_row, __m256i* fi) {
 	 * 		[ (ur2<<8) | (lr2) , (ur3<<12) | (lr3<<4) , (ur4<<8) | (lr4) , (ur1<<12) | (lr1<<4) , ... ] (analogous for the other lane)
 	 */
 
-	upper_row = _mm256_or_si256(lower_row, _mm256_permute_ps(lower_row, 57 ) );
+	upper_row_int = _mm256_or_si256(lower_row_int, _mm256_permute_ps( _mm256_castsi256_ps(lower_row_int) , 57 ) );
 
-	_mm256_store_si256( fi, upper_row);
+	_mm256_store_si256( fi, upper_row_int );
 
 }
 
