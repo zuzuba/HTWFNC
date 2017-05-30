@@ -83,9 +83,8 @@ void register_functions_4x4()
 {	
 	add_function_4x4(&qmm_naive, (char *)"naive",4,0);
 	add_function_4x4(&qmm_trick, (char *)"naive_trick",2,0);
-	add_function_4x4(&qmm_trick_AVX, (char *)"trick_AVX",2,0);
 	add_function_4x4(&qmm_trick_blocking, (char *)"trick_blocking",2,0);
-	add_function_4x4(&qmm_trick_AVX_unrolled, (char *)"trick_AVX_unrolled",2,0);
+	add_function_4x4(&qmm_trick_blocking_AVX, (char *)"trick_blocking",2,0);
 	// Add your functions here
 	// add_function(&your_function, "function: Optimization X", nrflops);
 	
