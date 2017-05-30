@@ -3,129 +3,438 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
+data_folder = './data'
+plot_folder = './plots'
+peak = 4
 
-prefix = 'Cycle_qmm'
+############## QMM NAVIVE ###############################################
 
-files_qmm = [i for i in os.listdir(data_folder) if os.path.isfile(os.path.join(data_folder,i)) and prefix in i]
+# Qmm_naive = qmm_kernel_naive + round_saturation_naive
 
-fig=plt.figure()
+fig = plt.figure()
 ax = plt.subplot(111)
 plt.xlabel("n")
-label = ax.set_ylabel('[flops/cycle]', rotation = 0)
+ax.set_ylabel('[cycles]', rotation=0)
 ax.yaxis.set_label_coords(0, 1.05)
 plt.grid()
-plt.title("Performance of qmm VS matrix dimension")
-plt.ylim(1e-3,peak+1)
+plt.title("Runtime of naive qmm VS matrix dimension")
+# plt.ylim(1e-3,peak+1)
 
-number_func = len(files_qmm)
-color=cm.rainbow(np.linspace(0,1,number_func))
+number_func = 2
+color = cm.rainbow(np.linspace(0, 1, number_func))
 
-for file,c in zip(files_qmm,color):
-	dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
-	plt.plot(dim, performance,c=c,marker='d')
-	plt.plot(dim, performance,c=c)
-	plt.xlim(dim[0], dim[-1])
-	ax.text(dim[-3],11/10*performance[-1],file[len(prefix):-len(suffix)],color=c)
+# kernel
+file = 'cycles_qmm_kernel_naive.dat'
+dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
+cum_perf = np.copy(performance)
+c = color[0]
+plt.plot(dim, cum_perf, c=c, marker='d')
+plt.plot(dim, cum_perf, c=c)
+plt.xlim(dim[0], dim[-1])
 
-plt.plot(dim, peak*np.ones(dim.shape),'k')
-ax.text(dim[-5],7/10*peak,'scalar peak performance',color='k')
+ax.text(dim[-3], 1.1*cum_perf[-1], 'kernel_naive', color=c)
+
+# round_sat
+file = 'cycles_round_saturation_naive.dat'
+
+dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
+cum_perf = cum_perf + performance
+c = color[1]
+plt.plot(dim, cum_perf, c=c, marker='d')
+plt.plot(dim, cum_perf, c=c)
+plt.xlim(dim[0], dim[-1])
+
+ax.text(dim[-3], 1.1*cum_perf[-1], 'round/sat naive', color=c)
+
 plt.show()
 
-fig.savefig(os.path.join(plot_folder, 'Performance_qmm.eps'), format='eps')
-fig.savefig(os.path.join(plot_folder, 'Performance_qmm.png'), format='png', dpi=200)
+fig.savefig(os.path.join(plot_folder, 'Cycles_naive.eps'), format='eps')
+fig.savefig(os.path.join(plot_folder, 'Cycles_naive.png'), format='png',
+            dpi=200)
 
 
+############## QMM TRICK ###############################################
 
-prefix = 'perf_add_vector'
+# Qmm_naive_trick = trick_vector_naive +
+#                   qmm_kernel_trick +
+#                   add_trick_vector_naive +
+#                   round_saturation_naive
 
-files_qmm = [i for i in os.listdir(data_folder) if os.path.isfile(os.path.join(data_folder,i)) and prefix in i]
-
-fig=plt.figure()
+fig = plt.figure()
 ax = plt.subplot(111)
 plt.xlabel("n")
-label = ax.set_ylabel('[flops/cycle]', rotation = 0)
+ax.set_ylabel('[cycles]', rotation=0)
 ax.yaxis.set_label_coords(0, 1.05)
 plt.grid()
-plt.title("Performance of add_vector VS matrix dimension")
-plt.ylim(1e-3,peak+1)
+plt.title("Runtime of qmm with trick VS matrix dimension")
+# plt.ylim(1e-3,peak+1)
 
-number_func = len(files_qmm)
-color=cm.rainbow(np.linspace(0,1,number_func))
+number_func = 4
+color = cm.rainbow(np.linspace(0, 1, number_func))
 
-for file,c in zip(files_qmm,color):
-	dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
-	plt.plot(dim, performance,c=c,marker='d')
-	plt.plot(dim, performance,c=c)
-	plt.xlim(dim[0], dim[-1])
-	ax.text(dim[-3],11/10*performance[-1],file[len(prefix):-len(suffix)],color=c)
+# trick_vec
+file = 'cycles_trick_vector_naive.dat'
+dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
+cum_perf = np.copy(performance)
+c = color[0]
+plt.plot(dim, cum_perf, c=c, marker='d')
+plt.plot(dim, cum_perf, c=c)
+plt.xlim(dim[0], dim[-1])
 
-plt.plot(dim, peak*np.ones(dim.shape),'k')
-ax.text(dim[-5],7/10*peak,'scalar peak performance',color='k')
+ax.text(dim[-3], 1.1*cum_perf[-1], 'trick_naive', color=c)
+
+
+# kernel
+file = 'cycles_qmm_kernel_naive_trick.dat'
+
+dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
+cum_perf = cum_perf + performance
+c = color[1]
+plt.plot(dim, cum_perf, c=c, marker='d')
+plt.plot(dim, cum_perf, c=c)
+plt.xlim(dim[0], dim[-1])
+
+ax.text(dim[-3], 1.1*cum_perf[-1], 'kernel trick', color=c)
+
+
+# add_trick_vector
+file = 'cycles_add_vector_naive.dat'
+
+dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
+cum_perf = cum_perf + performance
+c = color[2]
+plt.plot(dim, cum_perf, c=c, marker='d')
+plt.plot(dim, cum_perf, c=c)
+plt.xlim(dim[0], dim[-1])
+
+ax.text(dim[-3], 1.1*cum_perf[-1], 'add_naive', color=c)
+
+
+# round/sat
+file = 'cycles_round_saturation_naive.dat'
+
+dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
+cum_perf = cum_perf + performance
+c = color[3]
+plt.plot(dim, cum_perf, c=c, marker='d')
+plt.plot(dim, cum_perf, c=c)
+plt.xlim(dim[0], dim[-1])
+
+ax.text(dim[-3], 1.1*cum_perf[-1], 'round/sat', color=c)
+
 plt.show()
 
-fig.savefig(os.path.join(plot_folder, 'Performance_add_vector.eps'), format='eps')
-fig.savefig(os.path.join(plot_folder, 'Performance_add_vector.png'), format='png', dpi=200)
+fig.savefig(os.path.join(plot_folder, 'Cycles_trick.eps'), format='eps')
+fig.savefig(os.path.join(plot_folder, 'Cycles_trick.png'), format='png',
+            dpi=200)
 
 
 
-prefix = 'perf_trick_vector'
+############## QMM TRICK BLOCKING ##############################################
 
-files_qmm = [i for i in os.listdir(data_folder) if os.path.isfile(os.path.join(data_folder,i)) and prefix in i]
+# Qmm_naive_trick_blocking = trick_vector_naive +
+#                            qmm_kernel_trick_blocking +
+#                            add_trick_vector_naive +
+#                            round_saturation_naive
 
-fig=plt.figure()
+fig = plt.figure()
 ax = plt.subplot(111)
 plt.xlabel("n")
-label = ax.set_ylabel('[flops/cycle]', rotation = 0)
+ax.set_ylabel('[cycles]', rotation=0)
 ax.yaxis.set_label_coords(0, 1.05)
 plt.grid()
-plt.title("Performance of trick_vector VS matrix dimension")
-plt.ylim(1e-3,peak+1)
+plt.title("Runtime of qmm with trick blocking VS matrix dimension")
+# plt.ylim(1e-3,peak+1)
 
-number_func = len(files_qmm)
-color=cm.rainbow(np.linspace(0,1,number_func))
+number_func = 4
+color = cm.rainbow(np.linspace(0, 1, number_func))
 
-for file,c in zip(files_qmm,color):
-	dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
-	plt.plot(dim, performance,c=c,marker='d')
-	plt.plot(dim, performance,c=c)
-	plt.xlim(dim[0], dim[-1])
-	ax.text(dim[-3],11/10*performance[-1],file[len(prefix):-len(suffix)],color=c)
+# trick_vec
+file = 'cycles_trick_vector_naive.dat'
+dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
+cum_perf = np.copy(performance)
+c = color[0]
+plt.plot(dim, cum_perf, c=c, marker='d')
+plt.plot(dim, cum_perf, c=c)
+plt.xlim(dim[0], dim[-1])
 
-plt.plot(dim, peak*np.ones(dim.shape),'k')
-ax.text(dim[-5],7/10*peak,'scalar peak performance',color='k')
+ax.text(dim[-3], 1.1*cum_perf[-1], 'trick_naive', color=c)
+
+
+# kernel
+file = 'cycles_qmm_kernel_trick_blocking.dat'
+
+dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
+cum_perf = cum_perf + performance
+c = color[1]
+plt.plot(dim, cum_perf, c=c, marker='d')
+plt.plot(dim, cum_perf, c=c)
+plt.xlim(dim[0], dim[-1])
+
+ax.text(dim[-3], 1.1*cum_perf[-1], 'kernel blocking', color=c)
+
+
+# add_trick_vector
+file = 'cycles_add_vector_naive.dat'
+
+dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
+cum_perf = cum_perf + performance
+c = color[2]
+plt.plot(dim, cum_perf, c=c, marker='d')
+plt.plot(dim, cum_perf, c=c)
+plt.xlim(dim[0], dim[-1])
+
+ax.text(dim[-3], 1.1*cum_perf[-1], 'add vector', color=c)
+
+
+# round/sat
+file = 'cycles_round_saturation_naive.dat'
+
+dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
+cum_perf = cum_perf + performance
+c = color[3]
+plt.plot(dim, cum_perf, c=c, marker='d')
+plt.plot(dim, cum_perf, c=c)
+plt.xlim(dim[0], dim[-1])
+
+ax.text(dim[-3], 1.1*cum_perf[-1], 'round/sat', color=c)
+
 plt.show()
 
-fig.savefig(os.path.join(plot_folder, 'Performance_trick_vector.eps'), format='eps')
-fig.savefig(os.path.join(plot_folder, 'Performance_trick_vector.png'), format='png', dpi=200)
+fig.savefig(os.path.join(plot_folder, 'Cycles_blocking.eps'), format='eps')
+fig.savefig(os.path.join(plot_folder, 'Cycles_blocking.png'), format='png',
+            dpi=200)
 
 
 
-prefix = 'perf_round_saturation'
+############## QMM TRICK AVX ##############################################
 
-files_qmm = [i for i in os.listdir(data_folder) if os.path.isfile(os.path.join(data_folder,i)) and prefix in i]
+# Qmm_naive_trick_AVX = trick_vector_AVX +
+#                       qmm_kernel_trick_AVX +
+#                       add_trick_vector_AVX +
+#                       round_saturation_naive
 
-fig=plt.figure()
+fig = plt.figure()
 ax = plt.subplot(111)
 plt.xlabel("n")
-label = ax.set_ylabel('[flops/cycle]', rotation = 0)
+ax.set_ylabel('[cycles]', rotation=0)
 ax.yaxis.set_label_coords(0, 1.05)
 plt.grid()
-plt.title("Performance of trick_vector VS matrix dimension")
-plt.ylim(1e-3,peak+1)
+plt.title("Runtime of qmm with trick AVX VS matrix dimension")
+# plt.ylim(1e-3,peak+1)
 
-number_func = len(files_qmm)
-color=cm.rainbow(np.linspace(0,1,number_func))
+number_func = 4
+color = cm.rainbow(np.linspace(0, 1, number_func))
 
-for file,c in zip(files_qmm,color):
-	dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
-	plt.plot(dim, performance,c=c,marker='d')
-	plt.plot(dim, performance,c=c)
-	plt.xlim(dim[0], dim[-1])
-	ax.text(dim[-3],11/10*performance[-1],file[len(prefix):-len(suffix)],color=c)
+# trick_vec
+file = 'cycles_trick_vector_AVX.dat'
+dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
+cum_perf = np.copy(performance)
+c = color[0]
+plt.plot(dim, cum_perf, c=c, marker='d')
+plt.plot(dim, cum_perf, c=c)
+plt.xlim(dim[0], dim[-1])
 
-plt.plot(dim, peak*np.ones(dim.shape),'k')
-ax.text(dim[-5],7/10*peak,'scalar peak performance',color='k')
+ax.text(dim[-3], 1.1*cum_perf[-1], 'trick_AVX', color=c)
+
+
+# kernel
+file = 'cycles_qmm_kernel_trick_AVX.dat'
+
+dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
+cum_perf = cum_perf + performance
+c = color[1]
+plt.plot(dim, cum_perf, c=c, marker='d')
+plt.plot(dim, cum_perf, c=c)
+plt.xlim(dim[0], dim[-1])
+
+ax.text(dim[-3], 1.1*cum_perf[-1], 'kernel AVX', color=c)
+
+
+# add_trick_vector
+file = 'cycles_add_vector_AVX.dat'
+
+dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
+cum_perf = cum_perf + performance
+c = color[2]
+plt.plot(dim, cum_perf, c=c, marker='d')
+plt.plot(dim, cum_perf, c=c)
+plt.xlim(dim[0], dim[-1])
+
+ax.text(dim[-3], 1.1*cum_perf[-1], 'add vector AVX', color=c)
+
+
+# round/sat
+file = 'cycles_round_saturation_naive.dat'
+
+dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
+cum_perf = cum_perf + performance
+c = color[3]
+plt.plot(dim, cum_perf, c=c, marker='d')
+plt.plot(dim, cum_perf, c=c)
+plt.xlim(dim[0], dim[-1])
+
+ax.text(dim[-3], 1.1*cum_perf[-1], 'round/sat', color=c)
+
 plt.show()
 
-fig.savefig(os.path.join(plot_folder, 'Performance_round_saturation.eps'), format='eps')
-fig.savefig(os.path.join(plot_folder, 'Performance_round_saturation.png'), format='png', dpi=200)
+fig.savefig(os.path.join(plot_folder, 'Cycles_trick_AVX.eps'), format='eps')
+fig.savefig(os.path.join(plot_folder, 'Cycles_trick_AVX.png'), format='png',
+            dpi=200)
+
+
+############## QMM TRICK AVX UNROLLED ###########################################
+
+# Qmm_naive_trick_AVX_unrolled = trick_vector_naive +
+#                                qmm_kernel_trick_AVX_unrolled +
+#                                add_trick_vector_AVX +
+#                                round_saturation_naive
+
+fig = plt.figure()
+ax = plt.subplot(111)
+plt.xlabel("n")
+ax.set_ylabel('[cycles]', rotation=0)
+ax.yaxis.set_label_coords(0, 1.05)
+plt.grid()
+plt.title("Runtime of qmm with trick AVX unrolled VS matrix dimension")
+# plt.ylim(1e-3,peak+1)
+
+number_func = 4
+color = cm.rainbow(np.linspace(0, 1, number_func))
+
+# trick_vec
+file = 'cycles_trick_vector_naive.dat'
+dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
+cum_perf = np.copy(performance)
+c = color[0]
+plt.plot(dim, cum_perf, c=c, marker='d')
+plt.plot(dim, cum_perf, c=c)
+plt.xlim(dim[0], dim[-1])
+
+ax.text(dim[-3], 1.1*cum_perf[-1], 'trick_naive', color=c)
+
+
+# kernel
+file = 'cycles_qmm_kernel_AVX_unrolled.dat'
+
+dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
+cum_perf = cum_perf + performance
+c = color[1]
+plt.plot(dim, cum_perf, c=c, marker='d')
+plt.plot(dim, cum_perf, c=c)
+plt.xlim(dim[0], dim[-1])
+
+ax.text(dim[-3], 1.1*cum_perf[-1], 'kernel AVX unrolled', color=c)
+
+
+# add_trick_vector
+file = 'cycles_add_vector_AVX.dat'
+
+dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
+cum_perf = cum_perf + performance
+c = color[2]
+plt.plot(dim, cum_perf, c=c, marker='d')
+plt.plot(dim, cum_perf, c=c)
+plt.xlim(dim[0], dim[-1])
+
+ax.text(dim[-3], 1.1*cum_perf[-1], 'add vector AVX', color=c)
+
+
+# round/sat
+file = 'cycles_round_saturation_naive.dat'
+
+dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
+cum_perf = cum_perf + performance
+c = color[3]
+plt.plot(dim, cum_perf, c=c, marker='d')
+plt.plot(dim, cum_perf, c=c)
+plt.xlim(dim[0], dim[-1])
+
+ax.text(dim[-3], 1.1*cum_perf[-1], 'round/sat', color=c)
+
+plt.show()
+
+fig.savefig(os.path.join(plot_folder, 'Cycles_AVX_unrolled.eps'), format='eps')
+fig.savefig(os.path.join(plot_folder, 'Cycles_AVX_unrolled.png'), format='png',
+            dpi=200)
+
+
+################## OVERALL COMPARISON ###############################
+# Compare the runtime of the 5 different qmm
+
+fig = plt.figure()
+ax = plt.subplot(111)
+plt.xlabel("n")
+ax.set_ylabel('[cycles]', rotation=0)
+ax.yaxis.set_label_coords(0, 1.05)
+plt.grid()
+plt.title("Runtime of qmm implementations VS matrix dimension")
+# plt.ylim(1e-3,peak+1)
+
+number_func = 5
+color = cm.rainbow(np.linspace(0, 1, number_func))
+
+# Naive
+file = 'cycles_qmm_naive.dat'
+
+dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
+c = color[0]
+plt.plot(dim, performance, c=c, marker='d')
+plt.plot(dim, performance, c=c)
+plt.xlim(dim[0], dim[-1])
+
+ax.text(dim[-3], 1.1*performance[-1], 'naive', color=c)
+
+
+# trick
+file = 'cycles_qmm_naive_trick.dat'
+
+dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
+c = color[1]
+plt.plot(dim, performance, c=c, marker='d')
+plt.plot(dim, performance, c=c)
+plt.xlim(dim[0], dim[-1])
+
+ax.text(dim[-3], 1.1*performance[-1], 'naive trick', color=c)
+
+# trick AVX
+file = 'cycles_qmm_naive.dat'
+
+dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
+c = color[2]
+plt.plot(dim, performance, c=c, marker='d')
+plt.plot(dim, performance, c=c)
+plt.xlim(dim[0], dim[-1])
+
+ax.text(dim[-3], 1.1*performance[-1], 'trick AVX', color=c)
+
+# trick blocking
+file = 'cycles_qmm_trick_blocking.dat'
+
+dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
+c = color[3]
+plt.plot(dim, performance, c=c, marker='d')
+plt.plot(dim, performance, c=c)
+plt.xlim(dim[0], dim[-1])
+
+ax.text(dim[-3], 1.1*performance[-1], 'trick blocking', color=c)
+
+
+# AVX unrolled
+file = 'cycles_qmm_trick_AVX_unrolled.dat'
+
+dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
+c = color[4]
+plt.plot(dim, performance, c=c, marker='d')
+plt.plot(dim, performance, c=c)
+plt.xlim(dim[0], dim[-1])
+
+ax.text(dim[-3], 1.1*performance[-1], 'AVX unrolled', color=c)
+
+
+plt.show()
+
+fig.savefig(os.path.join(plot_folder, 'Cycles_qmm_comparison.eps'),
+            format='eps')
+fig.savefig(os.path.join(plot_folder, 'Cycles_qmm_comparison.png'), format='png',
+            dpi=200)
