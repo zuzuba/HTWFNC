@@ -81,7 +81,7 @@ void destroy(float * m)
 void register_functions_4x4()
 {	
 	add_function_4x4(&quantize_4x4, (char *)"naive",7,0);
-	//add_function_4x4(&quantize_AVX, (char *)"AVX",7,0);
+	add_function_4x4(&quantize_AVX, (char *)"AVX",7,0);
 	
 }
 
