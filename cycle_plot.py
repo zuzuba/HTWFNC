@@ -78,10 +78,10 @@ dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
 cum_perf = np.copy(performance)
 c = color[0]
 plt.plot(dim, cum_perf, c=c, marker='d')
-plt.plot(dim, cum_perf, c=c)
+plt.plot(dim, cum_perf, c=c,label = 'trick_naive')
 plt.xlim(dim[0], dim[-1])
-
-ax.text(dim[-3], 1.1*cum_perf[-1], 'trick_naive', color=c)
+	
+ax.fill_between(dim, cum_perf, np.zeros(cum_perf.size), where=cum_perf >= 0, facecolor=c, interpolate=True)
 
 
 # kernel
@@ -91,11 +91,10 @@ dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
 cum_perf = cum_perf + performance
 c = color[1]
 plt.plot(dim, cum_perf, c=c, marker='d')
-plt.plot(dim, cum_perf, c=c)
+plt.plot(dim, cum_perf, c=c,label = 'kernel trick')
 plt.xlim(dim[0], dim[-1])
 
-ax.text(dim[-3], 1.1*cum_perf[-1], 'kernel trick', color=c)
-
+ax.fill_between(dim, cum_perf, cum_perf-performance, where=cum_perf >= cum_perf-performance, facecolor=c, interpolate=True)
 
 # add_trick_vector
 file = 'cycles_add_vector_naive.dat'
@@ -104,11 +103,10 @@ dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
 cum_perf = cum_perf + performance
 c = color[2]
 plt.plot(dim, cum_perf, c=c, marker='d')
-plt.plot(dim, cum_perf, c=c)
+plt.plot(dim, cum_perf, c=c,label = 'add_naive' )
 plt.xlim(dim[0], dim[-1])
 
-ax.text(dim[-3], 1.1*cum_perf[-1], 'add_naive', color=c)
-
+ax.fill_between(dim, cum_perf, cum_perf-performance, where=cum_perf >= cum_perf-performance, facecolor=c, interpolate=True)
 
 # round/sat
 file = 'cycles_round_saturation_naive.dat'
@@ -117,11 +115,11 @@ dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
 cum_perf = cum_perf + performance
 c = color[3]
 plt.plot(dim, cum_perf, c=c, marker='d')
-plt.plot(dim, cum_perf, c=c)
+plt.plot(dim, cum_perf, c=c, label = 'round/sat')
 plt.xlim(dim[0], dim[-1])
 
-ax.text(dim[-3], 1.1*cum_perf[-1], 'round/sat', color=c)
-
+ax.fill_between(dim, cum_perf, cum_perf-performance, where=cum_perf >= cum_perf-performance, facecolor=c, interpolate=True)
+plt.legend(loc = 'best')
 plt.show()
 
 fig.savefig(os.path.join(plot_folder, 'Cycles_trick.eps'), format='eps')
@@ -419,22 +417,10 @@ plt.xlim(dim[0], dim[-1])
 
 ax.text(dim[-3], 1.1*performance[-1], 'trick blocking', color=c)
 
-
-# AVX unrolled
-file = 'cycles_qmm_trick_AVX_unrolled.dat'
-
-dim, performance = np.loadtxt(os.path.join(data_folder, file), unpack=True)
-c = color[4]
-plt.plot(dim, performance, c=c, marker='d')
-plt.plot(dim, performance, c=c)
-plt.xlim(dim[0], dim[-1])
-
-ax.text(dim[-3], 1.1*performance[-1], 'AVX unrolled', color=c)
-
-
 plt.show()
 
 fig.savefig(os.path.join(plot_folder, 'Cycles_qmm_comparison.eps'),
             format='eps')
 fig.savefig(os.path.join(plot_folder, 'Cycles_qmm_comparison.png'), format='png',
             dpi=200)
+	
