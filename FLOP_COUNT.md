@@ -9,5 +9,3 @@
 *add_trick_vecotr: 3 NxN integer ops
 
 *round_Saturate: 5 NxN flops
-
-*Naive_qmm: NxKxM (3 int add, 1 int mul): 4 NxKxM int operations
