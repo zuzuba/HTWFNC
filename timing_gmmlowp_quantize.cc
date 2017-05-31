@@ -39,7 +39,7 @@ c++ doc/quantization_example.cc -I . --std=c++11 -msse4.1 -lpthread \
 #define FREQUENCY 3.4e9     // need to change on different computers. This value is the actual CPU frequency
 // #define CALIBRATE        // Whether calibrate before measuring.
 /* end   ---definition relevant to timing */
-
+#define FLOPS 7*n*n
 using namespace std;
 double perf_test(int dim);
 #define TEST_FAILED -1
@@ -230,17 +230,18 @@ int main(int argc, char **argv)
   // Test of vanilla implementation first
 
   printf("Performance of gemmlowp quantization function:\n");
-  FILE *fp = fopen("data/perf__gemm_qmm.dat","w+");
-  FILE *fp_cycles = fopen("data/cycles__gemm_qmm.dat","w+");
+  FILE *fp = fopen("data/perf_quantize_google.dat","w+");
+  FILE *fp_cycles = fopen("data/cycles_quantize_google.dat","w+");
 
   for(int n=30; n<500;n+=30){
     cycles = perf_test(n);
-    perf = 7*n*n/cycles;
+    perf = FLOPS/cycles;
     printf("gemmlowp: n:%d cycles:%f perf:%f \n", n, cycles,perf);
     fprintf(fp, "%d %f\n",n,perf);
     fprintf(fp_cycles, "%d %f\n",n,cycles);
   } 
-
+  fclose(fp);
+  fclose(fp_cycles);
 
   return 0;
 }
