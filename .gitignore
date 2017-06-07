@@ -4,3 +4,10 @@ test/
 *.eps
 *.csv
 MNIST_data
+*.synctex.gz
+*.aux
+*.log
+*.bbl
+*.blg
+*.log
+*.out
