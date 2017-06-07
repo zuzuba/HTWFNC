@@ -11,21 +11,24 @@ They have been successfully applied to a wide range of tasks (often outperformin
 
 One of the main drawbacks of NNs is that they make use of a high number of parameters. This means that the network requires a lot of memory resources for storage and a lot of computational resources for training and forward prediction. While the training phase usually is performed on powerful parallel computing architectures where there is an abundance of both computational and memory resources, the platforms that make use of the trained network usually have much more limited capabilities (e.g. mobile phones). This problem has steered attention of the research community toward reducing the memory and computation requirements for trained NNs.
 
-A promising direction along this line of research is known as quantized neural networks (QNNs). The central idea to QNNs is to compress the parameters of the network from their float representation to a light-weight one based on quantization bins. The parameter space is divided into a predefined number of bins and each parameter value 
- The first task is to motivate what you do.  You can
-start general and zoom in one the specific problem you consider.  In
-the process you should have explained to the reader: what you are doing,
-why you are doing, why it is important (order is usually reversed).
+A promising direction along this line of research is known as quantized neural networks (QNNs). The central idea to QNNs is to compress the parameters of the network from their float representation to a light-weight one based on quantization bins. The parameter space is divided into a predefined number of bins and each parameter float value is mapped to a bin. The number of bins trades-off the accuracy versus the gain in memory and computation requirements. By ordering the bins, there is a convenient bijective relation between them and the natural numbers. This allows us to represent the approximation of the initial four byte floats with an integer that requires $ceil(\log_2({num~of~bins}))$ bits. This leads to an obvious improvement in memory requirements as long as the number of bins is smaller than $2^{32}$. Furthermore, by fitting more operands in AVX registers and by exploiting spatial locality in caches, quantization results in reduced computational cost for forward prediction.
 
-For example, if my result is the fastest DFT implementation ever, one
-could roughly go as follows. First explain why the DFT is important
-(used everywhere with a few examples) and why performance matters (large datasets,
-realtime). Then explain that fast implementations are very hard and
-expensive to get (memory hierarchy, vector, parallel). 
+In this work we present an optimized implementation of a QNN for the forward prediction on the MNIST data set that makes use of fours bits quantization. While this level of quantization can yield substantial improvements in memory and computation requirements, it presents implementation challenges due to the byte addressability of memories and to the lack of built-in data type for four bits integers.
 
-Now you state what you do in this paper. In our example: 
-presenting a DFT implementation that is
-faster for some sizes than all the other ones.
+% The first task is to motivate what you do.  You can
+%start general and zoom in one the specific problem you consider.  In
+%the process you should have explained to the reader: what you are doing,
+%why you are doing, why it is important (order is usually reversed).
+%
+%For example, if my result is the fastest DFT implementation ever, one
+%could roughly go as follows. First explain why the DFT is important
+%(used everywhere with a few examples) and why performance matters (large datasets,
+%realtime). Then explain that fast implementations are very hard and
+%expensive to get (memory hierarchy, vector, parallel). 
+%
+%Now you state what you do in this paper. In our example: 
+%presenting a DFT implementation that is
+%faster for some sizes than all the other ones.
 
 \mypar{Related work} Next, you have to give a brief overview of
 related work. For a paper like this, anywhere between 2 and 8
