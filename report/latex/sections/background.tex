@@ -1,31 +1,47 @@
-\section{Background: Whatever the Background is}\label{sec:background}
+\section{Background: NN and QNN}\label{sec:background}
 
-Give a short, self-contained summary of necessary
-background information. For example, assume you present an
-implementation of FFT algorithms. You could organize into DFT
-definition, FFTs considered, and cost analysis. The goal of the
-background section is to make the paper self-contained for an audience
-as large as possible. As in every section
-you start with a very brief overview of the section. Here it could be as follows: In this section 
-we formally define the discrete Fourier transform, introduce the algorithms we use
-and perform a cost analysis.
 
-\mypar{Discrete Fourier Transform}
-Precisely define the transform so I understand it even if I have never
-seen it before.
+\mypar{Artificial neural network}
+An artificial neural network (NN) is formally a (in general) non linear map from an input vector $\mathbf{x} \ \in \mathbb{R}^{d_i}$ to an output vector $f(\mathbf{x} ) = \mathbf{y} \ \in \mathbb{R}^{d_o}$. The map $f$ is built recursively applying at step $t$ a linear transformation $ \mathbf{a}_t = \mathbf{W}_t\mathbf{x}_t + \mathbf{b}_t$ and a non-linear transformation $\mathbf{x}_{t+1} = \phi_t(\mathbf{a}_t)$. The matrix $\mathbf{W}_t$ is called weight matrix, and the vector $\mathbf{b}_t$ is called bias vector. The step $t$ is also know as the layer index. 
 
-\mypar{Fast Fourier Transforms}
-Explain the algorithm you use.
+\mypar{Quantized neural network}
+A quantized neural network (QNN) is an artificial neural network that uses low precision weight matrix and bias vector. Formally, for a NN with parameters $\{\mathbf{W}_t\}, \{\mathbf{b}_t\}$ and activation functions $\phi_t$, the QNN of it is the NN that apply at each layer the linear transformation $\mathbf{a}_t = \mathcal{Q}(\mathbf{W}_t) \mathcal{Q}(\mathbf{x}_t) + \mathcal{Q}(\mathbf{b}_t)$ and a non-linear transformation $\mathbf{x}_{t+1} = \phi_t(\mathbf{a}_t)$. 
 
-\mypar{Cost Analysis}
-First define you cost measure (what you count) and then compute the
-cost. Ideally precisely, at least asymptotically. In the latter case you will need to instrument your code to count
-the operations so you can create a performance plot.
+\mypar{Matrix quantization} For a matrix $\mathbf{A}$, the function $\mathcal{Q}(\mathbf{A})$ returns a low precision encoding of the matrix $\mathbf{A}$. It first computes the minimum ($mn$) and the maximum ($mx$) entry of the matrix $\mathbf{A}$, then given $k$ bits it builds a linear binning of the continuous interval $[mn,mx]$ into $2^k$ many bins. The bin size of the quantization $\Delta(\mathbf{A})$ is then $\Delta(\mathbf{A}) = \frac{mx - mn}{2^k}$. To insure that the value $0$ is represented exactly as a bin value, its index is computed as $z(\mathbf{A}) = sat([-mn/\Delta(\mathbf{A})])$, where the brackets $[\cdot]$ stand for the rounding to the closest integer and the $sat(\cdot)$ function saturates an integer value into the integer value representable with k bits, hence $sat(n) = \max(0, \min(n,2^k) )$. The bin values are then $\{ (i-z(\mathbf{A})) \Delta(\mathbf{A}), \ \ i = 0, \dots, 2^k -1 \}$. Then every entry $A_{ij}$ is quantized to the closest bin value. The quantize matrix  $\mathcal{Q}(\mathbf{A})$ and the quantized integer matrix $\tilde{\mathcal{Q}}(\mathbf{A})$ have respectively the bin value and the bin index as entry $ij$. Note that the matrix $\mathcal{Q}(\mathbf{A})$ is a real-valued matrix, while $\tilde{\mathcal{Q}}(\mathbf{A})$ is k-bit integer valued, and also that
+\begin{equation}\label{eq:affine_transf}
+\mathcal{Q}(\mathbf{A}) = (\tilde{\mathcal{Q}}(\mathbf{A}) -z(\mathbf{A}) \mathbf{J}  ) \Delta(\mathbf{A})
+\end{equation} 
+where $\mathbf{J}$ is a matrix with all entries equal to one. The algorithm is showed in Algorithm \ref{alg:quantize}.
 
-Also state what is
-known about the complexity (asymptotic usually) 
-about your problem (including citations).
+\begin{algorithm}
+	\caption{Quantize}\label{alg:quantize}
+	\begin{algorithmic}[1]
+		\State compute $mn = \min A_{ij}$ and $mx = \max A_{ij}$
+		\State $\Delta = \frac{mx - mn}{2^k}$.
+		\State $z = -mn/\Delta$
+		\For{$i,j = 1, \dots N$}
+			\State $\tilde{\mathcal{Q}}(\mathbf{A})_{ij} = saturate([A_{ij}/\Delta + z ])$ 
+		\EndFor
+	\end{algorithmic}
+\end{algorithm}
 
-Don't talk about "the complexity of the algorithm.'' It's incorrect,
-remember (Lecture 2)?
+\mypar{Quantized Matrix-Matrix Multiplication} Given two matrices $\mathbf{L}$ and $\mathbf{R}$, we want to compute the product $\mathcal{Q}(\mathbf{L}) \mathcal{Q}(\mathbf{R})$. Using equation \ref{eq:affine_transf} and simple algebra we rewrite the product as 
+\begin{align}\label{eq:qmmm}
+\begin{split}
+\mathcal{Q}(\mathbf{L}) \mathcal{Q}(\mathbf{R}) = \Delta(\mathbf{L}) \Delta(\mathbf{R}) ( \tilde{\mathcal{Q}}(\mathbf{L}) \tilde{\mathcal{Q}}(\mathbf{R}) - z(\mathbf{L}) \mathbf{J} \tilde{\mathcal{Q}}(\mathbf{R}) + \\
+- z(\mathbf{R}) \tilde{\mathcal{Q}}(\mathbf{L}) \mathbf{J} +  z(\mathbf{L}) z(\mathbf{R}) \mathbf{J} \mathbf{J} )
+\end{split}
+\end{align}
+so that we only need to perform MMM on k-bit integer valued matrix. Inverting the equation \ref{eq:affine_transf}  we can then obtain the k-bit integer valued product matrix as 
+\begin{equation}\label{eq:affine_inverse}
+\tilde{\mathcal{Q}}(\mathbf{LR}) = sat([\frac{1}{\Delta(\mathbf{LR})}\mathcal{Q}(\mathbf{L}) \mathcal{Q}(\mathbf{R}) + z(\mathbf{LR}) \mathbf{J}])
+\end{equation} The algorithm is showed in Algorithm \ref{alg:qmmm}.
+
+\begin{algorithm}
+	\caption{QMMM}\label{alg:qmmm}
+	\begin{algorithmic}[1]
+		\State compute $\mathcal{Q}(\mathbf{L}) \mathcal{Q}(\mathbf{R})$ as in eq \ref{eq:qmmm}
+		\State compute the k-bit integer matrix $\tilde{\mathcal{Q}}(\mathbf{LR})$ as in eq \ref{eq:affine_inverse}
+ 	\end{algorithmic}
+\end{algorithm}
 
