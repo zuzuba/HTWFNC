@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include <immintrin.h> 
 
+extern int perf_step;
+extern int perf_max;
+
 float inline max(float a, float b);
 float inline min(float a, float b);
 int saturate(float a);

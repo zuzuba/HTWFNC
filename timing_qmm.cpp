@@ -84,7 +84,7 @@ void register_functions_4x4()
 	add_function_4x4(&qmm_naive, (char *)"naive",4,0);
 	add_function_4x4(&qmm_trick, (char *)"naive_trick",2,0);
 	add_function_4x4(&qmm_trick_blocking, (char *)"trick_blocking",2,0);
-	add_function_4x4(&qmm_trick_blocking_AVX, (char *)"trick_blocking",2,0);
+	add_function_4x4(&qmm_trick_blocking_AVX, (char *)"trick_blocking_AVX",2,0);
 	// Add your functions here
 	// add_function(&your_function, "function: Optimization X", nrflops);
 	
@@ -152,7 +152,7 @@ int main(int argc, char **argv)
 		strcat(file_name_cycles, ".dat");
 		FILE *fp = fopen(file_name,"w+");
 		FILE *fp_cycles = fopen(file_name_cycles,"w+");
-		for(int n=30; n<400;n+=30){
+		for(int n=perf_step; n<perf_max;n+=perf_step){
 			cycles = perf_test(userFuncs_4x4[i],funcNames_4x4[i],n);
 			perf = (funcFlops_cubic_term_4x4[i]*n*n*n + funcFlops_quad_term_4x4[i]*n*n)/cycles;
 			printf("%s: n:%d cycles:%f perf:%f \n",funcNames_4x4[i],n, cycles,perf);

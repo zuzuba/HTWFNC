@@ -139,7 +139,7 @@ int main(int argc, char **argv)
 	{
 		printf("Performance of trick function: %s \n", funcNames[i]);
 		strcpy(func_name, funcNames[i]);
-		strcpy(file_name,"data/perf_trick_vector");
+		strcpy(file_name,"data/perf_trick_vector_");
 		strcpy(file_name_cycles,"data/cycles_trick_vector_");
 		strcat(file_name, func_name);
 		strcat(file_name, ".dat");
@@ -148,7 +148,7 @@ int main(int argc, char **argv)
 		FILE *fp = fopen(file_name,"w+");
 		FILE *fp_cycles = fopen(file_name_cycles,"w+");
 
-		for(int n=30; n<400;n+=30){
+		for(int n=perf_step; n<perf_max;n+=perf_step){
 			cycles = perf_test(userFuncs[i],funcNames[i],n);
 			perf = (Flops_quad[i]*n*n + Flops_lin[i])/cycles;
 			printf("%s: n:%d cycles:%f perf:%f \n",funcNames[i],n, cycles,perf);

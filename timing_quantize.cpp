@@ -148,7 +148,7 @@ int main(int argc, char **argv)
 		FILE *fp = fopen(file_name,"w+");
 		FILE *fp_cycles = fopen(file_name_cycles,"w+");
 
-		for(int n=30; n<=400;n+=30){
+		for(int n=perf_step; n<perf_max;n+=perf_step){
 			cycles = perf_test(userFuncs_4x4[i],funcNames_4x4[i],n);
 			perf = (funcFlops_quad_term_4x4[i]*n*n + funcFlops_linear_term_4x4[i]*n)/cycles;
 			printf("%s: n:%d  cycles:%f perf:%f \n",funcNames_4x4[i],n, cycles,perf);

@@ -10,6 +10,9 @@
 #define qmax 15
 #define BUFF_SIZE 100000 
 
+int perf_step = 30;
+int perf_max = 1500;
+
 // struct unsigned_4_bit{
 //    uint8_t i : 4;
 // };

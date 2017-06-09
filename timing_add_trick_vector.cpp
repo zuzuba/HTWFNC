@@ -143,7 +143,7 @@ int main(int argc, char **argv)
 		strcat(file_name_cycles, ".dat");
 		FILE *fp = fopen(file_name,"w+");
 		FILE *fp_cycles = fopen(file_name_cycles,"w+");
-		for(int n=30; n<400;n+=30){
+		for(int n=perf_step; n<perf_max;n+=perf_step){
 			cycles = perf_test(userFuncs[i],funcNames[i],n);
 			perf = Flops[i]*n*n/cycles;
 			printf("%s: n:%d cycles:%f perf:%f \n",funcNames[i],n, cycles,perf);

@@ -216,7 +216,7 @@ void qmm_kernel_trick_blocking(uint4x4_t* l_int_mat, uint4x4_t* r_int_mat,int16_
 	uint16_t term4,t001,t002,t003,t004,t101,t102,t103,t104,t011,t012,t013,t014,t021,t022,t023,t024,t111,t112,t113,t114,t121,t122,t123,t124,t201,t202,t203,t204;
 	uint16_t t211,t212,t213,t214,t221,t222,t223,t224;
 	uint4x4_t r_elment,l_element,l0,l1,l2,r0,r1,r2;
-	int Nb=21;
+	int Nb=30;
 	int i,j,t,i_f,j_f,t_f;
 	for(i=0; i<n-Nb+1; i +=Nb){
 		for(j=0; j<m-Nb+1; j += Nb){
