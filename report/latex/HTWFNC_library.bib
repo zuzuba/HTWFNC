@@ -40,3 +40,169 @@ An extensive amount of information is currently available to clinical specialist
 	keywords = {Computer Science - Artificial Intelligence, Computer Science - Learning, Computer Science - Robotics},
 	file = {arXiv\:1610.00633 PDF:/Users/matteoturchetta/Library/Application Support/Zotero/Profiles/4tthog8z.default/zotero/storage/HZ5V5F5A/Gu et al. - 2016 - Deep Reinforcement Learning for Robotic Manipulati.pdf:application/pdf;arXiv.org Snapshot:/Users/matteoturchetta/Library/Application Support/Zotero/Profiles/4tthog8z.default/zotero/storage/T3EG2PSS/1610.html:text/html}
 }
+
+@article{vanhoucke_improving_2011,
+	title = {Improving the speed of neural networks on {CPUs}},
+	url = {https://research.google.com/pubs/pub37631.html},
+	urldate = {2017-06-05},
+	author = {Vanhoucke, Vincent and Senior, Andrew and Mao, Mark Z.},
+	year = {2011},
+	annote = {Exacltly what we do but for voice recognition with 8 bits linear quaantization.},
+	file = {37631.pdf:/Users/matteoturchetta/Library/Application Support/Zotero/Profiles/4tthog8z.default/zotero/storage/RJZPQFDP/37631.pdf:application/pdf;Snapshot:/Users/matteoturchetta/Library/Application Support/Zotero/Profiles/4tthog8z.default/zotero/storage/ZHDWCURK/pub37631.html:text/html}
+}
+
+@article{hubara_quantized_2016,
+	title = {Quantized {Neural} {Networks}: {Training} {Neural} {Networks} with {Low} {Precision} {Weights} and {Activations}},
+	shorttitle = {Quantized {Neural} {Networks}},
+	url = {http://arxiv.org/abs/1609.07061},
+	abstract = {We introduce a method to train Quantized Neural Networks (QNNs) --- neural networks with extremely low precision (e.g., 1-bit) weights and activations, at run-time. At train-time the quantized weights and activations are used for computing the parameter gradients. During the forward pass, QNNs drastically reduce memory size and accesses, and replace most arithmetic operations with bit-wise operations. As a result, power consumption is expected to be drastically reduced. We trained QNNs over the MNIST, CIFAR-10, SVHN and ImageNet datasets. The resulting QNNs achieve prediction accuracy comparable to their 32-bit counterparts. For example, our quantized version of AlexNet with 1-bit weights and 2-bit activations achieves \$51{\textbackslash}\%\$ top-1 accuracy. Moreover, we quantize the parameter gradients to 6-bits as well which enables gradients computation using only bit-wise operation. Quantized recurrent neural networks were tested over the Penn Treebank dataset, and achieved comparable accuracy as their 32-bit counterparts using only 4-bits. Last but not least, we programmed a binary matrix multiplication GPU kernel with which it is possible to run our MNIST QNN 7 times faster than with an unoptimized GPU kernel, without suffering any loss in classification accuracy. The QNN code is available online.},
+	journal = {arXiv:1609.07061 [cs]},
+	author = {Hubara, Itay and Courbariaux, Matthieu and Soudry, Daniel and El-Yaniv, Ran and Bengio, Yoshua},
+	month = sep,
+	year = {2016},
+	note = {arXiv: 1609.07061},
+	keywords = {Computer Science - Learning, Computer Science - Neural and Evolutionary Computing},
+	annote = {Comment: arXiv admin note: text overlap with arXiv:1602.02830},
+	file = {arXiv\:1609.07061 PDF:/Users/matteoturchetta/Library/Application Support/Zotero/Profiles/4tthog8z.default/zotero/storage/XKWWMU7R/Hubara et al. - 2016 - Quantized Neural Networks Training Neural Network.pdf:application/pdf;arXiv.org Snapshot:/Users/matteoturchetta/Library/Application Support/Zotero/Profiles/4tthog8z.default/zotero/storage/62DAN82U/1609.html:text/html}
+}
+
+@article{he_effective_2016,
+	title = {Effective {Quantization} {Methods} for {Recurrent} {Neural} {Networks}},
+	url = {http://arxiv.org/abs/1611.10176},
+	abstract = {Reducing bit-widths of weights, activations, and gradients of a Neural Network can shrink its storage size and memory usage, and also allow for faster training and inference by exploiting bitwise operations. However, previous attempts for quantization of RNNs show considerable performance degradation when using low bit-width weights and activations. In this paper, we propose methods to quantize the structure of gates and interlinks in LSTM and GRU cells. In addition, we propose balanced quantization methods for weights to further reduce performance degradation. Experiments on PTB and IMDB datasets confirm effectiveness of our methods as performances of our models match or surpass the previous state-of-the-art of quantized RNN.},
+	journal = {arXiv:1611.10176 [cs]},
+	author = {He, Qinyao and Wen, He and Zhou, Shuchang and Wu, Yuxin and Yao, Cong and Zhou, Xinyu and Zou, Yuheng},
+	month = nov,
+	year = {2016},
+	note = {arXiv: 1611.10176},
+	keywords = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Learning},
+	annote = {Focurs on recurrent NN that have proved hard to deal with
+4bits adaptive quantization of LSTM and GRU
+Focus on method.
+Open source code not optimized},
+	file = {arXiv\:1611.10176 PDF:/Users/matteoturchetta/Library/Application Support/Zotero/Profiles/4tthog8z.default/zotero/storage/2N6P8WFS/He et al. - 2016 - Effective Quantization Methods for Recurrent Neura.pdf:application/pdf;arXiv.org Snapshot:/Users/matteoturchetta/Library/Application Support/Zotero/Profiles/4tthog8z.default/zotero/storage/72I5KPGG/1611.html:text/html}
+}
+
+@article{zhou_incremental_2017,
+	title = {Incremental {Network} {Quantization}: {Towards} {Lossless} {CNNs} with {Low}-{Precision} {Weights}},
+	shorttitle = {Incremental {Network} {Quantization}},
+	url = {http://arxiv.org/abs/1702.03044},
+	abstract = {This paper presents incremental network quantization (INQ), a novel method, targeting to efficiently convert any pre-trained full-precision convolutional neural network (CNN) model into a low-precision version whose weights are constrained to be either powers of two or zero. Unlike existing methods which are struggled in noticeable accuracy loss, our INQ has the potential to resolve this issue, as benefiting from two innovations. On one hand, we introduce three interdependent operations, namely weight partition, group-wise quantization and re-training. A well-proven measure is employed to divide the weights in each layer of a pre-trained CNN model into two disjoint groups. The weights in the first group are responsible to form a low-precision base, thus they are quantized by a variable-length encoding method. The weights in the other group are responsible to compensate for the accuracy loss from the quantization, thus they are the ones to be re-trained. On the other hand, these three operations are repeated on the latest re-trained group in an iterative manner until all the weights are converted into low-precision ones, acting as an incremental network quantization and accuracy enhancement procedure. Extensive experiments on the ImageNet classification task using almost all known deep CNN architectures including AlexNet, VGG-16, GoogleNet and ResNets well testify the efficacy of the proposed method. Specifically, at 5-bit quantization, our models have improved accuracy than the 32-bit floating-point references. Taking ResNet-18 as an example, we further show that our quantized models with 4-bit, 3-bit and 2-bit ternary weights have improved or very similar accuracy against its 32-bit floating-point baseline. Besides, impressive results with the combination of network pruning and INQ are also reported. The code will be made publicly available.},
+	journal = {arXiv:1702.03044 [cs]},
+	author = {Zhou, Aojun and Yao, Anbang and Guo, Yiwen and Xu, Lin and Chen, Yurong},
+	month = feb,
+	year = {2017},
+	note = {arXiv: 1702.03044},
+	keywords = {Computer Science - Artificial Intelligence, Computer Science - Computer Vision and Pattern Recognition, Computer Science - Neural and Evolutionary Computing},
+	annote = {Comment: Accepted as a conference track paper by ICLR 2017},
+	file = {arXiv\:1702.03044 PDF:/Users/matteoturchetta/Library/Application Support/Zotero/Profiles/4tthog8z.default/zotero/storage/N8TEB94J/Zhou et al. - 2017 - Incremental Network Quantization Towards Lossless.pdf:application/pdf;arXiv.org Snapshot:/Users/matteoturchetta/Library/Application Support/Zotero/Profiles/4tthog8z.default/zotero/storage/RKJZNSK2/1702.html:text/html}
+}
+
+@article{li_ternary_2016,
+	title = {Ternary {Weight} {Networks}},
+	url = {http://arxiv.org/abs/1605.04711},
+	abstract = {We introduce ternary weight networks (TWNs) - neural networks with weights constrained to +1, 0 and -1. The Euclidian distance between full (float or double) precision weights and the ternary weights along with a scaling factor is minimized. Besides, a threshold-based ternary function is optimized to get an approximated solution which can be fast and easily computed. TWNs have stronger expressive abilities than the recently proposed binary precision counterparts and are thus more effective than the latter. Meanwhile, TWNs achieve up to 16\${\textbackslash}times\$ or 32\${\textbackslash}times\$ model compression rate and need fewer multiplications compared with the full precision counterparts. Benchmarks on MNIST, CIFAR-10, and large scale ImageNet datasets show that the performance of TWNs is only slightly worse than the full precision counterparts but outperforms the analogous binary precision counterparts a lot.},
+	journal = {arXiv:1605.04711 [cs]},
+	author = {Li, Fengfu and Zhang, Bo and Liu, Bin},
+	month = may,
+	year = {2016},
+	note = {arXiv: 1605.04711},
+	keywords = {Computer Science - Computer Vision and Pattern Recognition},
+	annote = {Comment: 5 pages, 3 fitures, conference},
+	file = {arXiv\:1605.04711 PDF:/Users/matteoturchetta/Library/Application Support/Zotero/Profiles/4tthog8z.default/zotero/storage/2ZW3FGCI/Li et al. - 2016 - Ternary Weight Networks.pdf:application/pdf;arXiv.org Snapshot:/Users/matteoturchetta/Library/Application Support/Zotero/Profiles/4tthog8z.default/zotero/storage/ZC9ZB5JJ/1605.html:text/html}
+}
+
+@article{lin_fixed_2015,
+	title = {Fixed {Point} {Quantization} of {Deep} {Convolutional} {Networks}},
+	url = {http://arxiv.org/abs/1511.06393},
+	abstract = {In recent years increasingly complex architectures for deep convolution networks (DCNs) have been proposed to boost the performance on image recognition tasks. However, the gains in performance have come at a cost of substantial increase in computation and model storage resources. Fixed point implementation of DCNs has the potential to alleviate some of these complexities and facilitate potential deployment on embedded hardware. In this paper, we propose a quantizer design for fixed point implementation of DCNs. We formulate and solve an optimization problem to identify optimal fixed point bit-width allocation across DCN layers. Our experiments show that in comparison to equal bit-width settings, the fixed point DCNs with optimized bit width allocation offer {\textgreater}20\% reduction in the model size without any loss in accuracy on CIFAR-10 benchmark. We also demonstrate that fine-tuning can further enhance the accuracy of fixed point DCNs beyond that of the original floating point model. In doing so, we report a new state-of-the-art fixed point performance of 6.78\% error-rate on CIFAR-10 benchmark.},
+	journal = {arXiv:1511.06393 [cs]},
+	author = {Lin, Darryl D. and Talathi, Sachin S. and Annapureddy, V. Sreekanth},
+	month = nov,
+	year = {2015},
+	note = {arXiv: 1511.06393},
+	keywords = {Computer Science - Learning},
+	annote = {Comment: ICML 2016},
+	file = {arXiv\:1511.06393 PDF:/Users/matteoturchetta/Library/Application Support/Zotero/Profiles/4tthog8z.default/zotero/storage/UIAIU3RF/Lin et al. - 2015 - Fixed Point Quantization of Deep Convolutional Net.pdf:application/pdf;arXiv.org Snapshot:/Users/matteoturchetta/Library/Application Support/Zotero/Profiles/4tthog8z.default/zotero/storage/5E882KWS/1511.html:text/html}
+}
+
+@incollection{hubara_binarized_2016,
+	title = {Binarized {Neural} {Networks}},
+	url = {http://papers.nips.cc/paper/6573-binarized-neural-networks.pdf},
+	booktitle = {Advances in {Neural} {Information} {Processing} {Systems} 29},
+	publisher = {Curran Associates, Inc.},
+	author = {Hubara, Itay and Courbariaux, Matthieu and Soudry, Daniel and El-Yaniv, Ran and Bengio, Yoshua},
+	editor = {Lee, D. D. and Sugiyama, M. and Luxburg, U. V. and Guyon, I. and Garnett, R.},
+	year = {2016},
+	pages = {4107--4115},
+	annote = {Uses binary NN.
+Focus on algorithm for training.
+Code is optimized for GPUs},
+	file = {NIPS Full Text PDF:/Users/matteoturchetta/Library/Application Support/Zotero/Profiles/4tthog8z.default/zotero/storage/WR3SUJ2U/Hubara et al. - 2016 - Binarized Neural Networks.pdf:application/pdf;NIPS Snapshort:/Users/matteoturchetta/Library/Application Support/Zotero/Profiles/4tthog8z.default/zotero/storage/8PK94HK6/6573-binarized-neural-networks.html:text/html}
+}
+
+@article{gong_compressing_2014,
+	title = {Compressing {Deep} {Convolutional} {Networks} using {Vector} {Quantization}},
+	url = {http://arxiv.org/abs/1412.6115},
+	abstract = {Deep convolutional neural networks (CNN) has become the most promising method for object recognition, repeatedly demonstrating record breaking results for image classification and object detection in recent years. However, a very deep CNN generally involves many layers with millions of parameters, making the storage of the network model to be extremely large. This prohibits the usage of deep CNNs on resource limited hardware, especially cell phones or other embedded devices. In this paper, we tackle this model storage issue by investigating information theoretical vector quantization methods for compressing the parameters of CNNs. In particular, we have found in terms of compressing the most storage demanding dense connected layers, vector quantization methods have a clear gain over existing matrix factorization methods. Simply applying k-means clustering to the weights or conducting product quantization can lead to a very good balance between model size and recognition accuracy. For the 1000-category classification task in the ImageNet challenge, we are able to achieve 16-24 times compression of the network with only 1\% loss of classification accuracy using the state-of-the-art CNN.},
+	journal = {arXiv:1412.6115 [cs]},
+	author = {Gong, Yunchao and Liu, Liu and Yang, Ming and Bourdev, Lubomir},
+	month = dec,
+	year = {2014},
+	note = {arXiv: 1412.6115},
+	keywords = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Learning, Computer Science - Neural and Evolutionary Computing},
+	annote = {Focus on algorithmic aspect of the problem.
+Only focuses on memory and not performace
+Uses k-means to quantize},
+	file = {arXiv\:1412.6115 PDF:/Users/matteoturchetta/Library/Application Support/Zotero/Profiles/4tthog8z.default/zotero/storage/BSJ6BTJC/Gong et al. - 2014 - Compressing Deep Convolutional Networks using Vect.pdf:application/pdf;arXiv.org Snapshot:/Users/matteoturchetta/Library/Application Support/Zotero/Profiles/4tthog8z.default/zotero/storage/C4BZ8AC5/1412.html:text/html}
+}
+
+@article{rastegari_xnor-net:_2016,
+	title = {{XNOR}-{Net}: {ImageNet} {Classification} {Using} {Binary} {Convolutional} {Neural} {Networks}},
+	shorttitle = {{XNOR}-{Net}},
+	url = {http://arxiv.org/abs/1603.05279},
+	abstract = {We propose two efficient approximations to standard convolutional neural networks: Binary-Weight-Networks and XNOR-Networks. In Binary-Weight-Networks, the filters are approximated with binary values resulting in 32x memory saving. In XNOR-Networks, both the filters and the input to convolutional layers are binary. XNOR-Networks approximate convolutions using primarily binary operations. This results in 58x faster convolutional operations and 32x memory savings. XNOR-Nets offer the possibility of running state-of-the-art networks on CPUs (rather than GPUs) in real-time. Our binary networks are simple, accurate, efficient, and work on challenging visual tasks. We evaluate our approach on the ImageNet classification task. The classification accuracy with a Binary-Weight-Network version of AlexNet is only 2.9\% less than the full-precision AlexNet (in top-1 measure). We compare our method with recent network binarization methods, BinaryConnect and BinaryNets, and outperform these methods by large margins on ImageNet, more than 16\% in top-1 accuracy.},
+	journal = {arXiv:1603.05279 [cs]},
+	author = {Rastegari, Mohammad and Ordonez, Vicente and Redmon, Joseph and Farhadi, Ali},
+	month = mar,
+	year = {2016},
+	note = {arXiv: 1603.05279},
+	keywords = {Computer Science - Computer Vision and Pattern Recognition},
+	file = {arXiv\:1603.05279 PDF:/Users/matteoturchetta/Library/Application Support/Zotero/Profiles/4tthog8z.default/zotero/storage/S44RSTNS/Rastegari et al. - 2016 - XNOR-Net ImageNet Classification Using Binary Con.pdf:application/pdf;arXiv.org Snapshot:/Users/matteoturchetta/Library/Application Support/Zotero/Profiles/4tthog8z.default/zotero/storage/GVPI7T9I/1603.html:text/html}
+}
+
+@article{lecun_mnist_nodate,
+	title = {{THE} {MNIST} {DATABASE} of handwritten digits},
+	url = {http://ci.nii.ac.jp/naid/10027924478/},
+	journal = {http://yann.lecun.com/exdb/mnist/},
+	author = {LECUN, Y.},
+	file = {THE MNIST DATABASE of handwritten digits Snapshot:/Users/matteoturchetta/Library/Application Support/Zotero/Profiles/4tthog8z.default/zotero/storage/JXVDT9CI/10027924478.html:text/html}
+}
+
+@incollection{denton_exploiting_2014,
+	title = {Exploiting {Linear} {Structure} {Within} {Convolutional} {Networks} for {Efficient} {Evaluation}},
+	url = {http://papers.nips.cc/paper/5544-exploiting-linear-structure-within-convolutional-networks-for-efficient-evaluation.pdf},
+	booktitle = {Advances in {Neural} {Information} {Processing} {Systems} 27},
+	publisher = {Curran Associates, Inc.},
+	author = {Denton, Emily L and Zaremba, Wojciech and Bruna, Joan and LeCun, Yann and Fergus, Rob},
+	editor = {Ghahramani, Z. and Welling, M. and Cortes, C. and Lawrence, N. D. and Weinberger, K. Q.},
+	year = {2014},
+	pages = {1269--1277},
+	annote = {Focus on performance but from algorithm, not code optimization. Focus on filters of CNN. Compress by low-rank approximation and clustering of learned features, not reducing bits.},
+	file = {NIPS Full Text PDF:/Users/matteoturchetta/Library/Application Support/Zotero/Profiles/4tthog8z.default/zotero/storage/3SAZU975/Denton et al. - 2014 - Exploiting Linear Structure Within Convolutional N.pdf:application/pdf;NIPS Snapshort:/Users/matteoturchetta/Library/Application Support/Zotero/Profiles/4tthog8z.default/zotero/storage/59PMUV9K/5544-exploiting-linear-structure-within-convolutional-networks-for-efficient-evaluation.html:text/html}
+}
+
+@article{chen_compressing_2015,
+	title = {Compressing {Neural} {Networks} with the {Hashing} {Trick}},
+	url = {http://arxiv.org/abs/1504.04788},
+	abstract = {As deep nets are increasingly used in applications suited for mobile devices, a fundamental dilemma becomes apparent: the trend in deep learning is to grow models to absorb ever-increasing data set sizes; however mobile devices are designed with very little memory and cannot store such large models. We present a novel network architecture, HashedNets, that exploits inherent redundancy in neural networks to achieve drastic reductions in model sizes. HashedNets uses a low-cost hash function to randomly group connection weights into hash buckets, and all connections within the same hash bucket share a single parameter value. These parameters are tuned to adjust to the HashedNets weight sharing architecture with standard backprop during training. Our hashing procedure introduces no additional memory overhead, and we demonstrate on several benchmark data sets that HashedNets shrink the storage requirements of neural networks substantially while mostly preserving generalization performance.},
+	journal = {arXiv:1504.04788 [cs]},
+	author = {Chen, Wenlin and Wilson, James T. and Tyree, Stephen and Weinberger, Kilian Q. and Chen, Yixin},
+	month = apr,
+	year = {2015},
+	note = {arXiv: 1504.04788},
+	keywords = {Computer Science - Learning, Computer Science - Neural and Evolutionary Computing},
+	annote = {Randomly Group weights through hashing function that is fat to compute. Exploits redundancy in paramer
+Focus on memory improvement, not performance. Focus on algorithm, not implementation},
+	file = {arXiv\:1504.04788 PDF:/Users/matteoturchetta/Library/Application Support/Zotero/Profiles/4tthog8z.default/zotero/storage/J2QDHXZF/Chen et al. - 2015 - Compressing Neural Networks with the Hashing Trick.pdf:application/pdf;arXiv.org Snapshot:/Users/matteoturchetta/Library/Application Support/Zotero/Profiles/4tthog8z.default/zotero/storage/RTFS363N/1504.html:text/html}
+}
