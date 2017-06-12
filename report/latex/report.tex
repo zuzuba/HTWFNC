@@ -6,6 +6,8 @@
 \documentclass[letterpaper]{article}
 \usepackage[hidelinks]{hyperref}
 \usepackage{spconf,amsmath,amssymb,graphicx}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
 
 % Example definitions.
 % --------------------
@@ -104,13 +106,6 @@ from Matlab, you can export to eps or pdf.
 
 Here is an example of how to get a plot into latex
 (Fig.~\ref{fftperf}). Note that the text should not be any smaller than shown.
-
-\begin{figure}\centering
-  \includegraphics[scale=0.33]{dft-performance.eps}
-  \caption{Performance of four single precision implementations of the
-  discrete Fourier transform. The operations count is roughly the
-  same. {\em The labels in this plot are too small.}\label{fftperf}}
-\end{figure}
 
 
 
