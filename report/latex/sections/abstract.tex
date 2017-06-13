@@ -1,4 +1,20 @@
 \begin{abstract}
+Neural Networks are a Machine Learning Model where a non-linear function
+is applied to subsequent applications of matrix multiplication and vector addition.
+In order to achieve state of the art results, a vast number are required for the model.
+Generally, these parameters are encoded as either 32-bit or 16-bit 
+floating point numbers, which lead to large memory requirements to store the parameters
+of a trained model. Quantization is a method to compress these parameters to
+an arbitrary fixed precision, while controlling the degradation of that model's precision.
+We achieve this compression by narrowing the range of values in a single parameter matrix to
+the minimum and maximum of the parameters in the matrix and subsequently encoding the values in the
+parameter matrix according to a simple encoding scheme for the values in the narrowed range.
+Once the values have been encoded, we are able to perform matrix multiplication on
+the compressed values rather than needing to perform decompression at each step. The result is that
+given a fixed bit-length for each of the compressed paramters, we are able to generate an
+encoded parameter matrix where each parameter is encoded with that fixed bit-length while ensuring
+only minute model degradation with significant memory savings.
+/*
 Describe in concise words what you do, why you do it (not necessarily
 in this order), and the main result.  The abstract has to be
 self-contained and readable for a person in the general area. You
@@ -17,4 +33,5 @@ self-contained and readable for a person in the general area. You
 should write the abstract last.
 Describe in concise words what you do, why you do it (not necessarily
 in this order), and the main result. 
+*/
 \end{abstract}

@@ -1,5 +1,17 @@
 \section{Your Proposed Method}\label{sec:yourmethod}
 
+\mypar{Baseline implementation}
+
+Our baseline implementation consists of two parts:
+\begin{itemize}
+\item Scalar quantization
+\item Scalar matrix to matrix multiplication
+\end{itemize}
+
+\textbf{Scalar Quantization: } Our input data \emph{v} is a vector of 32-bit floats that contains the values for an arbitrary matrix of size $\emph{rows} \times \emph{columns} \in \mathbb{N} \times \mathbb{N} $, i.e.\ $ \emph{v} \in \mathbb{R}^{ \emph{rows} \cdot \emph{columns} } \cong \mathbb{R}^{ \emph{rows} \times \emph{columns} } $. We traverse the values in \emph{v} to identify the minimum (\emph{min}) and maximum (\emph{max}) of the vector, i.e. $ \emph{min} = \min_{ i \in \emph{rows} \cdot \emph{columns} } v[i] , \emph{max} = \max_{i \in \emph{rows} \cdot \emph{columns} } v[i] $. Subsequently, given a desired precision $ \emph{p} \in \mathbb{N} $, we compute the size of a cell in our range $[\emph{min},\emph{max}] \subset \mathbb{R}$ via $ \Delta = \frac{ \emph{max} - \emph{min} }{ 2^{\emph{p}}} \in \mathbb{R} $. Finally, due to the importance of the 0 value in Neural Networks, we apply a correction value to ensure that the 0 value is encoded exactly, computed via $ \zeta = \frac{ | min | }{ \Delta } - \lfloor \frac{ | min | }{ \Delta } \rfloor $. Finally, we may encode every value in \emph{v} according to the encoding scheme: $ \emph{q}[i] = \frac{ \emph{v}[i] } {\Delta} + \zeta , i \in [0, \emph{rows}\cdot\emph{columns}] \cap \mathbb{N} $.
+
+\textbf{Scalar matrix to matrix multiplication: } Once the parameter matrix has been quantized, we arrive at a quantized vector $ \emph{q} \in  \left([0, 2^{\emph{p}} - 1]\right)^{ \emph{rows} \cdot \emph{columns} }$. Assuming that our input vectors ($ \emph{x} \in \mathbb{R}^{\rows} $), we must now compute $ \emph{q} \emph{x} $. Given that $ \emph{q} = ( \frac{ \emph{v}[i] }{ \Delta} + \zeta )_{i \in \emph{rows}\cdot\emph{columns}} \cdot \emph{x} = \frac{1}{\Delta} \left(  \emph[v] \cdot \emph{x} \right) + \zeta \cdot (1,1,1,...,1,1) $. Moreover, assuming that the input vectors are encoded in compressed format ($\emph{tilde{x}$), we may rearrange the terms as follows: $ \emph{\tilde{x}}^{T} \cdot \emph{q} = \frac{1}{\Delta_q \cdot \Delta_x} \left( \emph{x}' \cdot \emph{v} ) + \frac{\zeta_q}{\Delta_x} \emph{x} + \frac{\zeta_x}{\Delta_q} \emph{v} + \zeta_q \cdot \zeta_x \cdot (1,1,1,...,1,1) $.
+/*
 Now comes the ``beef'' of the paper, where you explain what you
 did. Again, organize it in paragraphs with titles. As in every section
 you start with a very brief overview of the section.
@@ -8,6 +20,7 @@ For this class, explain all the optimizations you performed. This mean, you firs
 explain the baseline implementation, then go through locality and other optimizations, and finally SSE (every project will be slightly different of course). Show or mention relevant analysis or assumptions. A few examples: 1) Profiling may lead you to optimize one part first; 2) bandwidth plus data transfer analysis may show that it is memory bound; 3) it may be too hard to implement the algorithm in full generality: make assumptions and state them (e.g., we assume $n$ is divisible by 4; or, we consider only one type of input image); 4) explain how certain data accesses have poor locality. Generally, any type of analysis adds value to your work.
 
 As important as the final results is to show that you took a structured, organized approach to the optimization and that you explain why you did what you did.
+*/
 
 Mention and cite any external resources including library or other code.
 
