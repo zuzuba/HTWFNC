@@ -1,4 +1,4 @@
-\section{Your Proposed Method}\label{sec:yourmethod}
+\section{Performed optimization}\label{sec:yourmethod}
 In this section we propose an optimized implementation of the quantization and Quantized Matrix-Matrix Multiplication (QMMM) functions introduced in \cref{sec:background} that uses four bits compression. We start by presenting the data structure that we use for our baseline implementation. We continue by analysing the bottlenecks of this implementation and by proposing a set of solutions to achieve a higher performance.
 
 \mypar{Baseline implementation}
@@ -13,8 +13,8 @@ We presented the algorithm at the base of a straight forward implementation of a
 
 
 \mypar{Operation count optimization}
-The first optimization we present concerns the reduction of redundant computation. Using simple linear algebra, we can rewrite \cref{eq:qmmm} as:
-\begin{align}\label{eq:qmmm_smart}
+The first optimization we present concerns the reduction of redundant computation. Using simple linear algebra, we can rewrite \cref{equation:qmmm} as:
+\begin{align}\label{equation:qmmm_smart}
 \begin{split}
 \mathcal{Q}(\mathbf{L}) \mathcal{Q}(\mathbf{R}) = \Delta(\mathbf{L}) \Delta(\mathbf{R}) ( \tilde{\mathcal{Q}}(\mathbf{L}) \tilde{\mathcal{Q}}(\mathbf{R}) - z(\mathbf{L}) \mathbf{J} \tilde{\mathcal{Q}}(\mathbf{R}) + \\
 - z(\mathbf{R}) \tilde{\mathcal{Q}}(\mathbf{L}) \mathbf{J} +  z(\mathbf{L}) z(\mathbf{R}) \mathbf{J} \mathbf{J} ).
@@ -23,14 +23,20 @@ The first optimization we present concerns the reduction of redundant computatio
 This formulation of the QMMM makes it easy to see its redundant computation. The result of the product $\mathbf{J} \tilde{\mathcal{Q}}(\mathbf{R})$ contained in the second term inside the parenthesis is a matrix that has all rows equal to each other. In particular the $i^{th}$ term of any such row is the sum of the elements of the $i^{th}$ column of  $\tilde{\mathcal{Q}}(\mathbf{R})$. As a consequence, one can compute such row only once and save computation. In particular, this means we move ops from the inner most loop of the QMMM to the second  inner most loop. Thus, the count of such ops grows quadratically with the size of the weight matrix rather than cubically. A similar reasoning can be applied to the third and fourth term inside the parenthesis.
 
 \mypar{Memory optimization}
-Another important optimization of our implementation is related to the efficient use of the memory. In particular, we focus on the inner most loop of the QMMM as it is the most critical when it comes to memory bandwidth.
+Another important optimization of our implementation is related to the efficient use of the memory. To increase the temporal locality of the QMMM kernel, we exploit the well known blocking strategy, both for cache and for register. The parameter of the blocking are the cache-block size $N_b$ and the register-block size $n_b$, as outlined in \cref{fig:blocking} 
+
+\begin{figure}
+\includegraphics[scale=0.5]{figures/blocking}
+\caption{Blocking parameters for the QMMM}
+\label{fig:blocking}
+\end{figure}
 
 
 \mypar{Vectorization}
-Finally, a critical aspect of our implementation concerns the vectorization of the code. The gain in performance that can be expected vary depending on what type of data a function operates on. For example, if we consider the functions needed to implement the quantization step, we can expect to observe a gain in performance up to $\times 8$ because an AVX register can operate on $8$ floats simultaneously. On the other hand, when we  consider the QMMM, in principle we can expect a gain in performance up to $\times 16$. This is because, in order to have the representation power that is necessary to compute correctly the dot products that appear in the term $ \tilde{\mathcal{Q}}(\mathbf{L}) \tilde{\mathcal{Q}}(\mathbf{R})$ of \cref{eq:qmmm_smart}, we use 16-bits integers as accumulators. As a consequence, our implementation of quantization and QMMM is divided into sub-functions that try to keep as separate as possible the integer computation from the float computation. Among them,  the most important are:
+Finally, a critical aspect of our implementation concerns the vectorization of the code. The gain in performance that can be expected vary depending on what type of data a function operates on. For example, if we consider the functions needed to implement the quantization step, we can expect to observe a gain in performance up to $\times 8$ because an AVX register can operate on $8$ floats simultaneously. On the other hand, when we  consider the QMMM, in principle we can expect a gain in performance up to $\times 16$. This is because, in order to have the representation power that is necessary to compute correctly the dot products that appear in the term $ \tilde{\mathcal{Q}}(\mathbf{L}) \tilde{\mathcal{Q}}(\mathbf{R})$ of \cref{equation:qmmm_smart}, we use 16-bits integers as accumulators. As a consequence, our implementation of quantization and QMMM is divided into sub-functions that try to keep as separate as possible the integer computation from the float computation. Among them,  the most important are:
 
 \begin{itemize}
-\item \emph{round-sat}: computes the round and saturation operation used in line 5 of \cref{alg:quantize} and line 2 of \cref{alg:qmmm}.
+\item \emph{round-sat}: computes the round and saturation operation used in line 5 of \cref{algorithm:quantize} and line 2 of \cref{algorithm:qmmm}.
 \item \emph{quantize}: given a weight matrix $\mathbf{A}$ performs the operation necessary to compute  $\tilde{\mathcal{Q}}(\mathbf{A}) $ except for rounding and saturating (e.g. computing $mn$, $mx$, $\Delta(\mathbf{A})$).
 \item \emph{qmmm\_kernel}: computes $ \tilde{\mathcal{Q}}(\mathbf{L}) \tilde{\mathcal{Q}}(\mathbf{R})$,or, in other words, the dot products of the inner most loop of the QMMM.
 \item \emph{trick}: computes the sum over columns and rows of $\tilde{\mathcal{Q}}(\mathbf{R})$ and $\tilde{\mathcal{Q}}(\mathbf{L})$ respectively. As explained before, this is needed to reduce the overall ops count of QMMM. 

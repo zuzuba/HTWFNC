@@ -1,20 +1,21 @@
-\section{Background: NN and QNN}\label{sec:background}
+\section{Background: NNs and QNNs}\label{sec:background}
 
+In this section we formally introduce NNs and QNNs and relative notation.
 
-\mypar{Artificial neural network}
-An artificial neural network (NN) is formally a (in general) non linear map from an input vector $\mathbf{x} \ \in \mathbb{R}^{d_i}$ to an output vector $f(\mathbf{x} ) = \mathbf{y} \ \in \mathbb{R}^{d_o}$. The map $f$ is built recursively applying at step $t$ a linear transformation $ \mathbf{a}_t = \mathbf{W}_t\mathbf{x}_t + \mathbf{b}_t$ and a non-linear transformation $\mathbf{x}_{t+1} = \phi_t(\mathbf{a}_t)$. The matrix $\mathbf{W}_t$ is called weight matrix, and the vector $\mathbf{b}_t$ is called bias vector. The step $t$ is also know as the layer index. 
+\mypar{Artificial neural networks}
+An artificial neural network (NN) is formally a (in general) non linear map from an input vector $\mathbf{x} \ \in \mathbb{R}^{d_i}$ to an output vector $f(\mathbf{x} ) = \mathbf{y} \ \in \mathbb{R}^{d_o}$. The map $f$ is built recursively applying at step $t$ a linear transformation $ \mathbf{a}_t = \mathbf{W}_t\mathbf{x}_t + \mathbf{b}_t$ and a non-linear transformation $\mathbf{x}_{t+1} = \phi_t(\mathbf{a}_t)$. The matrix $\mathbf{W}_t$ is called \emph{weight matrix}, and the vector $\mathbf{b}_t$ is called \emph{bias vector}. The step $t$ is also know as the \emph{layer} index. 
 
 \mypar{Quantized neural network}
-A quantized neural network (QNN) is an artificial neural network that uses low precision weight matrix and bias vector. Formally, for a NN with parameters $\{\mathbf{W}_t\}, \{\mathbf{b}_t\}$ and activation functions $\phi_t$, the QNN of it is the NN that apply at each layer the linear transformation $\mathbf{a}_t = \mathcal{Q}(\mathbf{W}_t) \mathcal{Q}(\mathbf{x}_t) + \mathcal{Q}(\mathbf{b}_t)$ and a non-linear transformation $\mathbf{x}_{t+1} = \phi_t(\mathbf{a}_t)$. 
+A quantized neural network (QNN) is a NN that uses low precision weight matrix and bias vector. Formally, given a NN with parameters $\{\mathbf{W}_t\}, \{\mathbf{b}_t\}$ and activation functions $\phi_t$, the quantized implementation is the NN that apply at each layer the linear transformation $\mathbf{a}_t = \mathcal{Q}(\mathbf{W}_t) \mathcal{Q}(\mathbf{x}_t) + \mathcal{Q}(\mathbf{b}_t)$ and a non-linear transformation $\mathbf{x}_{t+1} = \phi_t(\mathbf{a}_t)$, where the function $\mathcal{Q}(\cdot)$ is introduced in the following.
 
-\mypar{Matrix quantization} For a matrix $\mathbf{A}$, the function $\mathcal{Q}(\mathbf{A})$ returns a low precision encoding of the matrix $\mathbf{A}$. It first computes the minimum ($mn$) and the maximum ($mx$) entry of the matrix $\mathbf{A}$, then given $k$ bits it builds a linear binning of the continuous interval $[mn,mx]$ into $2^k$ many bins. The bin size of the quantization $\Delta(\mathbf{A})$ is then $\Delta(\mathbf{A}) = \frac{mx - mn}{2^k}$. To insure that the value $0$ is represented exactly as a bin value, its index is computed as $z(\mathbf{A}) = sat([-mn/\Delta(\mathbf{A})])$, where the brackets $[\cdot]$ stand for the rounding to the closest integer and the $sat(\cdot)$ function saturates an integer value into the integer value representable with k bits, hence $sat(n) = \max(0, \min(n,2^k) )$. The bin values are then $\{ (i-z(\mathbf{A})) \Delta(\mathbf{A}), \ \ i = 0, \dots, 2^k -1 \}$. Then every entry $A_{ij}$ is quantized to the closest bin value. The quantize matrix  $\mathcal{Q}(\mathbf{A})$ and the quantized integer matrix $\tilde{\mathcal{Q}}(\mathbf{A})$ have respectively the bin value and the bin index as entry $ij$. Note that the matrix $\mathcal{Q}(\mathbf{A})$ is a real-valued matrix, while $\tilde{\mathcal{Q}}(\mathbf{A})$ is k-bit integer valued, and also that
-\begin{equation}\label{eq:affine_transf}
+\mypar{Matrix quantization} For a matrix $\mathbf{A}$, the function $\mathcal{Q}(\mathbf{A})$ returns a low precision encoding of the matrix $\mathbf{A}$. It first computes the minimum ($mn$) and the maximum ($mx$) entry of the matrix $\mathbf{A}$, then given $k$ bits it builds a linear binning of the continuous interval $[mn,mx]$ into $2^k$ many bins. The bin size of the quantization $\Delta(\mathbf{A})$ is then $\Delta(\mathbf{A}) = \frac{mx - mn}{2^k}$. To insure that the value $0$ is represented exactly as a bin value, its index is computed as $z(\mathbf{A}) = sat([-mn/\Delta(\mathbf{A})])$, where the brackets $[\cdot]$ stand for the rounding to the closest integer and the $sat(\cdot)$ function saturates an integer value into the integer value representable with k bits, hence $sat(n) = \max(0, \min(n,2^k) )$. The bin values are then $\{ (i-z(\mathbf{A})) \Delta(\mathbf{A}), \ \ i = 0, \dots, 2^k -1 \}$. Then every entry $A_{ij}$ is quantized to the closest bin value. The quantize matrix  $\mathcal{Q}(\mathbf{A})$ and the quantized integer matrix $\tilde{\mathcal{Q}}(\mathbf{A})$ have respectively the bin value and the bin index as entry $ij$. Note that the matrix $\mathcal{Q}(\mathbf{A})$ is a real-valued matrix, while $\tilde{\mathcal{Q}}(\mathbf{A})$ is k-bit integer valued, and also that the following holds:
+\begin{equation}\label{equation:affine_transf}
 \mathcal{Q}(\mathbf{A}) = (\tilde{\mathcal{Q}}(\mathbf{A}) -z(\mathbf{A}) \mathbf{J}  ) \Delta(\mathbf{A})
 \end{equation} 
-where $\mathbf{J}$ is a matrix with all entries equal to one. The algorithm is showed in Algorithm \ref{alg:quantize}.
+where $\mathbf{J}$ is a matrix with all entries equal to one. The algorithm is showed in \cref{algorithm:quantize}.
 
 \begin{algorithm}
-	\caption{Quantize}\label{alg:quantize}
+	\caption{Quantize}\label{algorithm:quantize}
 	\begin{algorithmic}[1]
 		\State compute $mn = \min A_{ij}$ and $mx = \max A_{ij}$
 		\State $\Delta = \frac{mx - mn}{2^k}$.
@@ -25,24 +26,24 @@ where $\mathbf{J}$ is a matrix with all entries equal to one. The algorithm is s
 	\end{algorithmic}
 \end{algorithm}
 
-\mypar{Quantized Matrix-Matrix Multiplication} Given two matrices $\mathbf{L}$ and $\mathbf{R}$, we want to compute the product $\mathcal{Q}(\mathbf{L}) \mathcal{Q}(\mathbf{R})$. Using equation \ref{eq:affine_transf} and we write the product as 
-\begin{align}\label{eq:qmmm}
+\mypar{Quantized Matrix-Matrix Multiplication} Given two matrices $\mathbf{L}$ and $\mathbf{R}$, we want to compute the product $\mathcal{Q}(\mathbf{L}) \mathcal{Q}(\mathbf{R})$. Using \cref{equation:affine_transf} and we write the product as 
+\begin{align}\label{equation:qmmm}
 \begin{split}
 & \mathcal{Q}(\mathbf{L}) \mathcal{Q}(\mathbf{R}) =\\
  & \Delta (\mathbf{L})\left( \tilde{\mathcal{Q}}(\mathbf{L}) - z(\mathbf{L})\mathbf{J} \right)
 \left( \tilde{\mathcal{Q}}(\mathbf{R}) - z(\mathbf{R})\mathbf{J} \right)  \Delta (\mathbf{R})
 \end{split}
 \end{align}
-so that we only need to perform MMM on k-bit integer valued matrix. Inverting the equation \ref{eq:affine_transf}  we can then obtain the k-bit integer valued product matrix as 
-\begin{equation}\label{eq:affine_inverse}
+so that we only need to perform MMM on k-bit integer valued matrix. Inverting the equation \ref{equation:affine_transf}  we can then obtain the k-bit integer valued product matrix as 
+\begin{equation}\label{equation:affine_inverse}
 \tilde{\mathcal{Q}}(\mathbf{LR}) = sat([\frac{1}{\Delta(\mathbf{LR})}\mathcal{Q}(\mathbf{L}) \mathcal{Q}(\mathbf{R}) + z(\mathbf{LR}) \mathbf{J}])
-\end{equation} The algorithm is showed in Algorithm \ref{alg:qmmm}.
+\end{equation} The algorithm is showed in \cref{algorithm:qmmm}.
 
 \begin{algorithm}
-	\caption{QMMM}\label{alg:qmmm}
+	\caption{QMMM}\label{algorithm:qmmm}
 	\begin{algorithmic}[1]
-		\State compute $\mathcal{Q}(\mathbf{L}) \mathcal{Q}(\mathbf{R})$ as in eq \ref{eq:qmmm}
-		\State compute the k-bit integer matrix $\tilde{\mathcal{Q}}(\mathbf{LR})$ as in eq \ref{eq:affine_inverse}
+		\State compute $\mathcal{Q}(\mathbf{L}) \mathcal{Q}(\mathbf{R})$ as in \cref{equation:qmmm}
+		\State compute the k-bit integer matrix $\tilde{\mathcal{Q}}(\mathbf{LR})$ as in \cref{equation:affine_inverse}
  	\end{algorithmic}
 \end{algorithm}
 
