@@ -25,11 +25,12 @@ where $\mathbf{J}$ is a matrix with all entries equal to one. The algorithm is s
 	\end{algorithmic}
 \end{algorithm}
 
-\mypar{Quantized Matrix-Matrix Multiplication} Given two matrices $\mathbf{L}$ and $\mathbf{R}$, we want to compute the product $\mathcal{Q}(\mathbf{L}) \mathcal{Q}(\mathbf{R})$. Using equation \ref{eq:affine_transf} and simple algebra we rewrite the product as 
+\mypar{Quantized Matrix-Matrix Multiplication} Given two matrices $\mathbf{L}$ and $\mathbf{R}$, we want to compute the product $\mathcal{Q}(\mathbf{L}) \mathcal{Q}(\mathbf{R})$. Using equation \ref{eq:affine_transf} and we write the product as 
 \begin{align}\label{eq:qmmm}
 \begin{split}
-\mathcal{Q}(\mathbf{L}) \mathcal{Q}(\mathbf{R}) = \Delta(\mathbf{L}) \Delta(\mathbf{R}) ( \tilde{\mathcal{Q}}(\mathbf{L}) \tilde{\mathcal{Q}}(\mathbf{R}) - z(\mathbf{L}) \mathbf{J} \tilde{\mathcal{Q}}(\mathbf{R}) + \\
-- z(\mathbf{R}) \tilde{\mathcal{Q}}(\mathbf{L}) \mathbf{J} +  z(\mathbf{L}) z(\mathbf{R}) \mathbf{J} \mathbf{J} )
+& \mathcal{Q}(\mathbf{L}) \mathcal{Q}(\mathbf{R}) =\\
+ & \Delta (\mathbf{L})\left( \tilde{\mathcal{Q}}(\mathbf{L}) - z(\mathbf{L})\mathbf{J} \right)
+\left( \tilde{\mathcal{Q}}(\mathbf{R}) - z(\mathbf{R})\mathbf{J} \right)  \Delta (\mathbf{R})
 \end{split}
 \end{align}
 so that we only need to perform MMM on k-bit integer valued matrix. Inverting the equation \ref{eq:affine_transf}  we can then obtain the k-bit integer valued product matrix as 
