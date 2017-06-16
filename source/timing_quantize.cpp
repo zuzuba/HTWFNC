@@ -139,8 +139,8 @@ int main(int argc, char **argv)
 	{
 		printf("Performance of quantize function: %s \n", funcNames_4x4[i]);
 		strcpy(func_name, funcNames_4x4[i]);
-		strcpy(file_name,"data/perf_quantize_");
-		strcpy(file_name_cycles,"data/cycles_quantize_");
+		strcpy(file_name,"../data/perf_quantize_");
+		strcpy(file_name_cycles,"../data/cycles_quantize_");
 		strcat(file_name, func_name);
 		strcat(file_name, ".dat");
 		strcat(file_name_cycles, func_name);

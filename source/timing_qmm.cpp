@@ -85,9 +85,6 @@ void register_functions_4x4()
 	add_function_4x4(&qmm_trick, (char *)"naive_trick",2,0);
 	add_function_4x4(&qmm_trick_blocking, (char *)"trick_blocking",2,0);
 	add_function_4x4(&qmm_trick_blocking_AVX, (char *)"trick_blocking_AVX",2,0);
-	// Add your functions here
-	// add_function(&your_function, "function: Optimization X", nrflops);
-	
 }
 
 /*
@@ -144,8 +141,8 @@ int main(int argc, char **argv)
 	{
 		printf("Performance of qmm function: %s \n", funcNames_4x4[i]);
 		strcpy(func_name, funcNames_4x4[i]);
-		strcpy(file_name,"data/perf_qmm_");
-		strcpy(file_name_cycles,"data/cycles_qmm_");
+		strcpy(file_name,"../data/perf_qmm_");
+		strcpy(file_name_cycles,"../data/cycles_qmm_");
 		strcat(file_name, func_name);
 		strcat(file_name, ".dat");
 		strcat(file_name_cycles, func_name);
@@ -154,7 +151,7 @@ int main(int argc, char **argv)
 		FILE *fp_cycles = fopen(file_name_cycles,"w+");
 		for(int n=perf_step; n<perf_max;n+=perf_step){
 			cycles = perf_test(userFuncs_4x4[i],funcNames_4x4[i],n);
-			perf = (funcFlops_cubic_term_4x4[i]*n*n*n + funcFlops_quad_term_4x4[i]*n*n)/cycles;
+			perf = float(funcFlops_cubic_term_4x4[i]*n*n*n + funcFlops_quad_term_4x4[i]*n*n)/cycles;
 			printf("%s: n:%d cycles:%f perf:%f \n",funcNames_4x4[i],n, cycles,perf);
 			fprintf(fp, "%d %f\n",n,perf);
 			fprintf(fp_cycles, "%d %f\n",n,cycles);

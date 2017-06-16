@@ -139,8 +139,8 @@ int main(int argc, char **argv)
 	{
 		printf("Performance of trick function: %s \n", funcNames[i]);
 		strcpy(func_name, funcNames[i]);
-		strcpy(file_name,"data/perf_trick_vector_");
-		strcpy(file_name_cycles,"data/cycles_trick_vector_");
+		strcpy(file_name,"../data/perf_trick_vector_");
+		strcpy(file_name_cycles,"../data/cycles_trick_vector_");
 		strcat(file_name, func_name);
 		strcat(file_name, ".dat");
 		strcat(file_name_cycles, func_name);

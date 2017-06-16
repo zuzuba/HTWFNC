@@ -135,8 +135,8 @@ int main(int argc, char **argv)
 	{
 		printf("Performance of add vector function: %s \n", funcNames[i]);
 		strcpy(func_name, funcNames[i]);
-		strcpy(file_name,"data/perf_add_vector_");
-		strcpy(file_name_cycles,"data/cycles_add_vector_");
+		strcpy(file_name,"../data/perf_add_vector_");
+		strcpy(file_name_cycles,"../data/cycles_add_vector_");
 		strcat(file_name, func_name);
 		strcat(file_name, ".dat");
 		strcat(file_name_cycles, func_name);

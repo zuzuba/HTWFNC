@@ -67,10 +67,8 @@ perf: $(OBJS) timing_qmm.o timing_quantize.o timing_add_trick_vector.o timing_tr
 	./perf_trick_vector
 	$(CC) $(OBJS) timing_round_saturation.o -o perf_round_saturation
 	./perf_round_saturation
-	#$(GCC) timing_gmmlowp_quantize.cc -o timing_gmmlowp_quantize
-	#./timing_gmmlowp_quantize
-	#$(GCC) timing_gmmlowp_qmm.cc -o timing_gmmlowp_qmm
-	#./timing_gmmlowp_qmm
+	$(GCC) timing_gmmlowp_quantize.cc -o timing_gmmlowp_quantize
+	
 	python performance_plot.py
 	python cycle_plot.py
 

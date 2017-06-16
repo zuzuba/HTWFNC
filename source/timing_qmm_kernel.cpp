@@ -96,9 +96,6 @@ void register_functions_4x4()
 	add_function_4x4(&qmm_kernel_trick, (char *)"naive_trick",2);
 	add_function_4x4(&qmm_kernel_trick_blocking, (char *)"trick_blocking",2);
 	add_function_4x4(&qmm_kernel_trick_AVX, (char *)"trick_AVX",2);
-	add_function_4x4(&qmm_kernel_trick_AVX_unrolled, (char *)"AVX_unrolled",2);
-	// Add your functions here
-	// add_function(&your_function, "function: Optimization X", nrflops);
 	
 }
 
@@ -163,22 +160,13 @@ int main(int argc, char **argv)
 	register_functions_4x4_notrick();
     
     // Message if there are zero functions
-	if (numFuncs_4x4 == 0)
-	{
-		printf("No 4x4 functions registered - nothing for driver to do\n");
-		printf("Register functions by calling register_func(f, name)\n");
-		printf("in register_funcs()\n");
-
-		return TEST_FAILED;
-	}
-	printf("\n%d 4x4 functions registered\n", numFuncs_4x4);
 	
 	for (int i = 0; i < numFuncs_4x4; ++i)
 	{
 		printf("Performance of qmm_kernel function: %s \n", funcNames_4x4[i]);
 		strcpy(func_name, funcNames_4x4[i]);
-		strcpy(file_name,"data/perf_qmm_kernel_");
-		strcpy(file_name_cycles,"data/cycles_qmm_kernel_");
+		strcpy(file_name,"../data/perf_qmm_kernel_");
+		strcpy(file_name_cycles,"../data/cycles_qmm_kernel_");
 		strcat(file_name, func_name);
 		strcat(file_name, ".dat");
 		strcat(file_name_cycles, func_name);
@@ -200,8 +188,8 @@ int main(int argc, char **argv)
 	{
 		printf("Performance of qmm_kernel function with no trick: %s \n", funcNames_4x4_notrick[i]);
 		strcpy(func_name, funcNames_4x4_notrick[i]);
-		strcpy(file_name,"data/perf_qmm_kernel_");
-		strcpy(file_name_cycles,"data/cycles_qmm_kernel_");
+		strcpy(file_name,"../data/perf_qmm_kernel_");
+		strcpy(file_name_cycles,"../data/cycles_qmm_kernel_");
 		strcat(file_name, func_name);
 		strcat(file_name, ".dat");
 		strcat(file_name_cycles, func_name);
