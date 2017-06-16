@@ -8,7 +8,7 @@ In this section we perform the empirical evaluation of the optimization performe
 For the empirical evaluation of the code, we use an Skylake processor (3.5 GHz, L1 cache 128 KB, L2 cache 1 MB, L3 cache 6 Mb). The compiler used is g++ with flags "-O3 -fno-tree-vectorize -march=native -mavx". The matrix size varies in the range $[30,1000]$.
 
 \mypar{Results: operational count optimization}
-We first evaluate the gain the in the runtime regarding the optimization in the operational count performed with the trick as in \cref{equation:qmmm_smart}. From \cref{figure:performance_qmm_kernel} we can see the decrease in performance of the trick version with respect to the naive implementation. \cref{figure:cycles_qmm_comparison} shows that the operation count optimization gives an overall speed-up of $15 \%$. In \cref{figure:Cycles_trick} we can see the contribution of each function of the pipeline in the overall runtime. In the following the trick version is further optimized.
+We first evaluate the gain in the runtime regarding the optimization in the operational count performed with the trick as in \cref{equation:qmmm_smart}. From \cref{figure:performance_qmm_kernel} we can see the decrease in performance of the trick version with respect to the naive implementation. \cref{figure:cycles_qmm_comparison} shows that the operation count optimization gives an overall speed-up of $15 \%$. In \cref{figure:Cycles_trick} we can see the contribution of each function of the pipeline in the overall runtime. In the following the trick version is further optimized.
 
 \begin{figure}[h]
 \includegraphics[width=0.5\textwidth]{Performance_qmm.eps}
