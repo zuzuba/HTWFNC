@@ -14,7 +14,9 @@ We first evaluate the gain the in the runtime regarding the optimization in the 
 \includegraphics[width=0.5\textwidth]{Performance_qmm.eps}
 \caption{Performance plot for the QMM kernel}
 \label{figure:performance_qmm_kernel}
+\end{figure}
 
+\begin{figure}[h]
 \includegraphics[width=0.5\textwidth]{Cycles_qmm_comparison.eps}
 \caption{Runtime plot of the overall pipeline}
 \label{figure:cycles_qmm_comparison}
@@ -32,7 +34,7 @@ The blocking parameter used is $N_b = 30$ for the cache blocking parameter and $
 
 
 \mypar{Results: vectorization} 
-In this paragraph we evaluate the performance gain of the vectorization of the sub-functions \emph{trick\_vector}, \emph{quantize}, \emph{add\_trick\_vector} and \emph{round\_saturation} as outlined in \cref{sec:yourmethod}. \cref{figure:performance_add_vector} and \cref{figure:performance_trick_vector} show a linear increase of the performance for small instances. This is due to a border effect. The instance size in the  performance plot are not in general a multiple of the vector size ($16$X$16 \ Bits$), hence for small instance size the scalar computation can be non-negligible. Moreover the scalar contribution decreases linearly with the size of the instance.
+In this paragraph we evaluate the performance gain thanks to vectorization for \emph{trick\_vector}, \emph{quantize}, \emph{add\_trick\_vector} and \emph{round\_saturation} as outlined in \cref{sec:yourmethod}. \cref{figure:performance_add_vector} and \cref{figure:performance_trick_vector} show a linear increase of the performance for small instances. This is due to a border effect. The instance size in the  performance plot are not in general a multiple of the vector size ($16$X$16 \ Bits$), hence for small instance size the scalar computation can be non-negligible. Moreover the scalar contribution decreases linearly with the size of the instance.
 
 \begin{figure}[h]
 \includegraphics[width=0.5\textwidth]{Performance_add_vector.eps}
@@ -40,25 +42,25 @@ In this paragraph we evaluate the performance gain of the vectorization of the s
 \label{figure:performance_add_vector}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[h]
 	\includegraphics[width=0.5\textwidth]{Performance_quantize.eps}
 	\caption{Performance plot of the function \emph{quantize}}
 	\label{figure:performance_quantize}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[h]
 \includegraphics[width=0.5\textwidth]{Performance_trick_vector.eps}
 \caption{Performance plot of the function \emph{trick\_vector}}
 \label{figure:performance_trick_vector}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[h]
 \includegraphics[width=0.5\textwidth]{Performance_round_saturation.eps}
 \caption{Performance plot of the function \emph{round\_saturation}}
 \label{figure:performance_round_saturation}
 \end{figure}
 
-The maximal gain in performance that the vectorization can allow for the integer functions \emph{trick\_vector} and \emph{add\_trick\_vector} is $16$X, that is the size of the accumulator vector. The measured performance gain are respectively  $9.8$X and $8.5$X.
+The maximal gain in performance that the vectorization can allow for the functions \emph{trick\_vector} and \emph{add\_trick\_vector} is $16$X, that is the size of the accumulator vector for 16 bit integers. The measured performance gain are respectively  $9.8$X and $8.5$X.
 
 \cref{figure:performance_quantize} and \cref{figure:performance_round_saturation} show the performance plot for the functions \emph{quantize} and \emph{round\_saturation}. The measured performance gain are respectively $9.2$X and $14.2$X. 
 
