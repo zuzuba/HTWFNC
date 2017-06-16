@@ -60,6 +60,8 @@ Finally, a critical aspect of our implementation concerns the vectorization of t
 \label{tab:cost} 
 \end{table}
 
+Among the numerous advantages in terms of performance that come from using 4-bits compression, there are also drawbacks due to the memory layout of the $uint4x4\_t$ data structure shown in \cref{fig:uint4x4_t}. For example, listing \ref{list:load_row} shows the overhead in terms of masking, shifting and blending that is required to load two rows of the quantized weight matrix.
+
 \lstinputlisting[language=C++, caption={Load of two $uint4x4\_t$ rows.}, label={list:load_row}]{figures/load.cpp}
 
 
